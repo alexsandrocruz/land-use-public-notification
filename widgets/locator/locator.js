@@ -50,7 +50,7 @@ define([
         "esri/geometry",
         "esri/SpatialReference"
     ],
-    function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domClass, string, Locator, window, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, nls, topic, Query, QueryTask, scrollBar, query, InfoWindow, array, Deferred, DeferredList, all, Color, Symbol, Geometry, SpatialReference) {
+    function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domClass, string, Locator, window, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, nls, topic, Query, QueryTask, scrollBar, dojoquery, InfoWindow, array, Deferred, DeferredList, all, Color, Symbol, Geometry, SpatialReference) {
 
         //========================================================================================================================//
         return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
@@ -61,19 +61,20 @@ define([
             mapPoint: null,
             nameArray: [],
             overLayerArray: [],
-            splashScreenScrollbar: null,
-            polygon: null,               //flag for handling to draw route and polygon
+            addressContainerScrollbar: null,
             interactiveParcel: null,
             selectedPoint: null,
             isSpanClicked: false,
+            deferredListarr: [],
             /**
             * display locator widget
             *
             * @class
             * @name widgets/locator/locator
             */
+
             postCreate: function () {
-                deferredListarr = [];
+
                 /**
                 * close locator widget if any other widget is opened
                 * @param {string} widget Key of the newly opened widget
@@ -90,6 +91,8 @@ define([
                 }));
                 topic.subscribe("showProgressIndicator", lang.hitch(this, this.showProgressIndicator));
                 topic.subscribe("setMapTipPosition", this.onSetMapTipPosition);
+                topic.subscribe("createInfoWindowContent", lang.hitch(this, this.onCreateInfoWindowContent));
+                topic.subscribe("removeChildren", this.onRemoveChildren);
                 this.domNode = domConstruct.create("div", {
                     "title": this.title,
                     "class": "esriCTTdHeaderSearch"
@@ -156,11 +159,12 @@ define([
                 })));
                 this.own(on(this.close, "click", lang.hitch(this, function () {
                     this._hideText();
+                    domConstruct.empty(this.divAddressResults);
                 })));
             },
+
             _hideText: function () {
                 this.txtAddress.value = "";
-                domStyle.set(this.close, "display", "none");
             },
 
 
@@ -230,7 +234,6 @@ define([
                         if (lang.trim(this.txtAddress.value) != '') {
                             if (this.lastSearchString != lang.trim(this.txtAddress.value)) {
                                 this.lastSearchString = lang.trim(this.txtAddress.value);
-                                // domConstruct.empty(this.divAddressResults);
                                 var _this = this;
 
                                 /**
@@ -278,86 +281,104 @@ define([
             * @memberOf widgets/locator/locator
             */
             _searchLocation: function () {
-                deferredListarr.length = 0;
+                this.deferredListarr.length = 0;
+                var taxParcelQueryUrl = dojo.configData.ParcelLayerSettings.LayerUrl;
                 domStyle.set(this.imgSearchLoader, "display", "block");
                 domStyle.set(this.close, "display", "none");
                 domAttr.set(this.txtAddress, "defaultAddress", this.txtAddress.value);
                 this._setHeightAddressResults();
-                qTask = new QueryTask(taxParcelQueryURL);
-                var RoadLineLayerSettings = dojo.configData.RoadCenterLayerSettings;
+                var qTask = new QueryTask(taxParcelQueryUrl);
+                var roadLineLayerSettings = dojo.configData.RoadCenterLayerSettings;
                 var queryOutFields = dojo.configData.QueryOutFields.split(",");
                 var searchText = lang.trim(this.txtAddress.value);
-                isSpanClicked = false;
                 if (searchText) {
                     searchText = lang.trim(searchText);
                 }
-
-                flagForAddress = true;
-                if (!searchText || searchText === "") {
-                    domStyle.set(this.imgSearchLoader, "display", "block");
-                    domStyle.set(this.close, "display", "none");
-                    domConstruct.empty(this.divAddressResults);
-                    alert(nls.errorMessages.addressToLocate);
-                    return;
-                }
-                this._queryParcelLayer();
                 this._queryRoadLineLayer();
+                this._queryParcelLayer();
                 this._queryOverlayLayer();
+                var deferredListResult = new DeferredList(this.deferredListarr);
+                deferredListResult.then(lang.hitch(this, function (result) {
+                    this._getUnifiedResult(result);
+                }));
             },
 
             _queryParcelLayer: function () {
+                var deferred = new Deferred();
                 var parcelLayerSettings = dojo.configData.ParcelLayerSettings;
-                taxParcelQueryURL = dojo.configData.ParcelLayerSettings.LayerUrl;
+                var taxParcelQueryUrl = dojo.configData.ParcelLayerSettings.LayerUrl;
                 var queryOutFields = dojo.configData.QueryOutFields.split(",");
                 var query = new Query();
                 query.returnGeometry = false;
                 query.outFields = queryOutFields;
-                searchFields = dojo.configData.SearchSettings.MultipleResults.split(",");
+                var searchFields = dojo.configData.SearchSettings.MultipleResults.split(",");
                 query.where = string.substitute(parcelLayerSettings.SearchExpression, [lang.trim(this.txtAddress.value).toUpperCase()]);
-                var qTask = new QueryTask(taxParcelQueryURL);
-                var QueryTaxParcel = qTask.execute(query, lang.hitch(this, function (featureSet) {
-                    var deferred = new dojo.Deferred();
-                    deferred.resolve(featureSet);
+                var qTask = new QueryTask(taxParcelQueryUrl);
+                var queryTaxParcel = qTask.execute(query, lang.hitch(this, function (featureSet) {
+                    setTimeout(function () {
+                        deferred.resolve(featureSet);
+                    }, 1000);
                     return deferred.promise;
-                },
-                    function (err) {
-                        domStyle.set(this.imgSearchLoader, "display", "none");
-                        domStyle.set(this.close, "display", "block");
-                        this._locatorErrBack();
-                    }));
-                deferredListarr.push(QueryTaxParcel);
+                }, function (err) {
+                    domStyle.set(this.imgSearchLoader, "display", "none");
+                    domStyle.set(this.close, "display", "block");
+                    this._locatorErrBack();
+                }));
+                this.deferredListarr.push(queryTaxParcel);
             },
 
             _queryRoadLineLayer: function () {
-                var RoadLineLayerSettings = dojo.configData.RoadCenterLayerSettings;
+                var deferred = new Deferred();
+                var roadLineLayerSettings = dojo.configData.RoadCenterLayerSettings;
                 var queryRoadLayer = new Query();
-                queryRoadLayer.where = string.substitute(RoadLineLayerSettings.SearchExpression, [lang.trim(this.txtAddress.value).toUpperCase()]); ;
+                queryRoadLayer.where = string.substitute(roadLineLayerSettings.SearchExpression, [lang.trim(this.txtAddress.value).toUpperCase()]); ;
                 domStyle.set(this.imgSearchLoader, "display", "block");
                 domStyle.set(this.close, "display", "none");
 
-                var QueryRoadLayer = this.map.getLayer("roadCenterLinesLayerID").queryFeatures(queryRoadLayer, lang.hitch(this, function (features) {
-                    var deferred = new dojo.Deferred();
-                    deferred.resolve(features);
+                var queryRoadLayer1 = this.map.getLayer("roadCenterLinesLayerID").queryFeatures(queryRoadLayer, lang.hitch(this, function (features) {
+                    setTimeout(function () {
+                        deferred.resolve(features);
+                    }, 700);
                     return deferred.promise;
                 }));
-                deferredListarr.push(QueryRoadLayer);
+                this.deferredListarr.push(queryRoadLayer1);
             },
 
             //Get Overlaylayer
             _queryOverlayLayer: function () {
                 var overlayLayerSettings = dojo.configData.OverlayLayerSettings;
+                var _this = this;
+                var deferred = new Deferred();
+                this.overLayerArray.length = 0;
+                var layerInfo;
                 for (var index = 0; index < overlayLayerSettings.length; index++) {
-                    this._getOverLayResult(overlayLayerSettings[index], index);
-
+                    layerInfo = overlayLayerSettings[index];
+                    var qtask = new QueryTask(overlayLayerSettings[index].LayerUrl);
+                    var query = new Query();
+                    query.returnGeometry = true;
+                    var whereClause = "";
+                    query.where = string.substitute(overlayLayerSettings[index].SearchExpression, [lang.trim(this.txtAddress.value).toUpperCase()]);
+                    query.outSpatialReference = this.map.spatialReference;
+                    query.outFields = ["*"];
+                    var queryOverlayTask = qtask.execute(query, function (featureSet) {
+                        setTimeout(function () {
+                            deferred.resolve(featureSet);
+                        }, 500);
+                        return deferred.promise;
+                    }, function (err) {
+                        this._locatorErrBack();
+                    });
+                    this.deferredListarr.push(queryOverlayTask);
                 }
             },
 
             //Populate data for parcel layer
-            _populateSearchItem: function (featureSet, searchFields) {
+            _populateSearchItem: function (featureSet) {
+                var searchFields = dojo.configData.SearchSettings.MultipleResults.split(",");
                 domStyle.set(this.imgSearchLoader, "display", "block");
                 domStyle.set(this.close, "display", "none");
                 var searchText = lang.trim(this.txtAddress.value);
-                var DisplayField = [];
+                var displayField = [];
                 _this = this;
                 var features = featureSet.features;
                 var parcelLayerSettings = dojo.configData.ParcelLayerSettings;
@@ -376,23 +397,24 @@ define([
                         });
                     }
                     var addressParcelFields = parcelLayerSettings.SearchDisplayFields.split(",");
-                    for (var i = 0; i < features.length; i++) {
+                    for (i = 0; i < features.length; i++) {
                         if (features[i].foundFieldName === addressParcelFields[0])
-                            DisplayField[i] = addressParcelFields[0];
+                            displayField[i] = addressParcelFields[0];
                         else if (features[i].foundFieldName === addressParcelFields[1])
-                            DisplayField[i] = addressParcelFields[1];
+                            displayField[i] = addressParcelFields[1];
                     }
-                    var divDispalyResultContainer = domConstruct.create("div", {}, this.divAddressResults);
-                    var divHeadding = domConstruct.create("div", { "class": "esriCTBottomBorder esriCTCursorPointer esriAddressCounty", "innerHTML": "ParcelID/Address" }, divDispalyResultContainer);
-                    for (var i = 0; i < features.length; i++) {
+                    var divDispalyResultContainer = domConstruct.create("div", { "class": "esriCTSerachAddressRow" }, this.divAddressResults);
+                    var divHeadding = domConstruct.create("div", { "class": "esriCTBottomBorder esriCTCursorPointer esriAddressCounty", "innerHTML": nls.parcelDisplayText }, divDispalyResultContainer);
+                    for (i = 0; i < features.length; i++) {
                         domStyle.set(this.imgSearchLoader, "display", "block");
                         domStyle.set(this.close, "display", "none");
-                        var divDisplayRow = domConstruct.create("div", {}, divDispalyResultContainer);
-                        var divDisplayColumn = domConstruct.create("div", { "class": "esriCTContentBottomBorder esriCTCursorPointer esriCTResultBottomBorder", "id": i, "title": "Click to Locate", "innerHTML": features[i].attributes[DisplayField[i]] }, divDisplayRow);
+                        var divDisplayRow = domConstruct.create("div", { "class": "esriCTSerachAddressRow" }, divDispalyResultContainer);
+                        var divDisplayColumn = domConstruct.create("div", { "class": "esriCTContentBottomBorder esriCTCursorPointer esriCTResultBottomBorder", "id": i, "title": nls.ClickToLocate, "innerHTML": features[i].attributes[displayField[i]] }, divDisplayRow);
                         domAttr.set(divDisplayColumn, "parcelId", features[i].attributes[addressParcelFields[0]]);
                         this.own(on(divDisplayColumn, "click", function () {
                             domAttr.set(_this.txtAddress, "defaultAddress", _this.txtAddress.value);
-                            _this._FindTaskResult(features[this.id]);
+                            _this.txtAddress.style.color = "#6e6e6e";
+                            _this._findTaskResult(features[this.id]);
                             _this._hideAddressContainer();
                             domStyle.set(_this.imgSearchLoader, "display", "none");
                         }));
@@ -403,7 +425,7 @@ define([
             //Populate data for roadline layer
             _findDisplayRoad: function (featureSets) {
                 var nameArray = [];
-                var numUnique = 0
+                var numUnique = 0;
                 var _this = this;
                 this.txtAddress.value = lang.trim(this.txtAddress.value);
                 var roadLineLayerSettings = dojo.configData.RoadCenterLayerSettings;
@@ -414,7 +436,7 @@ define([
                     var divDispalyResultContainer = domConstruct.create("div", {}, this.divAddressResults);
                     var divHeadding = domConstruct.create("div", {
                         "class": "esriCTBottomBorder esriCTCursorPointer esriAddressCounty",
-                        "innerHTML": "Road Centerline"
+                        "innerHTML": nls.roadDisplayText
                     }, divDispalyResultContainer);
                     for (var order = 0; order < featureSets.features.length; order++) {
                         nameArray.push({
@@ -427,30 +449,28 @@ define([
                         var nameA = a.name.toLowerCase();
                         var nameB = b.name.toLowerCase();
                         if (nameA < nameB) //sort string ascending
-                            return -1
+                            return -1;
                         if (nameA >= nameB)
-                            return 1
+                            return 1;
                     });
-
-                    //  _this._displayRoadResult(nameArray, divDispalyResultContainer);
                     for (var i = 0; i < nameArray.length; i++) {
                         if (0 == i || searchString != nameArray[i].attributes[roadLineLayerSettings.SearchDisplayFields].toLowerCase()) {
                             if (i > 0) {
                                 var previousFoundName = nameArray[i - 1].attributes[roadLineLayerSettings.SearchDisplayFields]
                             } else {
-                                var previousFoundName = "";
+                                previousFoundName = "";
                             }
                             if (nameArray[i].attributes[roadLineLayerSettings.SearchDisplayFields] != previousFoundName) {
                                 ++numUnique;
                                 var divDisplayRow = domConstruct.create("div", {}, divDispalyResultContainer);
-                                var divDisplayColumn = domConstruct.create("div", { "class": "esriCTContentBottomBorder esriCTCursorPointer esriCTResultBottomBorder", "id": "i", "title": "Click to locate", "innerHTML": nameArray[i].attributes[roadLineLayerSettings.SearchDisplayFields] }, divDisplayRow);
+                                var divDisplayColumn = domConstruct.create("div", { "class": "esriCTContentBottomBorder esriCTCursorPointer esriCTResultBottomBorder", "id": "i", "title": nls.ClickToLocate, "innerHTML": nameArray[i].attributes[roadLineLayerSettings.SearchDisplayFields] }, divDisplayRow);
                                 domAttr.set(divDisplayColumn, "OBJECTID", nameArray[0].attributes[this.map.getLayer("roadCenterLinesLayerID").objectIdField]);
                                 this.own(on(divDisplayColumn, "click", function () {
                                     domStyle.set(_this.imgSearchLoader, "display", "none");
                                     _this.txtAddress.value = this.innerHTML;
                                     domAttr.set(_this.txtAddress, "defaultAddress", _this.txtAddress.value);
-                                    polygon = false;
-                                    _this._FindAndShowRoads();
+                                    _this.txtAddress.style.color = "#6e6e6e";
+                                    _this._findAndShowRoads();
                                     _this._hideAddressContainer();
                                 }));
                             }
@@ -459,60 +479,43 @@ define([
                 }
             },
 
-            //Query Overlay Layer
-            _getOverLayResult: function (layerInfo, index) {
-                var _this = this;
-                this.overLayerArray.length = 0;
-                isSpanClicked = false;
-                var qtask = new QueryTask(layerInfo.LayerUrl);
-                var query = new Query();
-                query.returnGeometry = true;
-                var whereClause = "";
-                query.where = string.substitute(layerInfo.SearchExpression, [lang.trim(this.txtAddress.value).toUpperCase()]);
-                query.outSpatialReference = this.map.spatialReference;
-                query.outFields = ["*"];
-                var QueryOverlayTask = qtask.execute(query, function (featureSet) {
-                    var deferred = new dojo.Deferred();
-                    deferred.resolve(featureSet);
-                    return deferred.promise;
-
-                },
-                    function (err) {
-                        this._locatorErrBack();
-                    });
-                deferredListarr.push(QueryOverlayTask);
-                this._getUnifiedResult(deferredListarr, layerInfo, index);
-            },
-
             //Result for Parcel Layer , RoadLine Layer and overlay Layer
-            _getUnifiedResult: function (deferredListarr, layerInfo, index) {
-                var deferredListResult = new dojo.DeferredList(deferredListarr);
-                deferredListResult.then(lang.hitch(this, function (result) {
-                    domConstruct.empty(this.divAddressResults);
-                    if (result[0][0]) {
-                        this._populateSearchItem(result[0][1], searchFields);
+            _getUnifiedResult: function (result) {
+                var temp = 0;
+                domConstruct.empty(this.divAddressResults);
+                if (result[1][0]) {
+                    this._populateSearchItem(result[1][1]);
+                }
+                if (result[0][0]) {
+                    this._findDisplayRoad(result[0][1]);
+                }
+                for (var i = 2; i < this.deferredListarr.length; i++) {
+                    if (result[i][0]) {
+                        var overlayLayerSettings = dojo.configData.OverlayLayerSettings;
+                        this._populateData(result[i][1], overlayLayerSettings[temp]);
+                        temp++;
                     }
-                    if (result[1][0]) {
-                        this._findDisplayRoad(result[1][1]);
-                    }
-                    for (i = 2; i < deferredListarr.length; i++) {
-                        if (result[i][0]) {
-                            this._populateData(result[i][1], layerInfo, index);
-                        }
-                    }
-                    domClass.add(this.divAddressContent, "esriCTAddressContainerHeight");
-                    domStyle.set(this.imgSearchLoader, "display", "none");
-                    domStyle.set(this.close, "display", "block");
-                }));
-
+                }
+                domClass.add(this.divAddressContent, "esriCTAddressContainerHeight");
+                domStyle.set(this.imgSearchLoader, "display", "none");
+                domStyle.set(this.close, "display", "block");
+                if (this.addressContainerScrollbar) {
+                    domClass.add(this.addressContainerScrollbar._scrollBarContent, "esriCTZeroHeight");
+                    this.addressContainerScrollbar.removeScrollBar();
+                }
+                this.addressContainerScrollbar = new scrollBar({
+                    domNode: this.divAddressScrollContent
+                });
+                this.addressContainerScrollbar.setContent(this.divAddressResults);
+                this.addressContainerScrollbar.createScrollBar();
             },
 
             //Populate data for overlay layer
-            _populateData: function (featureSet, layerInfo, index) {
+            _populateData: function (featureSet, layerInfo) {
                 var _this = this;
                 this.overLayerArray.length = 0;
-                overlayLayerSettings = dojo.configData.OverlayLayerSettings;
-                var DisplayField = [];
+                var overlayLayerSettings = dojo.configData.OverlayLayerSettings;
+                var displayField = [];
                 var features = featureSet.features;
                 var searchText = lang.trim(this.txtAddress.value);
                 if (featureSet) {
@@ -523,7 +526,6 @@ define([
                             var searchSchoolFields = layerInfo.SearchDisplayFields.split(",");
                             array.some(searchSchoolFields, function (field) {
                                 var value = feature.attributes[field];
-
                                 if (value && value.toUpperCase().indexOf(whereSearchText) >= 0) {
                                     feature.foundFieldName = field;
                                     feature.value = value;
@@ -533,19 +535,18 @@ define([
                             });
                         }
                     }
-                    var addressSchoolFields = overlayLayerSettings[index].SearchDisplayFields.split(",");
-                    for (var i = 0; i < features.length; i++) {
+                    var addressSchoolFields = layerInfo.SearchDisplayFields.split(",");
+                    for (i = 0; i < features.length; i++) {
                         for (var j = 0; j < addressSchoolFields.length; j++) {
                             if (features[i].foundFieldName === addressSchoolFields[j]) {
-                                DisplayField[i] = addressSchoolFields[j];
+                                displayField[i] = addressSchoolFields[j];
                             }
                         }
                         this.overLayerArray.push({
                             attr: featureSet.features[i],
                             fields: featureSet.fields,
-                            index: index,
                             layerID: layerInfo,
-                            displayField: DisplayField[i]
+                            displayField: displayField[i]
                         });
                     }
                     if (this.overLayerArray.length > 0) {
@@ -555,12 +556,12 @@ define([
                         var divDispalyResultContainer = domConstruct.create("div", {}, this.divAddressResults);
                         var divHeadding = domConstruct.create("div", {
                             "class": "esriCTBottomBorder esriCTCursorPointer esriAddressCounty",
-                            "innerHTML": "School District"
+                            "innerHTML": nls.overLayDisplayText
                         }, divDispalyResultContainer);
-                        var arrPermits = [];
+                        var arrOverLay = [];
                         try {
                             for (var i = 0; i < this.overLayerArray.length; i++) {
-                                arrPermits.push({
+                                arrOverLay.push({
                                     attributes: this.overLayerArray[i],
                                     searchDisplayField: this.overLayerArray[i].layerID.SearchDisplayFields,
                                     name: this.overLayerArray[i].attr.attributes[this.overLayerArray[i].displayField]
@@ -569,41 +570,31 @@ define([
                         } catch (e) {
                             alert(messages.getElementsByTagName("falseConfigParams")[0].childNodes[0].nodeValue);
                         }
-                        var searchString = lang.trim(this.txtAddress.value).toLowerCase();
                         for (var i = 0; i < this.overLayerArray.length; i++) {
                             var divDisplayRow = domConstruct.create("div", {}, divDispalyResultContainer);
-                            var divDisplayColumn = domConstruct.create("div", { "class": "esriCTContentBottomBorder esriCTCursorPointer esriCTResultBottomBorder", "id": i, "title": "Click to locate", "innerHTML": arrPermits[i].name }, divDisplayRow);
+                            var divDisplayColumn = domConstruct.create("div", { "class": "esriCTContentBottomBorder esriCTCursorPointer esriCTResultBottomBorder", "id": i, "title": nls.ClickToLocate, "innerHTML": arrOverLay[i].name }, divDisplayRow);
                             domAttr.set(divDisplayColumn, "index", i);
-
                             this.own(on(divDisplayColumn, "click", function () {
-                                var attr = arrPermits[this.id];
+                                var attr = arrOverLay[this.id];
                                 domAttr.set(_this.txtAddress, "defaultAddress", _this.txtAddress.value);
+                                _this.txtAddress.style.color = "#6e6e6e";
                                 _this._hideAddressContainer();
                                 domStyle.set(_this.imgSearchLoader, "display", "none");
+                                index = layerInfo.index;
                                 _this._findTaskOverlayResults(attr, index);
                             }));
                         }
                     }
                 }
-                if (this.splashScreenScrollbar) {
-                    domClass.add(this.splashScreenScrollbar._scrollBarContent, "esriCTZeroHeight");
-                    this.splashScreenScrollbar.removeScrollBar();
-                }
-                this.splashScreenScrollbar = new scrollBar({
-                    domNode: this.divAddressScrollContent
-                });
-                this.splashScreenScrollbar.setContent(this.divAddressResults);
-                this.splashScreenScrollbar.createScrollBar();
-
-
             },
+
             _findTaskOverlayResults: function (selectedFeature, index) {
-                rendererColor = dojo.configData.OverlayLayerSettings[0].OverlayHighlightColor
+                var rendererColor = dojo.configData.OverlayLayerSettings[0].OverlayHighlightColor;
                 var overlayLayerSettings = dojo.configData.OverlayLayerSettings;
+                var layLayerSettings = dojo.configData.OverlayLayerSettings[0];
                 var queryOutFields = dojo.configData.QueryOutFields.split(",");
-                overlayQueryUrl = dojo.configData.OverlayLayerSettings[0].LayerUrl;
+                var overlayQueryUrl = dojo.configData.OverlayLayerSettings[0].LayerUrl;
                 this.map.getLayer("esriGraphicsLayerMapSettings").clear();
-                var _this = this;
                 this.txtAddress.value = (selectedFeature.name);
                 if (this.map.getLayer("roadCenterLinesLayerID")) {
                     this.map.getLayer("roadCenterLinesLayerID").clear();
@@ -613,7 +604,7 @@ define([
                 query.outFields = queryOutFields;
                 query.where = string.substitute(overlayLayerSettings[0].SearchExpression, [lang.trim(this.txtAddress.value).toUpperCase()]);
                 var qTask = new QueryTask(overlayQueryUrl);
-                var QuerOverlay = qTask.execute(query, lang.hitch(this, function (featureSet) {
+                var querOverlay = qTask.execute(query, lang.hitch(this, function (featureSet) {
                     var selectedSet = featureSet.features[0];
                     var layer = this.map.getLayer("esriGraphicsLayerMapSettings");
                     var lineColor = new Color();
@@ -623,36 +614,36 @@ define([
                     fillColor.a = 0.25;
                     var symbol = new Symbol.SimpleFillSymbol(Symbol.SimpleFillSymbol.STYLE_SOLID, new Symbol.SimpleLineSymbol(Symbol.SimpleLineSymbol.STYLE_SOLID, lineColor, 3), fillColor);
                     selectedSet.setSymbol(symbol);
-                    ringsmultiPoint = new Geometry.Multipoint(new SpatialReference({ wkid: 3857 }));
+                    var ringsmultiPoint = new Geometry.Multipoint(new SpatialReference({ wkid: 3857 }));
                     for (var i = 0; i < selectedSet.geometry.rings[0].length; i++)
                         ringsmultiPoint.addPoint(selectedSet.geometry.rings[0][i]);
                     var centerPoint = ringsmultiPoint.getExtent().getCenter();
 
                     this.map.setExtent(this._getExtentFromPolygon(selectedSet.geometry.getExtent().expand(4)));
+                    setTimeout(function () {
+                        topic.publish("createInfoWindowContent", selectedFeature.attributes.attr, centerPoint, layLayerSettings);
+                    }, 700);
                     layer.add(selectedSet);
                 }));
             },
 
-
-            _FindTaskResult: function (selectedFeature) {
+            _findTaskResult: function (selectedFeature) {
                 var parcelLayerSettings = dojo.configData.ParcelLayerSettings;
-                rendererColor = dojo.configData.ParcelLayerSettings.ParcelHighlightColor
-                taxParcelQueryURL = dojo.configData.ParcelLayerSettings.LayerUrl;
-                parcelInformation = dojo.configData.AveryLabelSettings[0].ParcelInformation;
+                var rendererColor = dojo.configData.ParcelLayerSettings.ParcelHighlightColor;
+                var taxParcelQueryUrl = dojo.configData.ParcelLayerSettings.LayerUrl;
+                var parcelInformation = dojo.configData.AveryLabelSettings[0].ParcelInformation;
                 var queryOutFields = dojo.configData.QueryOutFields.split(",");
                 this.map.getLayer("esriGraphicsLayerMapSettings").clear();
-                var _this = this;
                 this.txtAddress.value = (selectedFeature.value);
                 if (this.map.getLayer("roadCenterLinesLayerID")) {
                     this.map.getLayer("roadCenterLinesLayerID").clear();
                 }
                 var query = new Query();
-
                 query.returnGeometry = true;
                 query.outFields = queryOutFields;
                 query.where = string.substitute(parcelLayerSettings.SearchExpression, [lang.trim(this.txtAddress.value).toUpperCase()]);
-                var qTask = new QueryTask(taxParcelQueryURL);
-                var QueryTaxParcel = qTask.execute(query, lang.hitch(this, function (featureSet) {
+                var qTask = new QueryTask(taxParcelQueryUrl);
+                var queryTaxParcel = qTask.execute(query, lang.hitch(this, function (featureSet) {
                     var selectedSet = featureSet.features[0];
                     var layer = this.map.getLayer("esriGraphicsLayerMapSettings");
                     var lineColor = new Color();
@@ -664,14 +655,13 @@ define([
                     var symbol = new Symbol.SimpleFillSymbol(Symbol.SimpleFillSymbol.STYLE_SOLID, new Symbol.SimpleLineSymbol(Symbol.SimpleLineSymbol.STYLE_SOLID, lineColor, 3), fillColor);
 
                     selectedSet.setSymbol(symbol);
-                    ringsmultiPoint = new Geometry.Multipoint(new SpatialReference({ wkid: 3857 }));
+                    var ringsmultiPoint = new Geometry.Multipoint(new SpatialReference({ wkid: 3857 }));
                     for (var i = 0; i < selectedSet.geometry.rings[0].length; i++)
                         ringsmultiPoint.addPoint(selectedSet.geometry.rings[0][i]);
                     var centerPoint = ringsmultiPoint.getExtent().getCenter();
-
-                    this.map.setExtent(this._getExtentFromPolygon(selectedSet.geometry.getExtent().expand(4)));
+                    this.map.infoWindow.hide();
+                    topic.publish("createInfoWindowContent", selectedSet, centerPoint, parcelLayerSettings);
                     layer.add(selectedSet);
-
                 }));
             },
 
@@ -687,25 +677,24 @@ define([
             },
 
             // Dynamically create contents for infowindow and append the structure in main window
-            _createInfoWindowContent: function (feature, mapPoint) {
-                infoPopupFieldsCollection = dojo.configData.ParcelLayerSettings.InfoWindowSettings[0].InfoWindowData;
-                infoWindowTitle = dojo.configData.ParcelLayerSettings.InfoWindowSettings[0].InfoWindowTitleFields;
-                infoPopupHeight = dojo.configData.InfoPopupHeight;
-                infoPopupWidth = dojo.configData.InfoPopupWidth;
+            onCreateInfoWindowContent: function (feature, mapPoint, layerSettings) {
+                var infoPopupFieldsCollection = layerSettings.InfoWindowSettings[0].InfoWindowData;
+                var infoWindowTitle = layerSettings.InfoWindowSettings[0].InfoWindowTitleFields;
+                var infoPopupHeight = dojo.configData.InfoPopupHeight;
+                var infoPopupWidth = dojo.configData.InfoPopupWidth;
                 var showNullAs = dojo.configData.ShowNullValueAs;
-                displayInfo = feature.attributes[parcelInformation.AliasParcelField] + "$infoParcel";
-                selectedPoint = mapPoint;
-                var divDetailsTab = domConstruct.create("div", { "width": "100%", "height": "100%" }, null);
+                this.selectedPoint = mapPoint;
+                var divDetailsTab = domConstruct.create("div", { "class": "esriCTFullHeightWidth" }, null);
                 var scrollbar_container = domConstruct.create("div", { "id": "scrollbar_container1", "className": "scrollbar_container" }, divDetailsTab);
                 scrollbar_container.style.height = (infoPopupHeight - 80) + "px";
                 var scrollContent = domConstruct.create("div", { "id": "scrollList1", "className": "scrollbar_content", "display": "block" }, scrollbar_container);
                 scrollContent.style.height = (infoPopupHeight - 80) + "px";
                 var divInfoPopup = domConstruct.create("div", { "id": "tblParcels", "className": "esriCTdivTransparent" }, scrollContent);
                 for (var key = 0; key < infoPopupFieldsCollection.length; key++) {
-                    var divInfoRow = domConstruct.create("div", {}, divInfoPopup);
+                    var divInfoRow = domConstruct.create("div", { "className": "esriCTDisplayRow" }, divInfoPopup);
                     // Create the row's label
-                    this.divInfoCol1 = domConstruct.create("div", { "className": "esriCTDisplayField", "id": "divInfoCol1", "height": "20", "innerHTML": infoPopupFieldsCollection[key].DisplayText }, divInfoRow);
-                    this.divInfoCol2 = domConstruct.create("div", { "className": "esriCTValueField", "id": "divInfoCol2", "height": "20" }, divInfoRow);
+                    this.divInfoCol1 = domConstruct.create("div", { "className": "esriCTDisplayField", "id": "divInfoCol1", "innerHTML": infoPopupFieldsCollection[key].DisplayText }, divInfoRow);
+                    this.divInfoCol2 = domConstruct.create("div", { "className": "esriCTValueField", "id": "divInfoCol2" }, divInfoRow);
                     var valueString = "";
                     var aliases = infoPopupFieldsCollection[key].AliasField.split(',');
                     array.forEach(aliases, function (term) {
@@ -714,68 +703,45 @@ define([
                             valueString += value + " ";
                         }
                     });
-
                     if (valueString.length === 0) {
                         var fieldNames = infoPopupFieldsCollection[key].FieldName.split(',');
                         array.forEach(fieldNames, function (term) {
                             var value = feature.attributes[term];
-                            if (value && value !== "Null") {
+                            if (value && value !== "null") {
                                 valueString += value + " ";
                             }
                         });
-
                     }
                     if (valueString.length === 0) {
                         valueString = showNullAs;
                     }
-
-
                     this.divInfoCol2.innerHTML = valueString;
                 }
                 var divDisplay = domConstruct.create("div", { "width": "100%", "marginTop": "10px", "align": "right" }, divDetailsTab);
                 var divDisplayTable = domConstruct.create("div", {}, divDisplay);
                 var divDisplayRow = domConstruct.create("div", {}, divDisplayTable);
                 var divDisplayColumn1 = domConstruct.create("div", {}, divDisplayRow);
-                var divInfoImg = domConstruct.create("img", { "id": "imgAdjacentParcels", "src": "/themes/images/add.png" }, divDisplayColumn1);
-                this.own(on(divInfoImg, "click", lang.hitch(this, function () {
-                    this.polygon = true;
-                    this.interactiveParcel = true;
-                    selectedPoint = null;
-                    displayInfo = null;
-                    if (this.isSpanClicked == true) {
-                        return;
-                    }
-                })));
                 var divDisplayColumn2 = domConstruct.create("div", {}, divDisplayRow);
-                var divSpan = domConstruct.create("span", { "id": "spanAdjacentParcels", "class": "esrictDivSpan", "display": "block", "innerHTML": "Add adjacent parcel" }, divDisplayColumn2);
-                this.own(on(divSpan, "click", lang.hitch(this, function () {
-                    this.polygon = true;
-                    this.interactiveParcel = true;
-                    selectedPoint = null;
-                    displayInfo = null;
-                    if (this.isSpanClicked == true) {
-                        return;
-                    }
-
-                })));
-                //function to append dynamically created data in infowindow
-                this._resetInfoWindowContent(divDetailsTab);
                 this.map.infoWindow.resize(infoPopupWidth, infoPopupHeight);
                 var possibleTitleFields = infoWindowTitle.split(",");
                 var infoTitle = "";
                 array.some(possibleTitleFields, function (field) {
-                    if (feature.attributes[field] && feature.attributes[field] !== "Null") {
+                    if (feature.attributes[field] && feature.attributes[field] !== "null") {
                         infoTitle = feature.attributes[field];
                         return true;
                     }
                     return false;
                 });
-                this.map.infoWindow.hide();
-                selectedMapPoint = mapPoint;
+                this.map.infoWindow.hide(selectedMapPoint);
+                var selectedMapPoint = mapPoint;
                 dojo.selectedMapPoint = selectedMapPoint;
-                this.map.setExtent(this._getBrowserMapExtent(selectedMapPoint));
-                var screenPoint = this.map.toScreen(selectedMapPoint);
-                screenPoint.y = this.map.height - screenPoint.y;
+                var extentChanged = this.map.setExtent(this._getBrowserMapExtent(selectedMapPoint));
+                extentChanged.then(lang.hitch(this, function () {
+                    var screenPoint = this.map.toScreen(selectedMapPoint);
+                    screenPoint.y = this.map.height - screenPoint.y;
+                    this.map.infoWindow.setTitle(infoTitle);
+                    this.map.infoWindow.show(divDetailsTab, screenPoint);
+                }));
             },
 
             _getBrowserMapExtent: function (mapPoint) {
@@ -788,14 +754,9 @@ define([
                 return new Geometry.Extent(xmin, ymin, xmax, ymax, this.map.spatialReference);
             },
 
-            _resetInfoWindowContent: function (detailsTab) {
-                var x = query(".infopanel")[0]
-                this.RemoveChildren(dojo.byId("divInfoDetailsScroll"));
-                dojo.byId("divInfoDetailsScroll").appendChild(detailsTab);
-            },
 
             //Refresh address container div
-            RemoveChildren: function (parentNode) {
+            onRemoveChildren: function (parentNode) {
                 if (parentNode) {
                     while (parentNode.hasChildNodes()) {
                         parentNode.removeChild(parentNode.lastChild);
@@ -803,22 +764,23 @@ define([
                 }
             },
 
-
-
-            _FindAndShowRoads: function () {
+            _findAndShowRoads: function () {
                 var roadLayerSettings = dojo.configData.RoadCenterLayerSettings;
                 var query = new Query();
+                this.map.getLayer("esriGraphicsLayerMapSettings").clear();
                 if (this.map.getLayer("roadCenterLinesLayerID")) {
                     this.map.getLayer("roadCenterLinesLayerID").clear();
                 }
                 query.where = "UPPER(" + roadLayerSettings.SearchDisplayFields + ") LIKE '" + lang.trim(this.txtAddress.value).toUpperCase() + "%'";
                 this.map.getLayer("roadCenterLinesLayerID").selectFeatures(query, esri.layers.FeatureLayer.SELECTION_NEW, lang.hitch(this, function (features) {
-                    this._ShowSelectedRoads()
+                    this._showSelectedRoads(features);
                 }));
 
             },
-            _ShowSelectedRoads: function () {
-                var polyLine = new esri.geometry.Polyline(this.map.spatialReference);
+
+            _showSelectedRoads: function (features) {
+                var roadLayerSettings = dojo.configData.RoadCenterLayerSettings;
+                var polyLine = new Geometry.Polyline(this.map.spatialReference);
                 var numSegments = this.map.getLayer("roadCenterLinesLayerID").graphics.length;
                 var roadArray = [];
                 if (0 < numSegments) {
@@ -829,8 +791,11 @@ define([
                         roadArray.push(this.map.getLayer("roadCenterLinesLayerID").graphics[j].attributes[this.map.getLayer("roadCenterLinesLayerID").objectIdField]);
                     }
                     this.map.setExtent(polyLine.getExtent().expand(1.5));
+                    setTimeout(function () {
+                        var point = polyLine.getPoint(0, 0);
+                        topic.publish("createInfoWindowContent", _this.map.getLayer("roadCenterLinesLayerID").graphics[0], point, roadLayerSettings);
+                    }, 1000);
                 }
-
             },
 
             /**
@@ -842,7 +807,6 @@ define([
                 this.txtAddress.blur();
                 domClass.replace(this.divAddressHolder, "esriCTHideContainerHeight", "esriCTShowContainerHeight");
                 domClass.replace(this.divAddressHolder, "esriCTZeroHeight", "esriCTAddressContentHeight");
-                //                 domStyle.set(this.divAddressScrollContent, "display", "none");
             },
 
             /**
@@ -879,7 +843,6 @@ define([
                 }
                 this.txtAddress.value = domAttr.get(this.txtAddress, "defaultAddress");
                 this.lastSearchString = lang.trim(this.txtAddress.value);
-                //domConstruct.empty(this.divAddressResults);
             },
 
             /**
@@ -948,6 +911,5 @@ define([
                 domClass.add(target, "esriCTBlurColorChange");
                 this.lastSearchString = lang.trim(this.txtAddress.value);
             }
-
         });
     });

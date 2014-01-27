@@ -87,15 +87,15 @@ define([], function () {
                MapInstanceRequired: false
            }
         ],
-           // Set size of the info-Popup - select maximum height and width in pixels (not applicable for tabbed info-Popup)
-           //minimum height should be 310 for the info-popup in pixels
-           InfoPopupHeight: 300,
+        // Set size of the info-Popup - select maximum height and width in pixels (not applicable for tabbed info-Popup)
+        //minimum height should be 310 for the info-popup in pixels
+        InfoPopupHeight: 300,
 
-           // Minimum width should be 330 for the info-popup in pixels
-           InfoPopupWidth: 350,
+        // Minimum width should be 330 for the info-popup in pixels
+        InfoPopupWidth: 350,
 
-           // Set string value to be shown for null or blank values
-           ShowNullValueAs: "N/A",
+        // Set string value to be shown for null or blank values
+        ShowNullValueAs: "N/A",
 
         // ------------------------------------------------------------------------------------------------------------------------
         // BASEMAP SETTINGS
@@ -106,7 +106,6 @@ define([], function () {
             ThumbnailSource: "themes/images/parcelmap.png",
             Name: "Parcel Map",
             MapURL: "http://tryitlive.arcgis.com/arcgis/rest/services/ParcelPublicAccessMI/MapServer"
-
         }, {
             Key: "taxMap",
             ThumbnailSource: "themes/images/taxmap.png",
@@ -129,9 +128,22 @@ define([], function () {
         OverlayLayerSettings: [{
             OverlayHighlightColor: "#1C86EE",
             Title: "SchoolBoundaries",
+            index: "0",
             LayerUrl: "http://203.199.47.84/ArcGIS/rest/services/SchoolLocator/SchoolBoundaries/MapServer/3",
             SearchDisplayFields: "DISTRCTNAME,NAME",
-            SearchExpression: "UPPER(DISTRCTNAME) LIKE '%${0}%' OR UPPER(NAME) LIKE '%${0}%'"
+            SearchExpression: "UPPER(DISTRCTNAME) LIKE '%${0}%' OR UPPER(NAME) LIKE '%${0}%'",
+            InfoWindowSettings: [{
+                InfoWindowTitleFields: "NAME", //earlier key - InfoWindowTitle
+                InfoWindowData: [{
+                    DisplayText: "District Name:",
+                    FieldName: "DISTRCTNAME",
+                    AliasField: "School District Name"
+                }, {
+                    DisplayText: "Name:",
+                    FieldName: "NAME",
+                    AliasField: "School Name"
+                }]
+            }]
         }],
         // ------------------------------------------------------------------------------------------------------------------------
         // OPERATIONAL DATA SETTINGS
@@ -156,6 +168,17 @@ define([], function () {
 
         // Following zoom level will be set for the map upon searching an address
         ZoomLevel: 12,
+        // ------------------------------------------------------------------------------------------------------------------------
+        // Buffer distances
+        // ------------------------------------------------------------------------------------------------------------------------
+        //Maximum Buffer Distance
+        MaxBufferDistance: 2000,
+
+        //Buffer Distance
+        DefaultBufferDistance: 100,
+
+        //Name of the occupant
+        OccupantName: "Occupant",
 
         ParcelLayerSettings: {
             ParcelHighlightColor: "#1C86EE", //earlier key - RendererColor
@@ -210,27 +233,27 @@ define([], function () {
                 InfoWindowTitleFields: "FULLNAME", //earlier key - InfoWindowTitle
                 InfoWindowData: [{
                     DisplayText: "Road Class:",
-                    FieldName: "${ROADCLASS}",
+                    FieldName: "ROADCLASS",
                     AliasField: "Road Class"
                 }, {
                     DisplayText: "From Left:",
-                    FieldName: "${FROMLEFT}",
+                    FieldName: "FROMLEFT",
                     AliasField: "Left From Address"
                 }, {
                     DisplayText: "To Left:",
-                    FieldName: "${TOLEFT}",
+                    FieldName: "TOLEFT",
                     AliasField: "Left To Address"
                 }, {
                     DisplayText: "From Right:",
-                    FieldName: "${FROMRIGHT}",
+                    FieldName: "FROMRIGHT",
                     AliasField: "Right From Address"
                 }, {
                     DisplayText: "Zip Left:",
-                    FieldName: "${ZIPLEFT}",
+                    FieldName: "ZIPLEFT",
                     AliasField: "Zip on Left"
                 }, {
                     DisplayText: "Zip Right:",
-                    FieldName: "${ZIPRIGHT}",
+                    FieldName: "ZIPRIGHT",
                     AliasField: "Zip on Right"
                 }]
             }]
@@ -246,7 +269,7 @@ define([], function () {
         //        // MaxResults: Maximum number of locations to display in the results menu.
 
         SearchSettings: { //earlier key LocatorSettings
-            DefaultLocatorSymbol:"/themes/images/redpushpin.png",
+            DefaultLocatorSymbol: "/themes/images/redpushpin.png",
             MarkupSymbolSize: [{
                 width: 35,
                 height: 35
@@ -263,7 +286,14 @@ define([], function () {
                 ParcelIdentification: "PARCELID",
                 AliasParcelField: "Parcel Identification Number",
                 SiteAddress: "SITEADDRESS"
-            }
+            },
+            AveryLabelTemplates: [{
+                name: "5160",
+                value: "avery5160"
+            }, {
+                name: "5193",
+                value: "avery5193"
+            }]
         }
          ],
 

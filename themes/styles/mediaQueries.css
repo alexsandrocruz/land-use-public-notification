@@ -8,6 +8,7 @@
         width: 25% !important;
         padding: 8px 0 !important;
     }
+
     .clearInput
     {
         background-image: url("../images/close@2x.png") !important;
@@ -24,7 +25,6 @@
     {
         font-size: 11px !important;
     }
-   
 }
 
 @media only screen and (min-width : 768px) and (max-width : 1024px) /*if device wise  @media only screen and (min-device-width : 768px) and (max-device-width : 1024px)*/
@@ -33,11 +33,12 @@
     {
         font-size: 14px !important;
     }
+
     input
     {
         font-size: 14px !important;
     }
-   
+
     .esriCTTdHeaderSearch, .esriCTTdHeaderSearch-select, .esriCTTdGeolocation, .esriCTImgSocialMedia-select, .esriCTImgSocialMedia, .esriCTRouteImg, .esriCTRouteImg-select, .esriCTHelpImg, .esriCTImgPrint
     {
         height: 44px !important;
@@ -45,27 +46,33 @@
         background-size: 44px !important;
         padding: 8px 15px !important;
     }
+
     .esriCTApplicationHeader
     {
         height: 60px;
     }
+
     .esriCTAddressHolder, .esriCTAddressContentHeight
     {
         top: 61px !important;
     }
+
     .esriCTTxtAddress
     {
         font-size: 15px !important;
     }
+
     .esriCTDivAppContainer, .esriCTShowContainerHeight
     {
         top: 61px !important;
     }
+
     .esriCTTdShare
     {
         float: left;
         padding: 10px 0 10px 15%;
     }
+
     .esriCTShareCursor, .facebook, .twitter, .email
     {
         height: 44px !important;
@@ -73,20 +80,23 @@
         padding: 8px 0 !important;
         background-size: 44px;
     }
+
     .esriCTDivshareContainer
     {
         height: 180px !important;
     }
+
     .esriCTSearchClose
     {
         right: 70px;
     }
-    
+
     .esriCTApplicationHeaderTextTD
     {
-        display:none;
-       }
-        .esriCTApplicationHeaderIcon
+        display: none;
+    }
+
+    .esriCTApplicationHeaderIcon
     {
         display: none;
     }
@@ -98,11 +108,12 @@
     {
         font-size: 14px !important;
     }
+
     input
     {
         font-size: 14px !important;
     }
-   
+
     .esriCTTdHeaderSearch, .esriCTTdHeaderSearch-select, .esriCTTdGeolocation, .esriCTImgSocialMedia-select, .esriCTImgSocialMedia, .esriCTRouteImg, .esriCTRouteImg-select, .esriCTHelpImg, .esriCTImgPrint
     {
         height: 44px !important;
@@ -110,37 +121,43 @@
         background-size: 44px !important;
         padding: 8px 15px !important;
     }
+
     .esriCTApplicationHeader
     {
         height: 60px;
     }
+
     .esriCTApplicationHeaderIcon
     {
         display: none;
     }
+
     .esriCTAddressHolder, .esriCTAddressContentHeight
     {
         top: 61px !important;
     }
+
     .esriCTApplicationHeaderTextTD
     {
-        /* padding: 10px 23px; 
-         width:34%;*/
-         display:none;
-        }
+        display: none;
+    }
+
     .esriCTTxtAddress
     {
         font-size: 15px !important;
     }
+
     .esriCTDivAppContainer, .esriCTShowContainerHeight
     {
         top: 61px !important;
     }
+
     .esriCTTdShare
     {
         float: left;
         padding: 10px 0 10px 15%;
     }
+
     .esriCTShareCursor, .facebook, .twitter, .email
     {
         height: 44px !important;
@@ -148,12 +165,11 @@
         padding: 8px 0 !important;
         background-size: 44px;
     }
+
     .esriCTSearchClose
     {
         right: 70px;
     }
-   
-
 }
 
 @media screen and (min-width: 321px) and (max-width: 640px)
@@ -162,26 +178,29 @@
     {
         font-size: 14px !important;
     }
+
     input
     {
         font-size: 14px !important;
     }
-    
+
     .esriCTAddressHolder, .esriCTAddressContentHeight
     {
         top: 61px !important;
         width: 100% !important;
     }
+
     .esriCTAddressPlaceHolder
     {
         height: 44px;
     }
+
     .esriCTTxtAddress
     {
-        /* width: 100% !important;*/
         padding: 0px !important;
         padding: 6px 25px !important;
     }
+
     .esriCTTxtAddress
     {
         font-size: 15px !important;
@@ -194,20 +213,24 @@
         top: 61px !important;
         width: 100% !important;
     }
+
     .esriCTDivAppHolder
     {
         width: 100% !important;
     }
+
     .divAppContent
     {
         width: 287px;
         margin: 0 auto;
     }
+
     .esriCTTdShare
     {
         float: left;
         padding: 10px 0 10px 15%;
     }
+
     .esriCTShareCursor, .facebook, .twitter, .email
     {
         height: 44px !important;
@@ -215,14 +238,17 @@
         padding: 8px 0 !important;
         background-size: 44px;
     }
+
     .esriCTApplicationHeaderTextTD
     {
         display: none;
     }
+
     .esriCTApplicationHeaderIcon
     {
         display: none;
     }
+
     .esriCTTdHeaderSearch, .esriCTTdHeaderSearch-select, .esriCTTdGeolocation, .esriCTImgSocialMedia-select, .esriCTImgSocialMedia, .esriCTRouteImg, .esriCTRouteImg-select, .esriCTHelpImg, .esriCTImgPrint
     {
         height: 44px !important;
@@ -231,6 +257,7 @@
         width: 25% !important;
         padding: 8px 0 !important;
     }
+
     .esriCTRightTab
     {
         width: 100%;
@@ -245,14 +272,17 @@
     {
         top: 60px !important;
     }
+
     .esriCTApplicationHeaderIcon
     {
         display: none;
     }
+
     .legendbox
     {
         display: none;
     }
+
     /* Address container */
 
     .esriCTAddressHolder
@@ -264,6 +294,7 @@
         top: 60px !important;
         width: 100% !important;
     }
+
     .esriCTAddressContent
     {
         height: 300px;
@@ -271,14 +302,17 @@
         border-left: 1px solid #007ac2;
         border-bottom: 1px solid #007ac2;
     }
+
     .esriCTAddressPlaceHolder
     {
         height: 44px;
     }
+
     .esriCTBottomBorder
     {
         height: 40px;
     }
+
     .esriCTTxtAddress
     {
         padding: 0px !important;
@@ -301,16 +335,19 @@
         left: 40%;
         bottom: 0px;
     }
+
     .esriCTSplashScreenDialog
     {
         height: 95% !important;
         width: 95% !important;
         margin-top: 1% !important;
     }
-    . divSplashScreenContent
+
+    .divSplashScreenContent
     {
         width: 95% !important;
     }
+
     .esriCTFullWidth
     {
         width: 100% !important;
@@ -320,6 +357,7 @@
     {
         width: 100% !important;
     }
+
     .scrollbar_content
     {
         width: 100% !important;
@@ -330,15 +368,17 @@
     {
         display: none !important;
     }
-   
+
     .esriCTSearchClose
     {
         right: 75px;
     }
+
     .esriCTSearch
     {
         top: -45PX;
     }
+
     .esriCTTxtShare
     {
         border-top: 1px solid #007AC2;
@@ -361,14 +401,12 @@
         position: relative !important;
         width: 100% !important;
     }
+
     .esriCTTxtShare
     {
-
-        width:90% !important;
+        width: 90% !important;
     }
-
 }
-
 
 /* Portrait */
 @media screen and (max-width: 320px)
@@ -377,22 +415,25 @@
     {
         font-size: 14px !important;
     }
+
     input
     {
         font-size: 14px !important;
     }
-   
+
     .esriCTAddressHolder, .esriCTAddressContentHeight
     {
         top: 61px !important;
         width: 100% !important;
     }
+
     .esriCTTxtAddress
     {
         font-size: 15px !important;
         padding: 0px !important;
         padding: 6px 25px !important;
     }
+
     .esriCTDivAppContainer, .esriCTShowContainerHeight
     {
         top: 61px !important;
@@ -402,11 +443,13 @@
     {
         width: 100% !important;
     }
+
     .esriCTTdShare
     {
         float: left;
         padding: 10px 0 10px 15%;
     }
+
     .esriCTShareCursor, .facebook, .twitter, .email
     {
         height: 44px !important;
@@ -414,6 +457,7 @@
         padding: 8px 0 !important;
         background-size: 44px;
     }
+
     .esriCTAddressHolder
     {
         top: 50px !important;
@@ -428,10 +472,12 @@
         width: 25% !important;
         padding: 8px 0 !important;
     }
+
     .esriCTApplicationHeaderIcon
     {
         display: none;
     }
+
     .esriCTRightTab
     {
         width: 100% !important;
@@ -461,7 +507,7 @@
         width: 95% !important;
         margin-top: 1% !important;
     }
-    . divSplashScreenContent
+    .divSplashScreenContent
     {
         width: 95% !important;
     }
@@ -495,8 +541,8 @@
     {
         right: 75px;
     }
-   
-     .esriCTTxtShare
+
+    .esriCTTxtShare
     {
         border-top: 1px solid #007AC2;
         outline: medium none;
@@ -518,10 +564,9 @@
         position: relative !important;
         width: 100% !important;
     }
-     .esriCTTxtShare
+    .esriCTTxtShare
     {
-
-        width:80% !important;
+        width: 80% !important;
     }
 }
 

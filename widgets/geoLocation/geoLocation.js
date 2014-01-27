@@ -120,6 +120,5 @@ function (declare, lang, domConstruct, on, topic, _WidgetBase, GeometryService, 
             this.map.getLayer("esriGraphicsLayerMapSettings").clear();
             this.map.getLayer("esriGraphicsLayerMapSettings").add(graphic);
         }
-
     });
 });
