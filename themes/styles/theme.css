@@ -216,6 +216,7 @@
     color: #6e6e6e !important;
     margin-right: 4px;
 }
+
 .esriCTCursorPointer
 {
     cursor: pointer;
@@ -226,6 +227,7 @@
     cursor: default;
     font-weight: bold;
 }
+
 .clearInput
 {
     background: #fff url("../images/close.png") !important;
@@ -250,6 +252,16 @@
 }
 
 .esriCTAddressScrollContent
+{
+    overflow: hidden;
+    width: 90%;
+    float: right !important;
+    margin-right: 5px;
+    height: 215px !important;
+    position: relative;
+}
+
+.esriCTInfoScrollContent
 {
     overflow: hidden;
     width: 90%;
@@ -321,6 +333,11 @@
     overflow: hidden;
     width: 290px;
     float: left;
+}
+.divInfoScrollContainer
+{
+    overflow: hidden;
+    width: 370px !important;
 }
 
 .esriCTSearchLoader
@@ -491,6 +508,7 @@
 }
 
 /* End of Address container Styles */
+
 
 /* Share Container Styles */
 .esriCTDivAppContainer
@@ -924,6 +942,11 @@
     overflow: hidden;
     border: none;
 }
+.scrollbar_content1
+{
+    overflow: hidden;
+    border: none;
+}
 
 .splashScreenscrollBarheight
 {
@@ -945,6 +968,11 @@
     overflow: hidden;
     position: relative;
 }
+.divInfoScrollContent
+{
+    overflow: hidden;
+    position: relative;
+}
 
 .divAddressResults
 {
@@ -952,6 +980,13 @@
     width: 93%;
     color: White;
     height: 210px !important;
+}
+.divInfoDetailsScroll
+{
+    /*width: 100%;*/
+    overflow: hidden;
+    width: 93%;
+    color: White; /*height: 210px !important;*/
 }
 
 /* End of CSS for Scroll Bar */
@@ -966,6 +1001,7 @@
 }
 
 /*Start of Infowindow style*/
+
 .esriCTTInfoWindowContainer
 {
     z-index: 100002;
@@ -1007,11 +1043,13 @@
 
 .esriCTdivTransparent
 {
-    width: 100%;
     padding-left: 5px;
     color: #6e6e6e;
     font-size: 11px;
     margin-top: 15px;
+    overflow: hidden;
+    width: 93%;
+    height: 210px !important;
 }
 
 .esriCTDisplayRow
@@ -1121,7 +1159,7 @@
 .esriCTInfoDetailsScroll
 {
     overflow: hidden;
-    width: 98.2%;
+    width: 93%;
     color: White;
     margin-left: 5px;
 }
@@ -1260,21 +1298,20 @@ input
     text-decoration: underline;
     height: 20px;
     cursor: pointer;
+    width: 50%;
+    float: left;
 }
 
 .tdSiteAddress
 {
     color: #6e6e6e !important;
-    float: right !important;
+    float: left !important;
     height: 20px;
 }
 .tblTransparent
 {
-    width: 95%;
-    padding-left: 5px;
-    color: White;
-    font-size: 11px;
-    margin-top: 2px;
+    display: table;
+    width: 100%; /*width: 95%;     padding-left: 5px;     color: White;     font-size: 11px;     margin-top: 2px;*/
 }
 
 .mandatory
@@ -1315,3 +1352,66 @@ input
     padding-top: 5px;
     float: left;
 }
+.scrollbar_footer
+{
+    display: none;
+}
+.backBtn
+{
+    align: center;
+    vertical-align: middle;
+    color: white;
+    font-size: 11px;
+}
+.divDetailsTab
+{
+    display: table;
+    width: 100%;
+}
+
+/* Loading indicator Styles */
+
+.esriCTLoadingIndicator
+{
+    height: 100%;
+    width: 100%;
+    z-index: 10001;
+    position: absolute;
+    bottom: 0;
+    filter: alpha(opacity = 55);
+    -moz-opacity: 0.55;
+    -khtml-opacity: 0.55;
+    opacity: 0.55;
+    top: 0;
+    left: 0;
+    background-color: #007ac2;
+}
+
+.esriCTFullContainer
+{
+    width: 100%;
+    height: 100%;
+}
+
+.esriCTMainLoader
+{
+    background-position: 0 center;
+    background-image: url('../images/blue-loader.gif');
+    background-repeat: no-repeat;
+    position: absolute;
+    top: 50%;
+    left: 49%;
+    height: 25px;
+    width: 25px;
+}
+
+.displayNoneAll
+{
+    display: none;
+}
+
+.displayBlockAll
+{
+    display: block;
+}
+/* End of loading indicator Styles */

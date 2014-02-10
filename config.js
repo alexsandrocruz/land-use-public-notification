@@ -52,7 +52,7 @@ define([], function () {
 
         // Set splash window content - Message that appears when the application starts
         SplashScreen: {
-            // splash screen Message is set in locale file in nls dirctory
+            // splash screen Message is set in locale file in nls directory
             IsVisible: true
         },
 
@@ -87,6 +87,7 @@ define([], function () {
                MapInstanceRequired: false
            }
         ],
+
         // Set size of the info-Popup - select maximum height and width in pixels (not applicable for tabbed info-Popup)
         //minimum height should be 310 for the info-popup in pixels
         InfoPopupHeight: 300,
@@ -123,7 +124,7 @@ define([], function () {
         DefaultExtent: "-9273520, 5249870, -9270620, 5251510",
 
 
-        //Overlayer settings refers to the other operational layers configured apart from the standard layers.
+        //Overlay layer settings refers to the other operational layers configured apart from the standard layers.
         // ------------------------------------------------------------------------------------------------------------------------
         OverlayLayerSettings: [{
             OverlayHighlightColor: "#1C86EE",
@@ -145,25 +146,11 @@ define([], function () {
                 }]
             }]
         }],
-        // ------------------------------------------------------------------------------------------------------------------------
-        // OPERATIONAL DATA SETTINGS
-        // ------------------------------------------------------------------------------------------------------------------------
 
-        // Configure operational layers:
-
-        // Configure operational layers below.
-        // ServiceURL: URL of the layer.
-        // LoadAsServiceType: Field to specify if the operational layers should be added as dynamic map service layer or feature layer.
-        //                    Supported service types are 'dynamic' or 'feature'.
-
-
-        // ------------------------------------------------------------------------------------------------------------------------
-        // Renderer settings
-        // ------------------------------------------------------------------------------------------------------------------------
         // ------------------------------------------------------------------------------------------------------------------------
         // Query fields
         // ------------------------------------------------------------------------------------------------------------------------
-        //Fields to be displayed on info window.
+        //Fields to be queried
         QueryOutFields: "PARCELID,LOWPARCELID,OWNERNME1,OWNERNME2,SITEADDRESS,PSTLADDRESS,PSTLCITY,PSTLSTATE,PSTLZIP5,PSTLZIP4,BUILDING,UNIT,USEDSCRP,CNVYNAME,CVTTXDSCRP,SCHLDSCRP",
 
         // Following zoom level will be set for the map upon searching an address
@@ -179,6 +166,14 @@ define([], function () {
 
         //Name of the occupant
         OccupantName: "Occupant",
+
+        // ------------------------------------------------------------------------------------------------------------------------
+        // OPERATIONAL DATA SETTINGS
+        // ------------------------------------------------------------------------------------------------------------------------
+        // Configure operational layers:
+
+        // Configure operational layers below.
+        // LayerUrl: URL of the layer.
 
         ParcelLayerSettings: {
             ParcelHighlightColor: "#1C86EE", //earlier key - RendererColor
@@ -258,15 +253,6 @@ define([], function () {
                 }]
             }]
         },
-        // ------------------------------------------------------------------------------------------------------------------------
-        // ADDRESS SEARCH SETTINGS
-        // ------------------------------------------------------------------------------------------------------------------------
-        // Set locator settings such as locator symbol, size, display fields, match score
-        // LocatorParameters: Parameters(text, outFields, maxLocations, bbox, outSR) used for address and location search.
-        // AddressSearch: Candidates based on which the address search will be performed.
-        // PlaceNameSearch: Attributes based on which the layers will be queried when a location search is performed.
-        // AddressMatchScore: Setting the minimum score for filtering the candidate results.
-        //        // MaxResults: Maximum number of locations to display in the results menu.
 
         SearchSettings: { //earlier key LocatorSettings
             DefaultLocatorSymbol: "/themes/images/redpushpin.png",
@@ -279,6 +265,23 @@ define([], function () {
             MultipleResults: "PARCELID,SITEADDRESS" //earlier key - AddressSearchFields
         },
         AveryLabelSettings: [{
+            // Geoprocessing services for PDF creation
+            PDFServiceTask: "http://ec2-54-214-169-132.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/PublicNotification/GPServer/GenerateAveryLabels",
+
+            // Geoprocessing service for CSV file creation
+            CSVServiceTask: "http://ec2-54-214-169-132.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/PublicNotification/GPServer/GenerateCSVMailingList",
+
+            //Label to be displayed for Occupant
+            OccupantLabel: "Occupant", // earlier key-OccupantName
+
+            //Fields of the occupant
+            OccupantFields: "PARCELID,SITEADDRESS",
+
+            //Fields for Avery labels
+            AveryFieldsCollection: ["PARCELID", "OWNERNME1", "OWNERNME2", "PSTLADDRESS", "PSTLCITY,PSTLSTATE,PSTLZIP5"],
+
+            //Fields for CSV files
+            CsvFieldsCollection: ["PARCELID", "OWNERNME1", "OWNERNME2", "PSTLADDRESS", "PSTLCITY", "PSTLSTATE", "PSTLZIP5"],
 
             //Fields information for parcels
             ParcelInformation: {
@@ -294,13 +297,17 @@ define([], function () {
                 name: "5193",
                 value: "avery5193"
             }]
-        }
-         ],
+        }],
+
+        // ------------------------------------------------------------------------------------------------------------------------
+        // Offset distance
+        // ------------------------------------------------------------------------------------------------------------------------
+        //Maximum offset
+        MaxAllowableOffset: 1,
 
         // ------------------------------------------------------------------------------------------------------------------------
         // GEOMETRY SERVICE SETTINGS
         // ------------------------------------------------------------------------------------------------------------------------
-
         // Set geometry service URL
         GeometryService: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer",
 

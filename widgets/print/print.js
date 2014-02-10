@@ -45,15 +45,8 @@ function (declare, domConstruct, on, topic, lang, _WidgetBase) {
                 * minimize other open header panel widgets and show help
                 */
                 topic.publish("toggleWidget", "print");
-                this._ShowModal();
             })));
-        },
-
-        _ShowModal: function () {
-
-
-         }
-
+        }
 
     });
 });

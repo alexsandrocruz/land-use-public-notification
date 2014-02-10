@@ -33,7 +33,14 @@ define({
             shareLoadingFailed: "Unable to load share options.",
             shareFailed: "Unable to share.",
             noParcel: "Parcel not found at current location",
-            unableToPerform: "Unable to perform operation: invalid geometry."
+            unableToPerform: "Unable to perform operation: invalid geometry.",
+            enterNumeric: "Please enter numeric value.",
+            createBuffer: "Geometry for buffer is null in create buffer.",
+            selectProperty: "Select Property Owners or Occupants to notify.",
+            enterBufferDist: "Please enter the buffer distance.",
+            inValidAveryFormat: "Invalid Avery format. Please select a valid format from the dropdown list.",
+            fileSelect: "Select at least one file format to download.",
+            noDataAvailable: "Data not available for this particular location."
 
         }
     },

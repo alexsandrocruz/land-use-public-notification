@@ -31,6 +31,8 @@ define([
         "dojo/topic",
         "esri/domUtils",
         "esri/InfoWindowBase",
+        "esri/tasks/BufferParameters",
+        "../scrollBar/scrollBar",
         "dijit/form/Button",
         "dijit/form/ComboBox",
         "dijit/form/CheckBox",
@@ -41,7 +43,7 @@ define([
         "dijit/_WidgetsInTemplateMixin",
         "./infoWindowView"
 ],
-function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domClass, string, topic, domUtils, InfoWindowBase, Button, ComboBox, CheckBox, ItemFileReadStore, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, infoWindowView) {
+function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domClass, string, topic, domUtils, InfoWindowBase, BufferParameters, scrollBar, Button, ComboBox, CheckBox, ItemFileReadStore, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, infoWindowView) {
     return declare([infoWindowView], {
         templateString: template,
 
@@ -57,14 +59,22 @@ function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domC
             this._anchor = domConstruct.create("div", { "class": "esriCTdivTriangle" }, this.domNode);
             domUtils.hide(this.domNode);
             this.txtBuffer.value = dojo.configData.DefaultBufferDistance;
-            this.occupent.value = dojo.configData.OccupantName;
+            this.textoccupant.value = dojo.configData.OccupantName;
             this.own(on(this.esriCTclosediv, "click", lang.hitch(this, function (evt) {
                 this.map.getLayer("esriGraphicsLayerMapSettings").clear();
-                this.map.getLayer("roadCenterLinesLayerID").clear();
                 domUtils.hide(this.domNode);
                 dojo.selectedMapPoint = null;
 
             })));
+
+            this.own(on(this.btnSubmit, "click", lang.hitch(this, function () {
+                this.CreateBuffer();
+            })));
+
+            this.txtBuffer.onkeypress = lang.hitch(this, function (evt) {
+                return this.onlyNumbers(evt);
+            });
+
             this.esriCTShowDetailsView.src = dojoConfig.baseURL + "/themes/images/navigation.png";
             this.esriCTShowDetailsView.title = "navigation";
             this.attachInfoWindowEvents();
@@ -84,6 +94,15 @@ function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domC
             domStyle.set(this.divInfoDetails, "display", "block");
             domStyle.set(this.divInfoNotify, "display", "none");
             this.setLocation(screenPoint);
+            if (this.infoContainerScrollbar) {
+                domClass.add(this.infoContainerScrollbar._scrollBarContent, "esriCTZeroHeight");
+                this.infoContainerScrollbar.removeScrollBar();
+            }
+            this.infoContainerScrollbar = new scrollBar({
+                domNode: this.divInfoScrollContent
+            });
+            this.infoContainerScrollbar.setContent(this.divInfoDetailsScroll);
+            this.infoContainerScrollbar.createScrollBar();
         },
 
         resize: function (width, height) {
@@ -97,10 +116,11 @@ function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domC
 
         setTitle: function (infoTitle) {
             if (infoTitle.length > 0) {
+                this.esriCTheadderPanel.innerHTML = "";
                 this.esriCTheadderPanel.innerHTML = infoTitle;
                 this.esriCTheadderPanel.title = infoTitle;
             } else {
-                this.esriCTheadderPanel.innerHTML = "";
+                this.esriCTheadderPanel.innerHTML = dojo.configData.ShowNullValueAs;
             }
 
         },
@@ -126,7 +146,6 @@ function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domC
         _hideInfoContainer: function (map) {
             this.own(on(this.esriCTclosediv, "click", lang.hitch(this, function (evt) {
                 domUtils.hide(this.domNode);
-
             })));
         }
     });

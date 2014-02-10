@@ -21,13 +21,16 @@
 require([
         "coreLibrary/widgetLoader",
         "application/config",
-        "dojo/domReady!"
-    ], function (widgetLoader, config, domReady) {
+        "dojo/domReady!",
+         "esri/config"
+    ], function (widgetLoader, config, domReady, esriConfig) {
 
         //========================================================================================================================//
 
         try {
-
+            esriConfig.defaults.io.proxyUrl = "proxy.ashx";
+            esriConfig.defaults.io.alwaysUseProxy = false;
+            esriConfig.defaults.io.timeout = 180000;
             /**
             * load application configuration settings from configuration file
             * create an object of widget loader class

@@ -59,7 +59,6 @@ function (declare, _WidgetBase, Map, SplashScreen, appHeader, array, lang, Defer
                 var deferred = new Deferred();
                 widgets[widgetConfig.WidgetPath] = null;
                 require([widgetConfig.WidgetPath], function (widget) {
-
                     widgets[widgetConfig.WidgetPath] = new widget({ map: widgetConfig.MapInstanceRequired ? mapInstance : undefined, title: widgetConfig.Title });
 
                     deferred.resolve(widgetConfig.WidgetPath);

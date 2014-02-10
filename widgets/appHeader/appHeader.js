@@ -28,9 +28,11 @@ define([
     "dijit/_WidgetBase",
     "dijit/_TemplatedMixin",
     "dijit/_WidgetsInTemplateMixin",
+    "dojo/dom-class",
+     "dojo/topic",
     "dojo/i18n!nls/localizedStrings"
     ],
-     function (declare, domConstruct, lang, array, domAttr, dom, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, nls) {
+     function (declare, domConstruct, lang, array, domAttr, dom, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, domClass, topic, nls) {
 
          //========================================================================================================================//
 
@@ -48,6 +50,8 @@ define([
              */
              postCreate: function () {
 
+                 topic.subscribe("showProgressIndicator", lang.hitch(this, this.showProgressIndicator));
+                 topic.subscribe("hideProgressIndicator", lang.hitch(this, this.hideProgressIndicator));
                  /**
                  * add applicationHeaderParentContainer to div for header panel and append to esriCTParentDivContainer container
                  *
@@ -109,6 +113,14 @@ define([
                  * @memberOf widgets/appHeader/appHeader
                  */
                  this.applicationHeaderIcon.src = dojoConfig.baseURL + dojo.configData.ApplicationIcon;
+             },
+
+             showProgressIndicator: function () {
+                 domClass.replace(this.divLoadingIndicator, "displayBlockAll", "displayNoneAll");
+             },
+
+             hideProgressIndicator: function () {
+                 domClass.replace(this.divLoadingIndicator, "displayNoneAll", "displayBlockAll");
              }
          });
      });

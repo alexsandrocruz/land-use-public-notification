@@ -10,8 +10,15 @@
                     <div class="esriCTInfOIcon">
                         <img class="esriCTInfOptions" checked="info" title="Notify" data-dojo-attach-point="esriCTShowDetailsView" /></div>
                 </div>
-                <div data-dojo-attach-point="divInfoDetails" class="infopanel">
-                    <div data-dojo-attach-point="divInfoDetailsScroll" class="esriCTInfoDetailsScroll">
+                <div data-dojo-attach-point="divInfoDetails" class="esriCTAddressList">
+                    <div data-dojo-attach-point="divInfoScrollContainer" class="divInfoScrollContainer"
+                        align="left">
+                        <div data-dojo-attach-point="divInfoScrollContent" class="esriCTInfoScrollContent">
+                            <div data-dojo-attach-point="divInfoDetailsScroll" class="esriCTFullWidth">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="scrollbar_footer">
                     </div>
                 </div>
                 <div data-dojo-attach-point="divInfoNotify" class="divInfoComments" style="color: #fff;
@@ -24,7 +31,7 @@
                                         <span class="spanTxt">Enter buffer distance (feet)</span><span class="mandatory">*</span>
                                     </div>
                                     <div class="esriCTInputDistanc">
-                                        <input type="text" data-dojo-attach-point="txtBuffer" class="esriCTtxtBuffer" onkeypress="return onlyNumbers(event)" />
+                                        <input type="text" data-dojo-attach-point="txtBuffer" class="esriCTtxtBuffer" />
                                     </div>
                                 </div>
                             </div>
@@ -42,7 +49,7 @@
                                 </div>
                                 <div class="esriCTInputDistanc">
                                     <div class="esriCTtrBufferCheckbox">
-                                        <input id="Text1" name="chkOccupants" dojotype="dijit.form.CheckBox" /></div>
+                                        <input id="chkOccupants" name="chkOccupants" dojotype="dijit.form.CheckBox" /></div>
                                     <div class="esriCTtrBufferCheckboxlabel">
                                         <span class="">Property Occupants </span>
                                     </div>
@@ -53,13 +60,13 @@
                                     <span class="spanTxt">Occupants Label </span>
                                 </div>
                                 <div class="esriCTInputDistanc">
-                                    <input type="text" data-dojo-attach-point="occupent" class="esriCTtxtBuffer" />
+                                    <input type="text" data-dojo-attach-point="textoccupant" class="esriCTtxtBuffer" />
                                 </div>
                             </div>
                             <div class="esriCTtrBufferRow">
                                 <div class="esriCTBufferDistanc">
                                     <div class="esriCTtrBufferCheckbox">
-                                        <input id="Text3" name="chkPDF" dojotype="dijit.form.CheckBox" /></div>
+                                        <input id="chkPdf" name="chkPDF" dojotype="dijit.form.CheckBox" /></div>
                                     <div class="esriCTtrBufferCheckboxlabel">
                                         <span class="">Avery labels in PDF format </span>
                                     </div>
@@ -71,14 +78,18 @@
                             <div class="esriCTtrBufferRow">
                                 <div class="esriCTBufferDistanc">
                                     <div class="esriCTtrBufferCheckbox">
-                                        <input id="Text2" name="chkCSV" dojotype="dijit.form.CheckBox" /></div>
+                                        <input id="chkCsv" name="chkCSV" dojotype="dijit.form.CheckBox" /></div>
                                     <div class="esriCTtrBufferCheckboxlabel">
                                         <span class="">Download in CSV format </span>
                                     </div>
                                 </div>
                             </div>
+                            <div>
+                                <span class="spanFileUploadMessage" data-dojo-attach-point="spanFileUploadMessage"
+                                    style="display: none; font-size: 11px;"></span>
+                            </div>
                             <div class="esriCTtrBufferRow">
-                                <div class="customButton" id="btnSubmit">
+                                <div class="customButton" data-dojo-attach-point="btnSubmit">
                                     <div class="customButtonInner">
                                         Download</div>
                                 </div>

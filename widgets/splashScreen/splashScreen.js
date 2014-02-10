@@ -1,5 +1,4 @@
-﻿
-define([
+﻿define([
     "dojo/_base/declare",
     "dojo/dom-construct",
     "dojo/dom-style",
@@ -16,6 +15,7 @@ define([
     "dojo/i18n!nls/localizedStrings",
     "../scrollBar/scrollBar"
     ],
+
      function (declare, domConstruct, domStyle, lang, domClass, domAttr, on, domGeom, window, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, nls, scrollBar) {
          return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
              templateString: template,
@@ -24,7 +24,6 @@ define([
              splashScreenScrollbar: null,
 
              postCreate: function () {
-
                  this.inherited(arguments);
                  var customButtonInner = domConstruct.create("div", { "class": "customButtonInner", "innerHTML": nls.okButtonText }, this.customButton);
                  this.own(on(this.customButton, "click", lang.hitch(this, function () {

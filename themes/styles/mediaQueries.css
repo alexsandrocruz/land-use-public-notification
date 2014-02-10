@@ -8,11 +8,6 @@
         width: 25% !important;
         padding: 8px 0 !important;
     }
-
-    .clearInput
-    {
-        background-image: url("../images/close@2x.png") !important;
-    }
 }
 
 @media only screen and (min-width : 1024px) and (max-width : 1280px) /*if device wise @media only screen and (min-device-width : 1024px) and (max-device-width : 1280px)*/
