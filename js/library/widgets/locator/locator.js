@@ -34,10 +34,12 @@ define([
         "dijit/_WidgetBase",
         "dijit/_TemplatedMixin",
         "dijit/_WidgetsInTemplateMixin",
+        "dijit/TooltipDialog",
         "dojo/i18n!nls/localizedStrings",
         "dojo/topic",
         "esri/tasks/query",
         "esri/tasks/QueryTask",
+        "esri/graphic",
         "../scrollBar/scrollBar",
         "dojo/query",
         "widgets/infoWindow/infoWindow",
@@ -48,9 +50,11 @@ define([
         "dojo/_base/Color",
         "esri/symbol",
         "esri/geometry",
+        "dijit/place",
+        "esri/layers/FeatureLayer",
         "esri/SpatialReference"
     ],
-    function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domClass, string, Locator, window, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, nls, topic, Query, QueryTask, scrollBar, dojoQuery, InfoWindow, array, Deferred, DeferredList, all, Color, Symbol, Geometry, SpatialReference) {
+    function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domClass, string, Locator, window, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, TooltipDialog, nls, topic, Query, QueryTask, Graphic, scrollBar, dojoQuery, InfoWindow, array, Deferred, DeferredList, all, Color, Symbol, Geometry, Place, FeatureLayer, SpatialReference) {
 
         //========================================================================================================================//
         return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
@@ -67,6 +71,7 @@ define([
             isSpanClicked: false,
             deferredListarr: [],
             bufferArray: [],
+            toolTipContents: null, //variable to store the content's for tooltip
             /**
             * display locator widget
             *
@@ -95,7 +100,9 @@ define([
                 topic.subscribe("removeChildren", lang.hitch(this, this.onRemoveChildren));
                 topic.subscribe("showErrorMessage", lang.hitch(this, this.onShowErrorMessage));
                 topic.subscribe("drawPolygon", lang.hitch(this, this.ondrawPolygon));
+                topic.subscribe("hideMapTip", lang.hitch(this, this.hideMapTip));
                 this.domNode = domConstruct.create("div", { "title": this.title, "class": "esriCTTdHeaderSearch" }, null);
+                topic.subscribe("showMapTipForParcels", lang.hitch(this, this.showMapTipForParcels));
 
                 domConstruct.place(this.divAddressContainer, dom.byId("esriCTParentDivContainer"));
                 this.own(on(this.domNode, "click", lang.hitch(this, function () {
@@ -110,8 +117,8 @@ define([
 
                 domStyle.set(this.divAddressContainer, "display", "block");
                 this.divAddressContent.title = "";
-                this.close.src = dojoConfig.baseURL + "/themes/images/searchClose.png";
-                this.imgSearchLoader.src = dojoConfig.baseURL + "/themes/images/blue-loader.gif";
+                this.close.src = dojoConfig.baseURL + "/js/library/themes/images/searchClose.png";
+                this.imgSearchLoader.src = dojoConfig.baseURL + "/js/library/themes/images/blue-loader.gif";
 
                 this._setDefaultTextboxValue();
                 this._attachLocatorEvents();
@@ -599,7 +606,7 @@ define([
                 }
                 var query = new Query();
                 query.returnGeometry = true;
-                query.outFields = queryOutFields;
+                query.outFields = dojo.configData.SearchDisplayFields;
                 query.where = string.substitute(overlayLayerSettings[0].SearchExpression, [lang.trim(this.txtAddress.value).toUpperCase()]);
                 var qTask = new QueryTask(overlayQueryUrl);
                 var querOverlay = qTask.execute(query, lang.hitch(this, function (featureSet) {
@@ -657,7 +664,7 @@ define([
                     for (var i = 0; i < selectedSet.geometry.rings[0].length; i++)
                         ringsmultiPoint.addPoint(selectedSet.geometry.rings[0][i]);
                     var centerPoint = ringsmultiPoint.getExtent().getCenter();
-                   this.map.setExtent(this._getExtentFromPolygon(selectedSet.geometry.getExtent().expand(4)));
+                    this.map.setExtent(this._getExtentFromPolygon(selectedSet.geometry.getExtent().expand(4)));
                     this.map.infoWindow.hide();
                     setTimeout(function () {
                         topic.publish("createInfoWindowContent", selectedSet, centerPoint, parcelLayerSettings);
@@ -679,18 +686,27 @@ define([
 
             // Dynamically create contents for infowindow and append the structure in main window
             onCreateInfoWindowContent: function (feature, mapPoint, layerSettings) {
+                if (dojoQuery(".esrictDivSpan1")[0]) {
+                    var adjacentParcel = dojoQuery(".esrictDivSpan1")[0];
+                    domStyle.set(adjacentParcel, "display", "none");
+                    var imgAdjacentParcels = dojoQuery(".imgAdjacentParcels1")[0];
+                    domStyle.set(imgAdjacentParcels, "display", "none");
+                }
+
                 var infoPopupFieldsCollection = layerSettings.InfoWindowSettings[0].InfoWindowData;
                 var infoWindowTitle = layerSettings.InfoWindowSettings[0].InfoWindowTitleFields;
                 var infoPopupHeight = dojo.configData.InfoPopupHeight;
                 var infoPopupWidth = dojo.configData.InfoPopupWidth;
                 var showNullAs = dojo.configData.ShowNullValueAs;
+                this.divDataDetails = dojoQuery(".divDataDisplay")[0];
+                domConstruct.empty(dojoQuery(".divDataDisplay")[0]);
                 this.selectedPoint = mapPoint;
                 var divDetailsTab = domConstruct.create("div", { "class": "divDetailsTab" }, null);
-                this.divInfoPopup = domConstruct.create("div", { "id": "tblParcels", "className": "esriCTdivTransparent" }, divDetailsTab);
+                this.divInfoPopup = domConstruct.create("div", { "id": "tblParcels", "class": "esriCTDivTransparent" }, divDetailsTab);
                 for (var key = 0; key < infoPopupFieldsCollection.length; key++) {
-                    var divInfoRow = domConstruct.create("div", { "className": "esriCTDisplayRow" }, this.divInfoPopup);
-                    this.divInfoCol1 = domConstruct.create("div", { "className": "esriCTDisplayField", "id": "divInfoCol1", "innerHTML": infoPopupFieldsCollection[key].DisplayText }, divInfoRow);
-                    this.divInfoCol2 = domConstruct.create("div", { "className": "esriCTValueField", "id": "divInfoCol2" }, divInfoRow);
+                    var divInfoRow = domConstruct.create("div", { "class": "esriCTDisplayRow" }, this.divInfoPopup);
+                    this.divDispalyField = domConstruct.create("div", { "class": "esriCTDisplayField", "id": "divDispalyField", "innerHTML": infoPopupFieldsCollection[key].DisplayText }, divInfoRow);
+                    this.divValueField = domConstruct.create("div", { "class": "esriCTValueField", "id": "divValueField" }, divInfoRow);
                     var valueString = "";
                     var aliases = infoPopupFieldsCollection[key].AliasField.split(',');
                     array.forEach(aliases, function (term) {
@@ -711,13 +727,50 @@ define([
                     if (valueString.length === 0) {
                         valueString = showNullAs;
                     }
-                    this.divInfoCol2.innerHTML = valueString;
+                    this.divValueField.innerHTML = valueString;
                 }
-                var divDisplay = domConstruct.create("div", { "width": "100%", "marginTop": "10px", "align": "right" }, divDetailsTab);
-                var divDisplayTable = domConstruct.create("div", {}, divDisplay);
-                var divDisplayRow = domConstruct.create("div", {}, divDisplayTable);
-                var divDisplayColumn1 = domConstruct.create("div", {}, divDisplayRow);
-                var divDisplayColumn2 = domConstruct.create("div", {}, divDisplayRow);
+                if (layerSettings == dojo.configData.ParcelLayerSettings) {
+                    var divDisplayRow = domConstruct.create("div", {}, this.divDataDetails);
+                    var divDisplayColumn1 = domConstruct.create("div", {}, divDisplayRow);
+                    var divInfoImg = domConstruct.create("img", { "id": "imgAdjacentParcels", "class": "imgAdjacentParcels" }, divDisplayColumn1);
+                    this.own(on(divInfoImg, "click", lang.hitch(this, function () {
+                        this.polygon = true;
+                        this.interactiveParcel = true;
+                        dojo.selectedMapPoint = null;
+                        displayInfo = null;
+                        if (this.isSpanClicked == true) {
+                            return;
+                        }
+                    })));
+                    divInfoImg.src = dojoConfig.baseURL + "/js/library/themes/images/add.png";
+
+                    var divDisplayColumn2 = domConstruct.create("div", { "class": "divDisplaySpan" }, divDisplayRow);
+                    var divSpan = domConstruct.create("span", { "id": "spanAdjacentParcels", "class": "esrictDivSpan", "innerHTML": nls.spanAdjacentParcels }, divDisplayColumn2);
+                    this.own(on(divSpan, "click", lang.hitch(this, function () {
+                        this.polygon = true;
+                        this.interactiveParcel = true;
+                        dojo.selectedMapPoint = null;
+                        displayInfo = null;
+                        this.map.infoWindow.hide();
+                        if (dojo.isSpanClicked == true) {
+                            return;
+                        }
+
+                        var _self = this;
+                        dojo.mouseMoveHandle = this.map.on("mouse-move", lang.hitch(function (evt) {
+                            topic.publish("showMapTipForParcels", evt);
+                        }));
+                        dojo.isSpanClicked = true;
+
+                    })));
+
+                    if (dojoQuery(".esrictDivSpan")[0]) {
+                        var adjacentParcel = dojoQuery(".esrictDivSpan")[0];
+                        domStyle.set(adjacentParcel, "display", "block");
+                        var imgAdjacentParcels = dojoQuery(".imgAdjacentParcels")[0];
+                        domStyle.set(imgAdjacentParcels, "display", "block");
+                    }
+                }
                 this.map.infoWindow.resize(infoPopupWidth, infoPopupHeight);
                 var possibleTitleFields = infoWindowTitle.split(",");
                 var infoTitle = "";
@@ -739,6 +792,29 @@ define([
                     this.map.infoWindow.show(divDetailsTab, screenPoint);
                 }));
 
+            },
+
+            showMapTipForParcels: function (evt) {
+                if (this.map.getLayer("esriGraphicsLayerMapSettings").graphics.length) {
+                    if (dojo.isSpanClicked) {
+                        topic.publish("hideMapTip");
+                        var dialog = new TooltipDialog({
+                            id: "toolTipDialogues",
+                            content: nls.ToolTipContents.Parcel,
+                            style: "position: absolute; z-index:1000;"
+                        });
+                        dialog.startup();
+                        domStyle.set(dialog.domNode, "opacity", 0.80);
+                        Place.at(dialog.domNode, { x: evt.pageX, y: evt.pageY }, ["TL", "TR"], { x: 5, y: 5 });
+                    }
+                }
+
+            },
+
+            hideMapTip: function () {
+                if (dijit.byId('toolTipDialogues')) {
+                    dijit.byId('toolTipDialogues').destroy();
+                }
             },
 
             _getBrowserMapExtent: function (mapPoint) {
@@ -768,7 +844,7 @@ define([
                     this.map.getLayer("roadCenterLinesLayerID").clear();
                 }
                 query.where = "UPPER(" + roadLayerSettings.SearchDisplayFields + ") LIKE '" + lang.trim(this.txtAddress.value).toUpperCase() + "%'";
-                this.map.getLayer("roadCenterLinesLayerID").selectFeatures(query, esri.layers.FeatureLayer.SELECTION_NEW, lang.hitch(this, function (features) {
+                this.map.getLayer("roadCenterLinesLayerID").selectFeatures(query, FeatureLayer.SELECTION_NEW, lang.hitch(this, function (features) {
                     this._showSelectedRoads(features);
                 }));
 
@@ -920,9 +996,9 @@ define([
                 var parcelArray = [];
                 var rendererColor = dojo.configData.ParcelLayerSettings.ParcelHighlightColor;
                 var parcelInformation = dojo.configData.AveryLabelSettings[0].ParcelInformation;
-                var lineColor = new dojo.Color();
+                var lineColor = new Color();
                 lineColor.setColor(rendererColor);
-                var fillColor = new dojo.Color();
+                var fillColor = new Color();
                 fillColor.setColor(rendererColor);
                 fillColor.a = 0.25;
                 var symbol = new Symbol.SimpleFillSymbol(Symbol.SimpleFillSymbol.STYLE_SOLID, new Symbol.SimpleLineSymbol(Symbol.SimpleLineSymbol.STYLE_SOLID, lineColor, 3), fillColor);
@@ -958,7 +1034,7 @@ define([
                         parcelAttributeData = featureData[0].name;
                         this.bufferArray.push(featureData[0].name[parcelInformation.ParcelIdentification]);
                     }
-                    var graphic = new esri.Graphic(graphicCollection[lowerParcelId], symbol, parcelAttributeData);
+                    var graphic = new Graphic(graphicCollection[lowerParcelId], symbol, parcelAttributeData);
                     qglayer.add(graphic);
                 }
             }

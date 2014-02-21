@@ -43,6 +43,7 @@ define([
         "esri/geometry",
         "esri/tasks/FeatureSet",
         "esri/SpatialReference",
+        "esri/graphic",
         "dojo/i18n!nls/localizedStrings",
         "dijit/form/Button",
         "dijit/form/ComboBox",
@@ -58,7 +59,7 @@ define([
         "dijit/_WidgetsInTemplateMixin"
 
     ],
-     function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domClass, string, window, topic, Query, QueryTask, scrollBar, query, array, Deferred, DeferredList, all, Color, Symbol, Geometry, TaskFeatureSet, SpatialReference, nls, Button, ComboBox, CheckBox, BufferParameters, GeometryService, Geoprocessor, ItemFileReadStore, InfoWindowBase, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin) {
+     function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domClass, string, window, topic, Query, QueryTask, scrollBar, query, array, Deferred, DeferredList, all, Color, Symbol, Geometry, TaskFeatureSet, SpatialReference, Graphic, nls, Button, ComboBox, CheckBox, BufferParameters, GeometryService, Geoprocessor, ItemFileReadStore, InfoWindowBase, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin) {
 
          //========================================================================================================================//
          return declare([InfoWindowBase, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
@@ -70,21 +71,23 @@ define([
                          this.esriCTShowDetailsView.setAttribute("checked", "notify");
                          domStyle.set(this.divInfoDetails, "display", "none");
                          domStyle.set(this.divInfoNotify, "display", "block");
-                         this.esriCTShowDetailsView.src = dojoConfig.baseURL + "/themes/images/details.png";
+                         this.esriCTShowDetailsView.src = dojoConfig.baseURL + "/js/library/themes/images/details.png";
                          this.esriCTShowDetailsView.title = "Details";
                          dijit.byId('selectAvery').store.fetch({ query: { name: "5160" }, onComplete: function (items) {
                              dijit.byId('selectAvery').setDisplayedValue(items[0].name[0]);
                              dijit.byId('selectAvery').item = items[0];
                          }
                          });
+
                          dijit.byId('chkOwners').setChecked(false);
                          dijit.byId('chkOccupants').setChecked(false);
                          dijit.byId('chkPdf').setChecked(false);
                          dijit.byId('chkCsv').setChecked(false);
                          domStyle.set(this.spanFileUploadMessage, "display", "none");
+                         this.textoccupant.value = dojo.configData.AveryLabelSettings[0].OccupantLabel;
                      } else {
                          this.esriCTShowDetailsView.setAttribute("checked", "info");
-                         this.esriCTShowDetailsView.src = dojoConfig.baseURL + "/themes/images/navigation.png";
+                         this.esriCTShowDetailsView.src = dojoConfig.baseURL + "/js/library/themes/images/navigation.png";
                          this.esriCTShowDetailsView.title = "Notify";
                          domStyle.set(this.divInfoDetails, "display", "block");
                          domStyle.set(this.divInfoNotify, "display", "none");
@@ -191,7 +194,7 @@ define([
                  var taxParcelQueryUrl = dojo.configData.ParcelLayerSettings.LayerUrl;
                  var qTask = new QueryTask(taxParcelQueryUrl);
                  var symbol = new Symbol.SimpleFillSymbol(Symbol.SimpleFillSymbol.STYLE_SOLID,
-                 new Symbol.SimpleLineSymbol(Symbol.SimpleLineSymbol.STYLE_SOLID, new dojo.Color([255, 0, 0, 0.65]), 2), new dojo.Color([255, 0, 0, 0.35]));
+                 new Symbol.SimpleLineSymbol(Symbol.SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0, 0.65]), 2), new Color([255, 0, 0, 0.35]));
                  array.forEach(geometries, lang.hitch(this, function (geometry) {
                      _this._addGraphic(_this.map.getLayer("tempBufferLayer"), symbol, geometry);
                  }));
@@ -243,9 +246,13 @@ define([
                  if (this.map.getLayer("esriGraphicsLayerMapSettings").graphics) {
                      var polygon = new Geometry.Polygon(this.map.spatialReference);
                      for (var i = 0; i < this.map.getLayer("esriGraphicsLayerMapSettings").graphics.length; i++) {
-                         polygon.addRing(this.map.getLayer("esriGraphicsLayerMapSettings").graphics[i].geometry.rings[0]);
+                         var ringsLength = this.map.getLayer("esriGraphicsLayerMapSettings").graphics[i].geometry.rings.length;
+                         for (var j = 0; j < ringsLength; j++) {
+                             polygon.addRing(this.map.getLayer("esriGraphicsLayerMapSettings").graphics[i].geometry.rings[j]);
+                         }
 
                      }
+
                      params.geometries = [polygon];
                  } else {
                      alert(nls.errorMessages.createBuffer);
@@ -264,14 +271,14 @@ define([
              },
 
              _showBuffer: function (geometries) {
-                 _this = this;
+                 var _this = this;
                  var maxAllowableOffset = dojo.configData.MaxAllowableOffset;
                  dojo.selectedMapPoint = null;
                  topic.publish("showProgressIndicator");
                  var taxParcelQueryUrl = dojo.configData.ParcelLayerSettings.LayerUrl;
                  var qTask = new QueryTask(taxParcelQueryUrl);
                  var symbol = new Symbol.SimpleFillSymbol(Symbol.SimpleFillSymbol.STYLE_SOLID,
-                 new Symbol.SimpleLineSymbol(Symbol.SimpleLineSymbol.STYLE_SOLID, new dojo.Color([255, 0, 0, 0.65]), 2), new dojo.Color([255, 0, 0, 0.35]));
+                 new Symbol.SimpleLineSymbol(Symbol.SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0, 0.65]), 2), new Color([255, 0, 0, 0.35]));
                  array.forEach(geometries, lang.hitch(this, function (geometry) {
                      _this._addGraphic(_this.map.getLayer("tempBufferLayer"), symbol, geometry);
                  }));
@@ -291,7 +298,7 @@ define([
              },
 
              _addGraphic: function (layer, symbol, point, attr) {
-                 var graphic = new esri.Graphic(point, symbol, attr, null);
+                 var graphic = new Graphic(point, symbol, attr, null);
                  var features = [];
                  features.push(graphic);
                  var featureSet = new esri.tasks.FeatureSet();
@@ -313,12 +320,14 @@ define([
                      topic.publish("hideProgressIndicator");
                  } else {
                      try {
-                         var poly = new esri.geometry.Polygon(this.map.spatialReference);
+                         var poly = new Geometry.Polygon(this.map.spatialReference);
                          for (var feature in features) {
                              poly.addRing(features[feature].geometry.rings[0]);
                          }
                          this.map.setExtent(poly.getExtent().expand(3));
+
                          topic.publish("drawPolygon", features, false);
+
                          var strAveryParam = "";
                          var strCsvParam = "";
                          if (this.pdfFormat == "checked" || this.pdfFormat) {
@@ -468,13 +477,14 @@ define([
              _executeGPTask: function (pdf, csv, strAveryParam, strCsvParam) {
                  var gpTaskAvery = new Geoprocessor(dojo.configData.AveryLabelSettings[0].PDFServiceTask);
                  var gpTaskCsv = new Geoprocessor(dojo.configData.AveryLabelSettings[0].CSVServiceTask);
-                 esri.config.defaults.io.proxyUrl = "proxy.ashx";
                  topic.publish("showProgressIndicator");
                  if (pdf) {
+                     _self = this;
                      var params = { "Label_Format": averyFormat, "Address_Items": strAveryParam };
                      gpTaskAvery.submitJob(params, this._completeGPJob, this._statusCallback, this._errCallback);
                  }
                  if (csv) {
+                     _self = this;
                      var csvParams = { "Address_Items": strCsvParam };
                      gpTaskCsv.submitJob(csvParams, this._completeCsvGPJob, this._statusCallback);
                  }
@@ -484,13 +494,17 @@ define([
              _completeGPJob: function (jobInfo) {
                  var gpTaskAvery = new Geoprocessor(dojo.configData.AveryLabelSettings[0].PDFServiceTask);
                  if (jobInfo.jobStatus != "esriJobFailed") {
-                     gpTaskAvery.getResultData(jobInfo.jobId, "Output_File", this._downloadFile);
+                     gpTaskAvery.getResultData(jobInfo.jobId, "Output_File", _self._downloadFile);
                      topic.publish("hideProgressIndicator");
                  }
              },
 
-             _completeCsvGPJob: function () {
-                 topic.publish("hideProgressIndicator");
+             _completeCsvGPJob: function (jobInfo) {
+                 var gpTaskAvery = new Geoprocessor(dojo.configData.AveryLabelSettings[0].CSVServiceTask);
+                 if (jobInfo.jobStatus != "esriJobFailed") {
+                     gpTaskAvery.getResultData(jobInfo.jobId, "Output_File", _self._downloadCSVFile);
+                     topic.publish("hideProgressIndicator");
+                 }
              },
 
              //Pdf generation status callback event handler
@@ -503,14 +517,21 @@ define([
 
              //function to call when the error exists
              _errCallback: function (err) {
-                 if (window.location.toString().split("$displayInfo=").length > 1) {
-                 }
                  alert(err.message);
              },
 
              //Function to open generated Pdf in a new window
              _downloadFile: function (outputFile) {
-                 window.open(outputFile.value.url);
+                 this.window.open(outputFile.value.url);
+             },
+
+             _downloadCSVFile: function (outputFile) {
+                 if (navigator.appVersion.indexOf("Mac") != -1) {
+                     window.open(outputFile.value.url);
+                 }
+                 else {
+                     this.window.location = outputFile.value.url;
+                 }
              }
          });
      });

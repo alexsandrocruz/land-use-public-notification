@@ -46,9 +46,10 @@ define([
     "esri/geometry",
     "dojo/_base/Color",
     "esri/symbol",
+    "esri/renderers/Renderer",
     "dojo/domReady!"
     ],
-     function (declare, domConstruct, domStyle, lang, on, dom, dojoquery, domClass, domGeom, Query, QueryTask, _WidgetBase, esriMap, FeatureLayer, GraphicsLayer, geometryExtent, baseMapGallery, nls, HomeButton, ScrollBar, spatialReference, arcGISDynamicMapServiceLayer, infoWindow, topic, Locator, Geometry, Color, Symbol) {
+     function (declare, domConstruct, domStyle, lang, on, dom, dojoQuery, domClass, domGeom, Query, QueryTask, _WidgetBase, esriMap, FeatureLayer, GraphicsLayer, geometryExtent, baseMapGallery, nls, HomeButton, ScrollBar, spatialReference, arcGISDynamicMapServiceLayer, infoWindow, topic, Locator, Geometry, Color, Symbol, Renderer) {
          //========================================================================================================================//
 
          return declare([_WidgetBase], {
@@ -59,6 +60,10 @@ define([
              tempBufferLayer: "tempBufferLayer",
              bufferArray: [],
              infoWindowContainerScrollbar: null,
+             graphicLayerClicked: false,  //Flag for storing state of Graphics Layer Clicked
+             findTasksGraphicClicked: false, //flag for handling to draw polygon
+             interactiveParcel: false,
+
              /**
              * initialize map object
              *
@@ -66,52 +71,53 @@ define([
              * @name widgets/mapSettings/mapSettings
              */
              postCreate: function () {
+                 dojo.polygon = true;
+                 dojo.mouseMoveHandle;
+                 topic.subscribe("clearAll", lang.hitch(this, this.clearAll));
                  /**
                  * set map extent to default extent specified in configuration file
                  * @param {string} dojo.configData.DefaultExtent Default extent of map specified in configuration file
                  */
-                 var extentPoints = dojo.configData && dojo.configData.DefaultExtent && dojo.configData.DefaultExtent.split(","),
-                 graphicsLayer = new GraphicsLayer();
-                 graphicsLayer.id = this.tempGraphicsLayerId;
+                 var extentPoints = dojo.configData && dojo.configData.DefaultExtent && dojo.configData.DefaultExtent.split(",");
+
                  /**
                  * load map
                  * @param {string} dojo.configData.BaseMapLayers Basemap settings specified in configuration file
                  */
                  var layer = new esri.layers.ArcGISTiledMapServiceLayer(dojo.configData.BaseMapLayers[0].MapURL, { id: dojo.configData.BaseMapLayers[0].Key, visible: true });
 
-                 var infoWindow1 = new infoWindow({ infoWindowWidth: dojo.configData.InfoPopupWidth, infoWindowHeight: dojo.configData.InfoPopupHeight });
+                 var customInfoWindow = new infoWindow({ infoWindowWidth: dojo.configData.InfoPopupWidth, infoWindowHeight: dojo.configData.InfoPopupHeight });
                  this.map = new esriMap("esriCTParentDivContainer", {
-                     infoWindow: infoWindow1,
+                     infoWindow: customInfoWindow,
                      basemap: layer
                  });
                  this.map.addLayer(layer);
-
-                 this.map.addLayer(graphicsLayer);
 
                  var gLayer = new GraphicsLayer();
                  gLayer.id = this.tempBufferLayer;
                  this.map.addLayer(gLayer);
 
+                 var glayer = new GraphicsLayer();
+                 glayer.id = this.tempGraphicsLayerId;
+                 this.map.addLayer(glayer);
+
                  this.map.on("click", lang.hitch(this, function (evt) {
-                     if (this.map.getLayer("tempBufferLayer")) {
-                         this.map.getLayer("tempBufferLayer").clear();
-                     }
-                     this.btnDiv = dojo.query(".scrollbar_footer")[0];
+                     this.btnDiv = dojoQuery(".scrollbar_footer")[0];
                      domStyle.set(this.btnDiv, "display", "none");
                      this._executeQueryTask(evt);
-                     this.map.infoWindow.hide();
                  }));
 
                  var roadLineColor = dojo.configData.RoadCenterLayerSettings.RoadHighlightColor;
-                 var roadLineSymbol = new esri.symbol.SimpleLineSymbol();
+                 var roadLineSymbol = new Symbol.SimpleLineSymbol();
                  roadLineSymbol.setWidth(5);
-                 var roadLinefillColor = new dojo.Color(roadLineColor);
+                 var roadLinefillColor = new Color(roadLineColor);
                  roadLineSymbol.setColor(roadLinefillColor);
                  var roadLineRenderer = new esri.renderer.SimpleRenderer(roadLineSymbol);
                  var roadCenterLinesLayer = new FeatureLayer(dojo.configData.RoadCenterLayerSettings.LayerUrl, {
                      mode: FeatureLayer.MODE_SELECTION,
                      outFields: ["*"]
                  });
+
                  roadCenterLinesLayer.id = this.roadCenterLinesLayerID;
                  roadCenterLinesLayer.setRenderer(roadLineRenderer);
                  this.map.addLayer(roadCenterLinesLayer);
@@ -122,6 +128,12 @@ define([
                      evt.cancelBubble = true;
                      if (evt.stopPropagation) evt.stopPropagation();
                  })));
+
+                 this.own(on(glayer, "click", function (evt) {
+                     dojo.graphicLayerClicked = true;
+                     dojo.findTasksGraphicClicked = false;
+                 }));
+
                  /**
                  * load esri 'Home Button' widget
                  */
@@ -133,7 +145,7 @@ define([
                  this.map.on("load", lang.hitch(this, function () {
                      var mapDefaultExtent = new geometryExtent({ "xmin": parseFloat(extentPoints[0]), "ymin": parseFloat(extentPoints[1]), "xmax": parseFloat(extentPoints[2]), "ymax": parseFloat(extentPoints[3]), "spatialReference": { "wkid": this.map.spatialReference.wkid} });
                      this.map.setExtent(mapDefaultExtent);
-                     domConstruct.place(home.domNode, dojoquery(".esriSimpleSliderIncrementButton")[0], "after");
+                     domConstruct.place(home.domNode, dojoQuery(".esriSimpleSliderIncrementButton")[0], "after");
                      home.extent = mapDefaultExtent;
                      home.startup();
                      if (dojo.configData.BaseMapLayers.length > 1) {
@@ -170,10 +182,33 @@ define([
              },
 
              _executeQueryTask: function (evt) {
-                 topic.publish("showProgressIndicator");
-                 this._queryForParcel(evt);
-                 if (this.map.getLayer("roadCenterLinesLayerID")) {
-                     this.map.getLayer("roadCenterLinesLayerID").clear();
+                 if (!dojo.graphicLayerClicked || dojo.findTasksGraphicClicked) {
+                     if (!evt.ctrlKey) {
+                         topic.publish("showProgressIndicator");
+                         dojo.isSpanClicked = false;
+                         topic.publish("hideMapTip");
+                         if (dojo.mouseMoveHandle) {
+                             dojo.mouseMoveHandle.remove();
+                         }
+                         topic.publish("clearAll", evt);
+                         this._queryForParcel(evt);
+                         if (this.map.getLayer("roadCenterLinesLayerID")) {
+                             this.map.getLayer("roadCenterLinesLayerID").clear();
+                         }
+                     }
+
+                     if (evt.ctrlKey) {
+                         if (dojo.polygon) {
+                             topic.publish("hideMapTip");
+                             dojo.mouseMoveHandle = this.map.on("mouse-move", lang.hitch(this, function (evt) {
+                                 topic.publish("showMapTipForParcels", evt);
+                             }));
+                             this._queryForParcel(evt);
+                         }
+                     }
+                 } else {
+                     this._showFeatureDetails(evt.graphic, evt.mapPoint);
+                     dojo.graphicLayerClicked = false;
                  }
              },
 
@@ -191,8 +226,6 @@ define([
                          _this._showFeatureSet(fset, evt);
                      }
                      else {
-                         dojo.selectedMapPoint = null;
-                         _this.map.getLayer("esriGraphicsLayerMapSettings").clear();
                          alert(nls.errorMessages.noParcel);
                          topic.publish("hideProgressIndicator");
                      }
@@ -203,7 +236,6 @@ define([
              },
 
              _showFeatureSet: function (fset, evt) {
-                 this.map.getLayer("esriGraphicsLayerMapSettings").clear();
                  this.map.infoWindow.hide();
                  var rendererColor = dojo.configData.OverlayLayerSettings[0].OverlayHighlightColor;
                  var centerPoint = evt.mapPoint;
@@ -228,33 +260,62 @@ define([
                      var symbol = new Symbol.SimpleFillSymbol(Symbol.SimpleFillSymbol.STYLE_SOLID, new Symbol.SimpleLineSymbol(Symbol.SimpleLineSymbol.STYLE_SOLID, lineColor, 3), fillColor);
                      feature.setSymbol(symbol);
                      parcelArray.push(feature.attributes[dojo.configData.AveryLabelSettings[0].ParcelInformation.ParcelIdentification]);
-                     topic.publish("createInfoWindowContent", feature, centerPoint, parcelLayerSettings);
+                     this._showUniqueParcel(feature, centerPoint, evt);
                      topic.publish("hideProgressIndicator");
                      this.map.setExtent(this._centerMapPoint(evt.mapPoint, fset.features[0].geometry.getExtent().expand(9)));
                      layer.add(feature);
+                     dojo.polygon = true;
+                 }
+             },
+
+             _showUniqueParcel: function (feature, centerPoint, mapPoint) {
+                 var parcelLayerSettings = dojo.configData.ParcelLayerSettings;
+                 if (mapPoint.ctrlKey) {
+                     if (dijit.byId('toolTipDialog')) {
+                         dojo.selectedMapPoint = null;
+                         this.map.infoWindow.hide();
+                         if (!this.map.getLayer("roadCenterLinesLayerID").graphics.length) {
+                             this.map.getLayer("esriGraphicsLayerMapSettings").remove(feature);
+                         }
+                     }
+
+                     if (this.map.getLayer("esriGraphicsLayerMapSettings").graphics.length) {
+                         dojo.isSpanClicked = false;
+                         topic.publish("hideMapTip");
+                         dojo.mouseMoveHandle.remove();
+                         topic.publish("clearAll", mapPoint);
+                         this.interactiveParcel = false;
+                     }
+                 } else {
+                     topic.publish("createInfoWindowContent", feature, centerPoint, parcelLayerSettings);
                  }
              },
 
              _createContent: function (featureList) {
                  var _this = this;
-                 domConstruct.empty(dojo.query(".scrollbar_footer")[0]);
+                 domConstruct.empty(dojoQuery(".scrollbar_footer")[0]);
+                 domConstruct.empty(dojoQuery(".esriCTAdjacentParcel")[0]);
+                 var adjacentLabel = dojoQuery(".esriCTAdjacentParcel")[0];
+                 if (dojoQuery(".divDataDisplay")[0]) {
+                     domConstruct.empty(dojoQuery(".divDataDisplay")[0]);
+                 }
                  this.overlapCount = 0;
-                 this.detailsTab = domConstruct.create("div", { "width": "100%", "height": "100%" }, null);
+                 this.detailsTab = domConstruct.create("div", { "class": "esriCTFullHeightWidth" }, null);
                  this.buttonDetails = domConstruct.create("div", {}, this.detailsTab);
-                 this.scrollbar_container = domConstruct.create("div", { "data-dojo-attach-point": "scrollbar_container2", "className": "scrollbar_container" }, this.detailsTab);
-                 this.divParcelList = domConstruct.create("div", { "className": "scrollbar_content1", "display": "block" }, this.scrollbar_container);
+                 this.scrollbar_container = domConstruct.create("div", { "data-dojo-attach-point": "scrollbar_container2", "class": "scrollbar_container" }, this.detailsTab);
+                 this.divParcelList = domConstruct.create("div", { "class": "scrollbar_content1", "display": "block" }, this.scrollbar_container);
                  this.divParcelList.setAttribute("id", "divParcelList");
-                 this.divDescription = domConstruct.create("div", { "className": "scrollbar_content1", "display": "none" }, this.scrollbar_container);
+                 this.divDescription = domConstruct.create("div", { "class": "scrollbar_content1", "display": "none" }, this.scrollbar_container);
                  this.divDescription.setAttribute("id", "divDescription");
-                 this.btnDiv = dojo.query(".scrollbar_footer")[0];
+                 this.btnDiv = dojoQuery(".scrollbar_footer")[0];
                  domStyle.set(this.btnDiv, "display", "none");
                  this.own(on(this.btnDiv, "click", lang.hitch(this, function () {
                      this._showParcel(featureList[divParcelId.id].attributes);
                  })));
-                 var customButtondiv = domConstruct.create("div", { "className": "customButton", "cursor": "pointer" }, this.btnDiv);
-                 var btnInnerDiv = domConstruct.create("div", { "className": "customButtonInner", "cursor": "pointer" }, customButtondiv);
+                 var customButtondiv = domConstruct.create("div", { "class": "customButton", "cursor": "pointer" }, this.btnDiv);
+                 var btnInnerDiv = domConstruct.create("div", { "class": "customButtonInner", "cursor": "pointer" }, customButtondiv);
                  var btnTbody = domConstruct.create("div", {}, btnInnerDiv);
-                 var btnColumns = domConstruct.create("div", { "class": "backBtn", "innerHTML": "Back" }, btnTbody);
+                 var btnColumns = domConstruct.create("div", { "class": "backBtn", "innerHTML": nls.backBtn }, btnTbody);
 
                  var divDisplayTable = domConstruct.create("div", { "class": "tblTransparent", "id": "tblParcels" }, this.divParcelList);
                  for (var i = 0; i < featureList.length; i++) {
@@ -268,24 +329,67 @@ define([
                      }));
                      var divDisplayColumn1 = domConstruct.create("div", { "class": "tdSiteAddress", "innerHTML": "&nbsp&nbsp" + attributes[dojo.configData.AveryLabelSettings[0].ParcelInformation.SiteAddress] }, divDisplayRow);
                  }
-                 var div = domConstruct.create("div", {}, this.detailsTab);
-                 var divDisplayTable1 = domConstruct.create("div", {}, div);
-                 var divDisplayRow1 = domConstruct.create("div", { "class": "esriCTtrBufferRow" }, divDisplayTable1);
-                 var divDisplayColumn2 = domConstruct.create("div", { "class": "tdParcel", "cursor": "pointer", "height": "20" }, divDisplayRow1);
-                 var divColumn = domConstruct.create("div", {}, divDisplayRow1);
-                 var span = domConstruct.create("span", { "id": "spanAdjacentParcels" }, divColumn);
+
+                 var divDisplayRow = domConstruct.create("div", {}, adjacentLabel);
+                 var divDisplayColumn1 = domConstruct.create("div", {}, divDisplayRow);
+                 var divInfoImg = domConstruct.create("img", { "id": "imgAdjacentParcels1", "class": "imgAdjacentParcels1" }, divDisplayColumn1);
+                 this.own(on(divInfoImg, "click", lang.hitch(this, function () {
+                     this.polygon = true;
+                     this.interactiveParcel = true;
+                     dojo.selectedMapPoint = null;
+                     displayInfo = null;
+                     if (this.isSpanClicked == true) {
+                         return;
+                     }
+                 })));
+                 divInfoImg.src = dojoConfig.baseURL + "/js/library/themes/images/add.png";
+
+                 var divDisplayColumn2 = domConstruct.create("div", { "class": "divDisplaySpan" }, divDisplayRow);
+                 var divSpan = domConstruct.create("span", { "id": "spanAdjacentParcels1", "class": "esrictDivSpan1", "display": "block", "innerHTML": nls.spanAdjacentParcels }, divDisplayColumn2);
+                 this.own(on(divSpan, "click", lang.hitch(this, function () {
+                     this.polygon = true;
+                     this.interactiveParcel = true;
+                     dojo.selectedMapPoint = null;
+                     displayInfo = null;
+                     this.map.infoWindow.hide();
+                     if (dojo.isSpanClicked == true) {
+                         return;
+                     }
+
+                     var _self = this;
+                     dojo.mouseMoveHandle = this.map.on("mouse-move", lang.hitch(function (evt) {
+                         topic.publish("showMapTipForParcels", evt);
+                     }));
+                     dojo.isSpanClicked = true;
+
+                 })));
                  return this.detailsTab;
              },
 
              _showParcelDetail: function (attr) {
+                 debugger;
+                 if (dojoQuery(".esrictDivSpan1")[0]) {
+                     var adjacentParcel = dojoQuery(".esrictDivSpan1")[0];
+                     domStyle.set(adjacentParcel, "display", "none");
+                     var imgAdjacentParcels = dojoQuery(".imgAdjacentParcels1")[0];
+                     domStyle.set(imgAdjacentParcels, "display", "none");
+                 }
+                 //                 var adjacentLabel = dojoQuery(".esriCTAdjacentParcel")[0];
+                 //                 domStyle.set(adjacentLabel, "display", "none");
+                 if (dojoQuery(".esrictDivSpan")[0]) {
+                     var adjacentParcel = dojoQuery(".esrictDivSpan")[0];
+                     domStyle.set(adjacentParcel, "display", "none");
+                     var imgAdjacentParcels = dojoQuery(".imgAdjacentParcels")[0];
+                     domStyle.set(imgAdjacentParcels, "display", "none");
+                 }
                  var infoPopupFieldsCollection = dojo.configData.ParcelLayerSettings.InfoWindowSettings[0].InfoWindowData;
                  var parcelInformation = dojo.configData.AveryLabelSettings[0].ParcelInformation;
                  var showNullAs = dojo.configData.ShowNullValueAs;
-                 this.divParcelList.style.display = 'none';
-                 this.divDescription.style.display = 'block';
-                 this.btnDiv.style.display = 'block';
+                 domStyle.set(this.divParcelList, "display", "none");
+                 domStyle.set(this.divDescription, "display", "block");
+                 domStyle.set(this.btnDiv, "display", "block");
                  topic.publish("removeChildren", this.divDescription);
-                 var divParcelRow = domConstruct.create("div", { "class": "esriCTdivTransparent" }, null);
+                 var divParcelRow = domConstruct.create("div", { "class": "esriCTDivTransparent" }, null);
                  var divParcelDetails = domConstruct.create("div", { "id": "tblParcels", "class": "esriCTDisplayRow" }, null);
                  for (var key = 0; key < infoPopupFieldsCollection.length; key++) {
                      var divParcelInformation = domConstruct.create("div", { "class": "esriCTDisplayRow" }, divParcelRow);
@@ -296,24 +400,26 @@ define([
                      if (fieldNames.length > 1) {
                          var notApplicableCounter = 0;
                          for (var i = 0; i < fieldNames.length; i++) {
-                             if (!attr[fieldNames[i]])
+                             if (!attr[fieldNames[i]]) {
                                  notApplicableCounter++;
+                             }
                          }
-                         if (notApplicableCounter == fieldNames.length)
+                         if (notApplicableCounter == fieldNames.length) {
                              divInfoPopupField.innerHTML += showNullAs;
-                         else {
+                         } else {
                              for (i = 0; i < fieldNames.length; i++) {
-
-                                 if (attr[fieldNames[i]])
+                                 if (attr[fieldNames[i]]) {
                                      divInfoPopupField.innerHTML += attr[fieldNames[i]] + " ";
+                                 }
                              }
                              divInfoPopupField.innerHTML = divInfoPopupField.innerHTML.slice(0, -1);
                          }
                      } else {
-                         if (attr[fieldName] == null)
+                         if (attr[fieldName] == null) {
                              divInfoPopupField.innerHTML = showNullAs;
-                         else
+                         } else {
                              divInfoPopupField.innerHTML = attr[fieldName];
+                         }
                      }
                      divParcelInformation.appendChild(divInfoPopupDisplayText);
                      divParcelInformation.appendChild(divInfoPopupField);
@@ -322,7 +428,6 @@ define([
                  this.content = divDescription;
                  if (attr[parcelInformation.SiteAddress]) {
                      if (attr[parcelInformation.SiteAddress].length > 35) {
-                         //here write function for trimstring....
                          var title = attr[parcelInformation.SiteAddress];
                          this.map.infoWindow.setTitle(title);
                      } else {
@@ -335,31 +440,30 @@ define([
              },
 
              _showParcel: function () {
-                 var scrollbar_container = this.scrollbar_container;
-                 this.divParcelList.style.display = 'block';
-                 this.divDescription.style.display = 'none';
-                 this.btnDiv.style.display = 'none';
-                 this.content = divParcelList;
-             },
-
-             //Hide tooltip dialog
-             _hideMapTip: function () {
-                 if (dijit.byId('toolTipDialog')) {
-                     dijit.byId('toolTipDialog').destroy();
+                 debugger;
+                 if (dojoQuery(".esrictDivSpan1")[0]) {
+                     var adjacentParcel = dojoQuery(".esrictDivSpan1")[0];
+                     domStyle.set(adjacentParcel, "display", "block");
+                     var imgAdjacentParcels = dojoQuery(".imgAdjacentParcels1")[0];
+                     domStyle.set(imgAdjacentParcels, "display", "block");
                  }
+                 var scrollbar_container = this.scrollbar_container;
+                 domStyle.set(this.divParcelList, "display", "block");
+                 domStyle.set(this.divDescription, "display", "none");
+                 domStyle.set(this.btnDiv, "display", "none");
+                 this.content = divParcelList;
              },
 
              _showOverlappingParcels: function (feature, contentDiv, evt, parcelFeature) {
                  dojo.selectedMapPoint = evt.mapPoint;
-                 var selectedPoint = evt.mapPoint;
                  this.map.getLayer("esriGraphicsLayerMapSettings").remove(feature);
-                 var extentChanged = this.map.setExtent(this._getBrowserMapExtent(selectedPoint));
+                 var extentChanged = this.map.setExtent(this._getBrowserMapExtent(dojo.selectedMapPoint));
                  extentChanged.then(lang.hitch(this, function () {
-                     var screenPoint = this.map.toScreen(selectedPoint);
+                     var screenPoint = this.map.toScreen(dojo.selectedMapPoint);
                      screenPoint.y = this.map.height - screenPoint.y;
                      this.map.infoWindow.show(contentDiv, screenPoint);
                  }));
-                 var infoTitle = this.overlapCount + " Parcels found at this location";
+                 var infoTitle = this.overlapCount + nls.parcelsCount;
                  this.map.infoWindow.setTitle(infoTitle);
                  topic.publish("hideProgressIndicator");
              },
@@ -392,6 +496,46 @@ define([
                  var xmax = xmin + width;
                  var ymax = ymin + height;
                  return new Geometry.Extent(xmin, ymin, xmax, ymax, this.map.spatialReference);
+             },
+
+             _showFeatureDetails: function (feature, mapPoint) {
+                 var parcelLayerSettings = dojo.configData.ParcelLayerSettings;
+                 var parcelInformation = dojo.configData.AveryLabelSettings[0].ParcelInformation;
+                 if (feature.attributes) {
+                     if (feature.attributes[parcelInformation.ParcelIdentification] ||
+                         feature.attributes[parcelLayerSettings.SearchDisplayFields.split(",")[0]]) {
+                         topic.publish("createInfoWindowContent", feature, mapPoint, parcelLayerSettings);
+                         topic.publish("hideProgressIndicator");
+                     }
+                 }
+             },
+
+             clearAll: function (evt) {
+                 dojo.selectedMapPoint = null;
+                 this.map.infoWindow.hide();
+                 this.map.graphics.clear();
+                 for (var i = 0; i < this.map.graphicsLayerIds.length; i++) {
+                     if (evt) {
+                         if (evt.ctrlKey) {
+                             if (this.map.graphicsLayerIds[i] == "esriGraphicsLayerMapSettings") {
+                                 continue;
+                             }
+                             if (this.map.graphicsLayerIds[i] == "roadCenterLinesLayerID") {
+                                 continue;
+                             }
+                         }
+                     } else {
+                         if (this.map.getLayer("roadCenterLinesLayerID")) {
+                             this.map.getLayer("roadCenterLinesLayerID").clearSelection();
+                         }
+                     }
+
+                     if (this.map.graphicsLayerIds[i] == "roadCenterLinesLayerID") {
+                         continue;
+                     } else {
+                         this.map.getLayer(this.map.graphicsLayerIds[i]).clear();
+                     }
+                 }
              }
          });
      });

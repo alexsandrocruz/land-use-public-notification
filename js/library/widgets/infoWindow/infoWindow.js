@@ -37,13 +37,14 @@ define([
         "dijit/form/ComboBox",
         "dijit/form/CheckBox",
         "dojo/store/Memory",
+         "dojo/i18n!nls/localizedStrings",
         "dojo/text!./templates/infoWindow.html",
         "dijit/_WidgetBase",
         "dijit/_TemplatedMixin",
         "dijit/_WidgetsInTemplateMixin",
         "./infoWindowView"
 ],
-function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domClass, string, topic, domUtils, InfoWindowBase, BufferParameters, scrollBar, Button, ComboBox, CheckBox, ItemFileReadStore, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, infoWindowView) {
+function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domClass, string, topic, domUtils, InfoWindowBase, BufferParameters, scrollBar, Button, ComboBox, CheckBox, ItemFileReadStore, nls, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, infoWindowView) {
     return declare([infoWindowView], {
         templateString: template,
 
@@ -60,10 +61,13 @@ function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domC
             domUtils.hide(this.domNode);
             this.txtBuffer.value = dojo.configData.DefaultBufferDistance;
             this.textoccupant.value = dojo.configData.OccupantName;
-            this.own(on(this.esriCTclosediv, "click", lang.hitch(this, function (evt) {
-                this.map.getLayer("esriGraphicsLayerMapSettings").clear();
+
+            this.own(on(this.esriCTclosediv, "click", lang.hitch(this, function () {
                 domUtils.hide(this.domNode);
                 dojo.selectedMapPoint = null;
+                if (dojo.mouseMoveHandle) {
+                    dojo.mouseMoveHandle.remove();
+                }
 
             })));
 
@@ -75,8 +79,8 @@ function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domC
                 return this.onlyNumbers(evt);
             });
 
-            this.esriCTShowDetailsView.src = dojoConfig.baseURL + "/themes/images/navigation.png";
-            this.esriCTShowDetailsView.title = "navigation";
+            this.esriCTShowDetailsView.src = dojoConfig.baseURL + "/js/library/themes/images/navigation.png";
+            this.esriCTShowDetailsView.title = nls.navigation;
             this.attachInfoWindowEvents();
             this._getAveryTemplates();
         },
@@ -89,8 +93,8 @@ function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domC
             }
             this.divInfoDetailsScroll.appendChild(detailsTab);
             this.esriCTShowDetailsView.setAttribute("checked", "info");
-            this.esriCTShowDetailsView.src = dojoConfig.baseURL + "/themes/images/navigation.png";
-            this.esriCTShowDetailsView.title = "Notify";
+            this.esriCTShowDetailsView.src = dojoConfig.baseURL + "/js/library/themes/images/navigation.png";
+            this.esriCTShowDetailsView.title = nls.notify;
             domStyle.set(this.divInfoDetails, "display", "block");
             domStyle.set(this.divInfoNotify, "display", "none");
             this.setLocation(screenPoint);
@@ -137,14 +141,14 @@ function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domC
             this.isShowing = true;
         },
 
-        hide: function (mapPoint) {
+        hide: function () {
             domUtils.hide(this.domNode);
             this.isShowing = false;
             this.onHide();
         },
 
-        _hideInfoContainer: function (map) {
-            this.own(on(this.esriCTclosediv, "click", lang.hitch(this, function (evt) {
+        _hideInfoContainer: function () {
+            this.own(on(this.esriCTclosediv, "click", lang.hitch(this, function () {
                 domUtils.hide(this.domNode);
             })));
         }

@@ -132,13 +132,6 @@ function (declare, domConstruct, domStyle, lang, array, on, dom, domClass, domGe
                         }
 
                         /**
-                        * set images of each sharing options
-                        */
-                        this.imgFacebook.src = dojoConfig.baseURL + "/themes/images/img_facebook.png";
-                        this.imgTwitter.src = dojoConfig.baseURL + "/themes/images/img_twitter.png";
-                        this.imgMail.src = dojoConfig.baseURL + "/themes/images/img_email.png";
-
-                        /**
                         * remove event handlers from sharing options
                         */
                         if (this.facebookHandle) {

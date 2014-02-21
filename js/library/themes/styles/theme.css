@@ -98,86 +98,86 @@
 
 .esriCTTdHeaderSearch
 {
-    padding: 12px 24px;
+    margin: 12px 24px;
     background-image: url("../images/locate.png");
     background-repeat: no-repeat;
     background-position: center;
     float: left;
-    height: 24px;
-    width: 24px;
+    height: 26px;
+    width: 26px;
     float: left;
     cursor: pointer;
-    background-size: 24px;
+    background-size: 26px;
 }
 
 .esriCTTdHeaderSearch-select
 {
-    padding: 10px 27px 8px 15px;
+     margin: 12px 24px;
     background-image: url("../images/locate-select.png");
     background-repeat: no-repeat;
     background-position: center;
     float: left;
-    height: 30px;
-    width: 30px;
+   height: 26px;
+    width: 26px;
     float: left;
     cursor: pointer;
-    background-size: 24px;
+    background-size: 26px;
 }
 
 .esriCTTdGeolocation
 {
-    padding: 10px 27px 8px 15px;
+margin: 12px 24px;
     background-image: url("../images/imgGeolocation.png");
     background-repeat: no-repeat;
     background-position: center;
     float: left;
-    height: 30px;
-    width: 30px;
+    height: 26px;
+    width: 26px;
     float: left;
     cursor: pointer;
-    background-size: 24px;
+    background-size: 26px;
 }
 
 .esriCTImgSocialMedia-select
 {
-    padding: 12px 24px;
+    margin: 12px 24px;
     background-image: url("../images/imgSocialMedia-select.png");
     background-repeat: no-repeat;
     background-position: center;
     float: left;
-    height: 24px;
-    width: 24px;
+    height: 26px;
+    width: 26px;
     float: left;
     cursor: pointer;
-    background-size: 24px;
+    background-size: 26px;
 }
 
 .esriCTImgSocialMedia
 {
-    padding: 12px 24px;
+    margin: 12px 24px;
     background-image: url("../images/imgSocialMedia.png");
     background-repeat: no-repeat;
     background-position: center;
     float: left;
-    height: 24px;
-    width: 24px;
+     height: 26px;
+    width: 26px;
     float: left;
     cursor: pointer;
-    background-size: 24px;
+    background-size: 26px;
 }
 
 .esriCTHelpImg
 {
-    padding: 12px 24px;
+    margin: 12px 24px;
     background-image: url("../images/help.png");
     background-repeat: no-repeat;
     background-position: center;
     float: left;
-    height: 24px;
-    width: 24px;
+     height: 26px;
+    width: 26px;
     float: left;
     cursor: pointer;
-    background-size: 24px;
+    background-size: 26px;
 }
 
 .esriCTSearchByAddress, .esriCTSearchByUnSelectedFeature, .esriCTSearchByUnSelectedActivity, .esriCTSearchByUnSelectedAddress, .esriCTSearchByFeature, .esriCTSearchByActivity
@@ -242,7 +242,7 @@
 
 .esriCTAddressContent
 {
-    min-height: 146px;
+    min-height: 71px;
     border-right: 1px solid #007ac2;
     border-left: 1px solid #007ac2;
     border-bottom: 1px solid #007ac2;
@@ -523,6 +523,7 @@
 {
     background-color: #fff;
     border-right: 1px solid #007ac2;
+    border-top: 1px solid #007ac2;
     border-left: 1px solid #007ac2;
     border-bottom: 1px solid #007ac2;
     float: left;
@@ -543,7 +544,7 @@
 
 .facebook
 {
-    background-image: url("../images/img_facebook.png") !important;
+    background-image: url('../images/img_facebook.png') !important;
     background-repeat: no-repeat;
     background-position: center;
     float: left;
@@ -556,7 +557,7 @@
 
 .twitter
 {
-    background-image: url("../images/img_twitter.png") !important;
+    background-image: url('../images/img_twitter.png') !important;
     background-repeat: no-repeat;
     background-position: center;
     float: left;
@@ -569,7 +570,7 @@
 
 .email
 {
-    background-image: url("../images/img_email.png") !important;
+    background-image: url('../images/img_email.png') !important;
     background-repeat: no-repeat;
     background-position: center;
     float: left;
@@ -753,16 +754,16 @@
 /* End of CSS for Loading Indicator */
 .esriCTImgPrint
 {
-    padding: 12px 24px;
+    margin: 12px 24px;
     background-image: url("../images/imgPrint.png");
     background-repeat: no-repeat;
     background-position: center;
     float: left;
-    height: 24px !important;
-    width: 24px;
+    height: 26px !important;
+    width: 26px;
     float: left;
     cursor: pointer;
-    background-size: 24px;
+    background-size: 26px;
 }
 
 .esritbl
@@ -889,6 +890,17 @@
     height: 25px !important;
     margin: 10PX AUTO;
 }
+.customAdjacentButton
+{
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    background: #007ac2;
+    width: 85px;
+    height: 33px !important;
+    margin: 10PX AUTO;
+}
+
 
 .customButtonInner
 {
@@ -983,21 +995,34 @@
 }
 .divInfoDetailsScroll
 {
-    /*width: 100%;*/
     overflow: hidden;
     width: 93%;
-    color: White; /*height: 210px !important;*/
+    color: White;
 }
 
 /* End of CSS for Scroll Bar */
 .esrictDivSpan
 {
-    color: #6e6e6e;
-    text-decoration: underline;
+    color: #007ac2;
     cursor: pointer;
-    margin-right: 29px;
-    margin-left: 10px;
+    margin-left: 242px;
     font-size: 11px;
+}
+
+.esrictDivSpan1
+{
+    color: #007ac2;
+    cursor: pointer;
+    margin-left: 242px;
+    font-size: 11px;
+}
+.esrictSpan
+{
+    color: #007ac2;
+    cursor: pointer;
+    float: right;
+    width: 18%;
+    padding-top: 30px;
 }
 
 /*Start of Infowindow style*/
@@ -1032,7 +1057,7 @@
 
 .esriCTinfoWindow
 {
-    z-index: 1000 !important;
+    z-index: 994 !important;
     visibility: visible !important;
     border: #007ac2 solid 1px;
     background: #FFF;
@@ -1041,15 +1066,15 @@
     position: absolute;
 }
 
-.esriCTdivTransparent
+.esriCTDivTransparent
 {
     padding-left: 5px;
     color: #6e6e6e;
     font-size: 11px;
-    margin-top: 15px;
+    margin-top: 8px;
     overflow: hidden;
     width: 93%;
-    height: 210px !important;
+    height: 205px !important;
 }
 
 .esriCTDisplayRow
@@ -1084,7 +1109,7 @@
     top: 0;
     left: 0;
     position: absolute;
-    z-index: 1001;
+    z-index: 995;
     width: 100%;
     height: 100%;
 }
@@ -1196,9 +1221,10 @@ input
 {
     color: #6e6e6e;
     font-size: 11px;
-    margin-left: 10px;
-    margin-right: 10px;
+    margin-left: 19px;
+    margin-right: 5px;
     margin-top: 15px;
+    color: #6e6e6e;
 }
 
 .esriCTtrBuffer
@@ -1221,7 +1247,7 @@ input
 
 .esriCTtxtBuffer
 {
-    color: #6e6e6e;
+    color: Black;
     width: 132px;
     border: 1px Solid #DFDFDF !important;
     height: 20px;
@@ -1240,13 +1266,6 @@ input
     color: red;
 }
 
-.esriCTtrBufferRow
-{
-    clear: both;
-    width: 100%;
-    float: left;
-    padding: 6px 0;
-}
 
 .esriCTtrBufferRow div.esriCTtrBufferCheckbox
 {
@@ -1276,9 +1295,42 @@ input
     height: 17px;
     width: 17px;
     cursor: pointer;
-    background-image: url("../images/add.png");
+    position: absolute;
+    right: 130px;
+    padding-top: 9px;
+}
+.imgAdjacentParcels1
+{
+    height: 17px;
+    width: 17px;
+    cursor: pointer;
+    position: absolute;
+    right: 130px;
+    padding-top: 9px;
 }
 
+.imgDownloadParcels
+{
+    /*height: 17px;
+    width: 17px;
+    cursor: pointer;
+    position: absolute;
+    right: 45%;
+    top: 257px;
+    background-position: 0 center;
+    background-image: url('../images/download.png');
+    background-repeat: no-repeat;
+    vertical-align: bottom;
+    background-color: blue;*/
+
+   height: 17px;
+width: 17px;
+cursor: pointer;
+position: absolute;
+right: 74px;
+padding-top: 27px;
+
+}
 .spanAdjacentParcels
 {
     text-decoration: underline;
@@ -1289,6 +1341,10 @@ input
     left: 224px;
     position: absolute;
     color: #6e6e6e;
+}
+.divDisplaySpan
+{
+    padding-top: 9px;
 }
 
 .tdParcel
@@ -1311,12 +1367,20 @@ input
 .tblTransparent
 {
     display: table;
-    width: 100%; /*width: 95%;     padding-left: 5px;     color: White;     font-size: 11px;     margin-top: 2px;*/
+    width: 100%;
 }
 
 .mandatory
 {
     color: red;
+}
+
+.esriCTBufferRow
+{
+    clear: both;
+    width: 100%;
+    float: left;
+    padding: 5px 0;
 }
 
 .esriCTtrBufferRow
@@ -1326,7 +1390,6 @@ input
     float: left;
     padding: 5px 0;
 }
-
 .esriCTtrBufferRow div.esriCTtrBufferCheckbox input
 {
     -webkit-appearance: checkbox;
@@ -1341,17 +1404,7 @@ input
     padding-top: 3px;
 }
 
-.esriCTBufferDistanc span.spanTxt
-{
-    padding-top: 5px;
-    float: left;
-}
 
-.esriCTBufferDistanc span.mandatory
-{
-    padding-top: 5px;
-    float: left;
-}
 .scrollbar_footer
 {
     display: none;
@@ -1369,6 +1422,7 @@ input
     width: 100%;
 }
 
+
 /* Loading indicator Styles */
 
 .esriCTLoadingIndicator
@@ -1378,13 +1432,13 @@ input
     z-index: 10001;
     position: absolute;
     bottom: 0;
-    filter: alpha(opacity = 55);
-    -moz-opacity: 0.55;
-    -khtml-opacity: 0.55;
-    opacity: 0.55;
+    filter: alpha(opacity = 40);
+    -moz-opacity: 0.4;
+    -khtml-opacity: 0.4;
+    opacity: 0.4;
     top: 0;
     left: 0;
-    background-color: #007ac2;
+    background: #000;
 }
 
 .esriCTFullContainer
@@ -1414,4 +1468,12 @@ input
 {
     display: block;
 }
+
 /* End of loading indicator Styles */
+
+/*styles for dijit dialogue box*/
+.claro .dijitTooltipConnector
+{
+    width: 0px !important;
+}
+/*end of styles for dijit dialogue box*/

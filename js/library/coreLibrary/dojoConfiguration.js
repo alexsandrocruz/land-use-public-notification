@@ -29,8 +29,8 @@ dojoConfig = {
     locale: location.search.match(/locale=([\w\-]+)/) ? RegExp.$1 : "en-us",
     packages: [
             { name: "application", location: root },
-            { name: "widgets", location: root + '/widgets' },
-            { name: "coreLibrary", location: root + '/coreLibrary' },
-            { name: "nls", location: root + '/nls' }
+            { name: "widgets", location: root + '/js/library/widgets' },
+            { name: "coreLibrary", location: root + '/js/library/coreLibrary' },
+            { name: "nls", location: root + '/js/library/nls' }
         ]
 };

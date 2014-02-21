@@ -42,15 +42,15 @@ define([], function () {
         ApplicationName: "Land Use Public Notification",
 
         // Set application icon path
-        ApplicationIcon: "/themes/images/publicnotification.png",
+        ApplicationIcon: "/js/library/themes/images/publicnotification.png",
 
         // Set application Favicon path
-        ApplicationFavicon: "/themes/images/favicon.png",
+        ApplicationFavicon: "js/library/themes/images/favicon.png",
 
         // Set URL of help page/portal
         HelpURL: "help.htm",
 
-        // Set splash window content - Message that appears when the application starts
+        //Set splash window content - Message that appears when the application starts
         SplashScreen: {
             // splash screen Message is set in locale file in nls directory
             IsVisible: true
@@ -104,17 +104,17 @@ define([], function () {
         // Set baseMap layers
         BaseMapLayers: [{
             Key: "parcelMap",
-            ThumbnailSource: "themes/images/parcelmap.png",
+            ThumbnailSource: "js/library/themes/images/parcelmap.png",
             Name: "Parcel Map",
             MapURL: "http://tryitlive.arcgis.com/arcgis/rest/services/ParcelPublicAccessMI/MapServer"
         }, {
             Key: "taxMap",
-            ThumbnailSource: "themes/images/taxmap.png",
+            ThumbnailSource: "js/library/themes/images/taxmap.png",
             Name: "Tax Map",
             MapURL: "http://tryitlive.arcgis.com/arcgis/rest/services/TaxParcelMI/MapServer"
         }, {
             Key: "imagery",
-            ThumbnailSource: "themes/images/imagery.png",
+            ThumbnailSource: "js/library/themes/images/imagery.png",
             Name: "Imagery",
             MapURL: "http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer"
         }],
@@ -130,14 +130,14 @@ define([], function () {
             OverlayHighlightColor: "#1C86EE",
             Title: "SchoolBoundaries",
             index: "0",
-            LayerUrl: "http://203.199.47.84/ArcGIS/rest/services/SchoolLocator/SchoolBoundaries/MapServer/3",
+            LayerUrl: "http://ec2-54-214-169-132.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/SchoolDistrictQuery/MapServer/0",
             SearchDisplayFields: "DISTRCTNAME,NAME",
             SearchExpression: "UPPER(DISTRCTNAME) LIKE '%${0}%' OR UPPER(NAME) LIKE '%${0}%'",
             InfoWindowSettings: [{
                 InfoWindowTitleFields: "NAME", //earlier key - InfoWindowTitle
                 InfoWindowData: [{
                     DisplayText: "District Name:",
-                    FieldName: "DISTRCTNAME",
+                    FieldName: "DISTRCTNAME ",
                     AliasField: "School District Name"
                 }, {
                     DisplayText: "Name:",
@@ -255,7 +255,7 @@ define([], function () {
         },
 
         SearchSettings: { //earlier key LocatorSettings
-            DefaultLocatorSymbol: "/themes/images/redpushpin.png",
+            DefaultLocatorSymbol: "/js/library/themes/redpushpin.png",
             MarkupSymbolSize: [{
                 width: 35,
                 height: 35
@@ -274,8 +274,16 @@ define([], function () {
             //Label to be displayed for Occupant
             OccupantLabel: "Occupant", // earlier key-OccupantName
 
+            ResidentsLabel: "Resident",
+
             //Fields of the occupant
             OccupantFields: "PARCELID,SITEADDRESS",
+
+            PropertyOccupantsLabel: [
+                { name: "Property Residents", value: "PR" },
+                { name: "Property Occupants", value: "PO" },
+                { name: "Others", value: "OT" }
+            ],
 
             //Fields for Avery labels
             AveryFieldsCollection: ["PARCELID", "OWNERNME1", "OWNERNME2", "PSTLADDRESS", "PSTLCITY,PSTLSTATE,PSTLZIP5"],
