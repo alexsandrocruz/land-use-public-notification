@@ -79,6 +79,7 @@ function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domC
                 return this.onlyNumbers(evt);
             });
 
+            this.btnSubmitImage.src = dojoConfig.baseURL + "/js/library/themes/images/download.png"
             this.esriCTShowDetailsView.src = dojoConfig.baseURL + "/js/library/themes/images/navigation.png";
             this.esriCTShowDetailsView.title = nls.navigation;
             this.attachInfoWindowEvents();
