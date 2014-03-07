@@ -25,6 +25,7 @@ define([
     "dojo/_base/array",
     "dojo/on",
     "dojo/dom",
+     "dojo/dom-attr",
     "dojo/dom-class",
     "dojo/dom-geometry",
     "dojo/string",
@@ -36,7 +37,7 @@ define([
     "dojo/i18n!nls/localizedStrings",
     "dojo/topic"
   ],
-function (declare, domConstruct, domStyle, lang, array, on, dom, domClass, domGeom, string, html, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, nls, topic) {
+function (declare, domConstruct, domStyle, lang, array, on, dom, domAttr, domClass, domGeom, string, html, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, nls, topic) {
 
     //========================================================================================================================//
 
@@ -72,6 +73,9 @@ function (declare, domConstruct, domStyle, lang, array, on, dom, domClass, domGe
                 }
             }));
 
+            topic.subscribe("getoverlayValuesToBuffer", lang.hitch(this, this.getoverlayValuesToBuffer));
+            topic.subscribe("getValuesToBuffer", lang.hitch(this, this.getValuesToBuffer));
+
             this.domNode = domConstruct.create("div", { "title": this.title, "class": "esriCTImgSocialMedia" }, null);
 
             this.own(on(this.domNode, "click", lang.hitch(this, function () {
@@ -80,7 +84,7 @@ function (declare, domConstruct, domStyle, lang, array, on, dom, domClass, domGe
                 * minimize other open header panel widgets and show share panel
                 */
                 topic.publish("toggleWidget", "share");
-                this._shreLink();
+                this._sharelink();
             })));
         },
 
@@ -89,13 +93,66 @@ function (declare, domConstruct, domStyle, lang, array, on, dom, domClass, domGe
         * @param {array} dojo.configData.MapSharingOptions Sharing option settings specified in configuration file
         * @memberOf widgets/share/share
         */
-        _shreLink: function () {
+        _sharelink: function () {
+            domAttr.set(this.esriCTDivshareCodeContainer, "innerHTML", nls.webpageDispalyText);
+            this.esriCTDivshareCodeContent.value = "<iframe width='100%' height='100%' src='" + location.href + "'></iframe> ";
             /**
             * get current map extent to be shared
             */
+
             var mapExtent = this._getMapExtent(),
              url = esri.urlToObject(window.location.toString()),
-             urlStr = encodeURI(url.path) + "?extent=" + mapExtent;
+             urlStr;
+
+            if ((dojo.parcelArray.length > 0) && (dojo.roadArray.length <= 0) && (dojo.overLayArray.length <= 0)) {
+                if (this.map.getLayer("tempBufferLayer").graphics.length > 0) {
+                    urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$dist=" + this.map.infoWindow.txtBuffer.value + "$ocupntTxt=" + this.map.infoWindow.textoccupant.value + "$PDF=" + ((dijit.byId('chkPdf').checked) ? "checked" : false)
+            + "$CSV=" + ((dijit.byId('chkCsv').checked) ? "checked" : false) + "$occupant=" + ((dijit.byId('chkOccupants').checked) ? "checked" : false)
+             + "$owner=" + ((dijit.byId('chkOwners').checked) ? "checked" : false)
+            + "$averyFormat=" + dijit.byId('selectAvery').item.id[0] + "$parcelID=" + dojo.parcelArray.join(",");
+                }
+                else {
+                    urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$parcelID=" + dojo.parcelArray.join(",");
+                }
+            } else if (dojo.roadArray.length > 0) {
+                if (!(this.map.infoWindow.txtBuffer.value)) {
+                    this.map.infoWindow.txtBuffer.value = dojo.configData.DefaultBufferDistance;
+                }
+                if (!(dijit.byId('selectAvery').item)) {
+                    dijit.byId('selectAvery').store.fetch({ query: { name: "5160" }, onComplete: function (items) {
+                        dijit.byId('selectAvery').setDisplayedValue(items[0].name[0]);
+                        dijit.byId('selectAvery').item = items[0];
+                    }
+                    });
+                    dijit.byId('chkOwners').checked = true;
+                    dijit.byId('chkPdf').checked = true;
+                }
+
+                urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$dist=" + this.map.infoWindow.txtBuffer.value + "$ocupntTxt=" + this.map.infoWindow.textoccupant.value + "$PDF=" + ((dijit.byId('chkPdf').checked) ? "checked" : false)
+            + "$CSV=" + ((dijit.byId('chkCsv').checked) ? "checked" : false) + "$occupant=" + ((dijit.byId('chkOccupants').checked) ? "checked" : false)
+             + "$owner=" + ((dijit.byId('chkOwners').checked) ? "checked" : false)
+            + "$averyFormat=" + dijit.byId('selectAvery').item.id[0] + "$roadID=" + dojo.roadArray.join(",");
+            } else if (dojo.overLayArray.length > 0) {
+
+                if (this.map.getLayer("tempBufferLayer").graphics.length > 0) {
+                    urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$dist=" + this.map.infoWindow.txtBuffer.value + "$ocupntTxt=" + this.map.infoWindow.textoccupant.value + "$PDF=" + ((dijit.byId('chkPdf').checked) ? "checked" : false)
+            + "$CSV=" + ((dijit.byId('chkCsv').checked) ? "checked" : false) + "$occupant=" + ((dijit.byId('chkOccupants').checked) ? "checked" : false)
+             + "$owner=" + ((dijit.byId('chkOwners').checked) ? "checked" : false)
+            + "$averyFormat=" + dijit.byId('selectAvery').item.id[0] + "$overlayID=" + dojo.overLayArray.join(",") + "$Where=" + dojo.overlay;
+                } else {
+                    urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$overlayID=" + dojo.overLayArray.join(",");
+                }
+            } else {
+                urlStr = encodeURI(url.path) + "?extent=" + mapExtent;
+            }
+
+            if ((dojo.overLayArray.length > 0) && dojo.displayInfo) {
+                urlStr = urlStr + "$displayInfo=" + dojo.displayInfo + "$point=" + dojo.selectedMapPoint.x + "," + dojo.selectedMapPoint.y + "$Where=" + dojo.overlay;
+            }
+            else if (dojo.displayInfo) {
+                urlStr = urlStr + "$displayInfo=" + dojo.displayInfo + "$point=" + dojo.selectedMapPoint.x + "," + dojo.selectedMapPoint.y;
+            }
+
             try {
                 /**
                 * call tinyurl service to generate share URL
@@ -142,9 +199,9 @@ function (declare, domConstruct, domStyle, lang, array, on, dom, domClass, domGe
                         /**
                         * add event handlers to sharing options
                         */
-                        this.facebookHandle = on(this.tdFacebook, "click", lang.hitch(this, function () { this._Share("facebook", tinyUrl, urlStr); }));
-                        this.twitterHandle = on(this.tdTwitter, "click", lang.hitch(this, function () { this._Share("twitter", tinyUrl, urlStr); }));
-                        this.emailHandle = on(this.tdMail, "click", lang.hitch(this, function () { this._Share("email", tinyUrl, urlStr); }));
+                        this.facebookHandle = on(this.tdFacebook, "click", lang.hitch(this, function () { this._share("facebook", tinyUrl, urlStr); }));
+                        this.twitterHandle = on(this.tdTwitter, "click", lang.hitch(this, function () { this._share("twitter", tinyUrl, urlStr); }));
+                        this.emailHandle = on(this.tdMail, "click", lang.hitch(this, function () { this._share("email", tinyUrl, urlStr); }));
                     }),
                     error: function (error) {
                         domClass.replace(this.domNode, "esriCTImgSocialMedia-select", "esriCTImgSocialMedia");
@@ -174,7 +231,7 @@ function (declare, domConstruct, domStyle, lang, array, on, dom, domClass, domGe
         * @param {string} urlStr Long URL for sharing
         * @memberOf widgets/share/share
         */
-        _Share: function (site, tinyUrl, urlStr) {
+        _share: function (site, tinyUrl, urlStr) {
             /*
             * hide share panel once any of the sharing options is selected
             */
@@ -186,7 +243,6 @@ function (declare, domConstruct, domStyle, lang, array, on, dom, domClass, domGe
                 if (tinyUrl) {
                     this._shareOptions(site, tinyUrl);
                 } else {
-                    domClass.replace(this.domNode, "esriCTImgSocialMedia", "esriCTImgSocialMedia-select");
                     this._shareOptions(site, urlStr);
                 }
             } catch (err) {
@@ -201,6 +257,7 @@ function (declare, domConstruct, domStyle, lang, array, on, dom, domClass, domGe
         * @memberOf widgets/share/share
         */
         _shareOptions: function (site, url) {
+            domClass.replace(this.domNode, "esriCTImgSocialMedia", "esriCTImgSocialMedia-select");
             switch (site) {
                 case "facebook":
                     window.open(string.substitute(dojo.configData.MapSharingOptions.FacebookShareURL, [url]));
@@ -211,6 +268,64 @@ function (declare, domConstruct, domStyle, lang, array, on, dom, domClass, domGe
                 case "email":
                     parent.location = string.substitute(dojo.configData.MapSharingOptions.ShareByMailLink, [url]);
             }
+        },
+
+        getValuesToBuffer: function (parcel) {
+            if (window.location.toString().split("$dist=").length > 1) {
+                this.map.infoWindow.txtBuffer.value = Number(window.location.toString().split("$dist=")[1].split("$ocupntTxt=")[0]);
+                var str = window.location.toString().split("$PDF=")[1].split("$CSV=")[0];
+                dijit.byId('chkPdf').checked = (str == "false") ? "" : str;
+                str = window.location.toString().split("$CSV=")[1].split("$occupant=")[0];
+                dijit.byId('chkCsv').checked = (str == "false") ? "" : str;
+                str = window.location.toString().split("$occupant=")[1].split("$owner=")[0];
+                dijit.byId('chkOccupants').checked = (str == "false") ? "" : str;
+                str = window.location.toString().split("$owner=")[1].split("$averyFormat=")[0];
+                dijit.byId('chkOwners').checked = (str == "false") ? "" : str;
+                this.map.infoWindow.textoccupant.value = (window.location.toString().split("$ocupntTxt=")[1].split("$PDF")[0]);
+                var annotation;
+                if (parcel) {
+                    annotation = "$parcelID=";
+                }
+                else {
+                    annotation = "$roadID=";
+                }
+                dijit.byId('selectAvery').store.fetch({
+                    query: { name: window.location.toString().split("$averyFormat=")[1].split(annotation)[0].split("avery")[1] },
+                    onComplete: function (items) {
+                        dijit.byId('selectAvery').setDisplayedValue(items[0].name[0]);
+                        dijit.byId('selectAvery').item = items[0];
+                    }
+                });
+            }
+        },
+
+        getoverlayValuesToBuffer: function (overlay) {
+            if (window.location.toString().split("$dist=").length > 1) {
+                this.map.infoWindow.txtBuffer.value = Number(window.location.toString().split("$dist=")[1].split("$ocupntTxt=")[0]);
+                var str = window.location.toString().split("$PDF=")[1].split("$CSV=")[0];
+                dijit.byId('chkPdf').checked = (str == "false") ? "" : str;
+                str = window.location.toString().split("$CSV=")[1].split("$occupant=")[0];
+                dijit.byId('chkCsv').checked = (str == "false") ? "" : str;
+                str = window.location.toString().split("$occupant=")[1].split("$owner=")[0];
+                dijit.byId('chkOccupants').checked = (str == "false") ? "" : str;
+                str = window.location.toString().split("$owner=")[1].split("$averyFormat=")[0];
+                dijit.byId('chkOwners').checked = (str == "false") ? "" : str;
+                this.map.infoWindow.textoccupant.value = (window.location.toString().split("$ocupntTxt=")[1].split("$PDF")[0]);
+                var annotation;
+                if (overlay) {
+                    annotation = "$overlayID=";
+                }
+
+                dijit.byId('selectAvery').store.fetch({
+                    query: { name: window.location.toString().split("$averyFormat=")[1].split(annotation)[0].split("avery")[1] },
+                    onComplete: function (items) {
+                        dijit.byId('selectAvery').setDisplayedValue(items[0].name[0]);
+                        dijit.byId('selectAvery').item = items[0];
+                    }
+                });
+            }
+
         }
+
     });
 });

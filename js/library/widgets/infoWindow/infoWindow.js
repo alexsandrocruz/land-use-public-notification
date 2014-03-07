@@ -55,30 +55,36 @@ function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domC
             if (!this.infoWindowHeight) {
                 this.infoWindowHeight = "100px";
             }
+            topic.subscribe("createRoadBuffer", lang.hitch(this, this.createRoadBuffer));
+            this.btnSubmitImage.src = dojoConfig.baseURL + "/js/library/themes/images/download.png";
             this.infoWindowContainer = domConstruct.create("div", {}, dom.byId("esriCTParentDivContainer"));
             this.infoWindowContainer.appendChild(this.domNode);
             this._anchor = domConstruct.create("div", { "class": "esriCTdivTriangle" }, this.domNode);
             domUtils.hide(this.domNode);
             this.txtBuffer.value = dojo.configData.DefaultBufferDistance;
-            this.textoccupant.value = dojo.configData.OccupantName;
+            this.textoccupant.value = dojo.configData.AveryLabelSettings[0].OccupantLabel;
 
             this.own(on(this.esriCTclosediv, "click", lang.hitch(this, function () {
                 domUtils.hide(this.domNode);
                 dojo.selectedMapPoint = null;
+                dojo.displayInfo = null;
+                topic.publish("hideMapTip");
                 if (dojo.mouseMoveHandle) {
                     dojo.mouseMoveHandle.remove();
                 }
-
+                dojo.polygon = true;
+                dojo.interactiveParcel = false;
+                dojo.isSpanClicked = false;
+                dojo.displyOverlayInfo = true;
             })));
 
             this.own(on(this.btnSubmit, "click", lang.hitch(this, function () {
-                this.CreateBuffer();
+                this.createBuffer();
             })));
 
             this.txtBuffer.onkeypress = lang.hitch(this, function (evt) {
                 return this.onlyNumbers(evt);
             });
-
             this.btnSubmitImage.src = dojoConfig.baseURL + "/js/library/themes/images/download.png"
             this.esriCTShowDetailsView.src = dojoConfig.baseURL + "/js/library/themes/images/navigation.png";
             this.esriCTShowDetailsView.title = nls.navigation;
@@ -119,11 +125,13 @@ function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domC
             });
         },
 
-        setTitle: function (infoTitle) {
+        setTitle: function (str) {
+            var len = 35;
+            var infoTitle = (str.length > len) ? str.substring(0, len) + "..." : str;
             if (infoTitle.length > 0) {
                 this.esriCTheadderPanel.innerHTML = "";
                 this.esriCTheadderPanel.innerHTML = infoTitle;
-                this.esriCTheadderPanel.title = infoTitle;
+                this.esriCTheadderPanel.title = str;
             } else {
                 this.esriCTheadderPanel.innerHTML = dojo.configData.ShowNullValueAs;
             }
@@ -152,6 +160,10 @@ function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domC
             this.own(on(this.esriCTclosediv, "click", lang.hitch(this, function () {
                 domUtils.hide(this.domNode);
             })));
+        },
+
+        createRoadBuffer: function () {
+            this.createBuffer();
         }
     });
 });

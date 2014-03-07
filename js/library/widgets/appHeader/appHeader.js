@@ -100,19 +100,22 @@ define([
              * @memberOf widgets/appHeader/appHeader
              */
              _loadApplicationHeaderIcon: function () {
-                 var shortcutIcon = domConstruct.create("link");
-                 shortcutIcon.rel = "icon";
-                 shortcutIcon.type = "image/png";
-                 shortcutIcon.href = dojoConfig.baseURL + dojo.configData.ApplicationFavicon;
-                 document.getElementsByTagName('head')[0].appendChild(shortcutIcon);
+                 if (dojo.configData.ApplicationFavicon && lang.trim(dojo.configData.ApplicationFavicon).length !== 0) {
+                     this._loadIcons("shortcut icon", dojo.configData.ApplicationFavicon);
+                 }
+                 if (dojo.configData.ApplicationIcon && lang.trim(dojo.configData.ApplicationIcon).length !== 0) {
+                     this._loadIcons("apple-touch-icon-precomposed", dojo.configData.ApplicationIcon);
+                     this._loadIcons("apple-touch-icon", dojo.configData.ApplicationIcon);
+                     domConstruct.create("img", { "class": "esriCTApplicationIcon", "src": dojoConfig.baseURL + dojo.configData.ApplicationIcon }, this.applicationHeaderIcon);
+                 }
+             },
 
-                 /**
-                 * applicationHeaderIcon contains application icon for header panel widgets
-                 * @member {img} applicationHeaderIcon
-                 * @private
-                 * @memberOf widgets/appHeader/appHeader
-                 */
-                 this.applicationHeaderIcon.src = dojoConfig.baseURL + dojo.configData.ApplicationIcon;
+             _loadIcons: function (rel, iconPath) {
+                 var icon = domConstruct.create("link");
+                 icon.rel = rel;
+                 icon.type = "image/x-icon";
+                 icon.href = dojoConfig.baseURL + iconPath;
+                 document.getElementsByTagName('head')[0].appendChild(icon);
              },
 
              showProgressIndicator: function () {

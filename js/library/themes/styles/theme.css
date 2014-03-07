@@ -68,7 +68,7 @@
     color: #007AC2;
     float: left;
     font-size: 22px;
-    padding: 10px 65px;
+    padding: 10px 15px;
     text-shadow: 0 0 1px #AAAAAA;
     white-space: nowrap;
 }
@@ -187,12 +187,19 @@ margin: 12px 24px;
 
 .esriCTApplicationHeaderIcon
 {
-    width: 50px;
-    left: 0px;
-    top: 0px;
-    border: none;
-    position: absolute;
+    height: 50px;
+    float: left;
 }
+
+.esriCTApplicationIcon
+{
+    height:50px;
+}
+
+.txtColor
+{
+    color: #6e6e6e;
+ }
 /* End of Application Header */
 
 /* Address container Styles */
@@ -257,7 +264,7 @@ margin: 12px 24px;
     width: 90%;
     float: right !important;
     margin-right: 5px;
-    height: 215px !important;
+    height: 235px !important;
     position: relative;
 }
 
@@ -514,9 +521,10 @@ margin: 12px 24px;
 .esriCTDivAppContainer
 {
     position: absolute;
-    z-index: 1000;
+    z-index: 996;
     top: 48px;
     right: 0px;
+    width: 287px;
 }
 
 .esriCTDivAppHolder
@@ -527,7 +535,17 @@ margin: 12px 24px;
     border-left: 1px solid #007ac2;
     border-bottom: 1px solid #007ac2;
     float: left;
-    width: 287px;
+    width: 285px;
+}
+
+.esriCTDivshareContainer
+{
+    float: left;
+    width: 99.2%;
+    background-color: #fff;
+    border-right: 1px solid #007ac2;
+    border-left: 1px solid #007ac2;
+    border-bottom: 1px solid #007ac2;
 }
 
 .esriCTShareCursor
@@ -536,6 +554,26 @@ margin: 12px 24px;
     height: 24px;
     width: 24px;
 }
+
+.esriCTDivshareCodeContainer
+{
+    margin-top: 10px;
+    margin-left: 12px;
+}
+
+.esriCTTxtShare
+{
+    cursor: default !important;
+    height: 60px;
+    margin: 10px !important;
+    position: relative;
+    width: 90%;
+    border-top: 1px solid #007AC2;
+    border-bottom: 1px solid #007AC2;
+    border-left: 1px solid #007AC2;
+    border-right: 1px solid #007AC2;
+}
+
 .esriCTTdShare
 {
     float: left;
@@ -718,7 +756,6 @@ margin: 12px 24px;
     padding: 7px;
 }
 
-
 .divLayerHolder
 {
     width: 120px;
@@ -791,7 +828,6 @@ margin: 12px 24px;
     line-height: 25px;
 }
 
-
 /*splash Screen*/
 
 .splashScreenScrollBarContainer
@@ -819,6 +855,7 @@ margin: 12px 24px;
     margin-top: 10px;
     padding-left: 10px;
     position: relative;
+    text-align:justify;
 }
 
 .applicationHeaderSplashscreenContainer
@@ -867,6 +904,7 @@ margin: 12px 24px;
     overflow: hidden;
     position: relative;
     margin-top: 10px;
+    height:100%;
 }
 
 .divSplashContent
@@ -879,6 +917,13 @@ margin: 12px 24px;
     height: 224px;
 }
 
+.customButtonContainer
+{
+	width:100%;
+	position:absolute;
+	bottom:5px;
+	background:#fff;
+ }
 
 .customButton
 {
@@ -890,6 +935,7 @@ margin: 12px 24px;
     height: 25px !important;
     margin: 10PX AUTO;
 }
+
 .customAdjacentButton
 {
     border: none;
@@ -901,7 +947,6 @@ margin: 12px 24px;
     margin: 10PX AUTO;
 }
 
-
 .customButtonInner
 {
     width: 100%;
@@ -909,6 +954,7 @@ margin: 12px 24px;
     text-align: center;
     padding-top: 5px;
 }
+
 .splashTbldspl
 {
     display: table;
@@ -1016,7 +1062,7 @@ margin: 12px 24px;
     margin-left: 242px;
     font-size: 11px;
 }
-.esrictSpan
+.esriCTspan
 {
     color: #007ac2;
     cursor: pointer;
@@ -1025,6 +1071,13 @@ margin: 12px 24px;
     padding-top: 30px;
 }
 
+.esrictDivRoadSpan
+{
+    color: #007ac2;
+    cursor: pointer;
+    margin-left: 242px;
+    font-size: 11px;
+    }
 /*Start of Infowindow style*/
 
 .esriCTTInfoWindowContainer
@@ -1201,7 +1254,7 @@ input
 {
     cursor: pointer;
     position: absolute;
-    right: 30px;
+    right: 40px;
     top: 6px;
 }
 
@@ -1266,7 +1319,6 @@ input
     color: red;
 }
 
-
 .esriCTtrBufferRow div.esriCTtrBufferCheckbox
 {
     width: 20px;
@@ -1290,7 +1342,7 @@ input
     float: left;
 }
 
-.imgAdjacentParcels
+.imgAdjacentParcels, .imgAdjacentRoad
 {
     height: 17px;
     width: 17px;
@@ -1299,6 +1351,7 @@ input
     right: 130px;
     padding-top: 9px;
 }
+
 .imgAdjacentParcels1
 {
     height: 17px;
@@ -1309,29 +1362,17 @@ input
     padding-top: 9px;
 }
 
-.imgDownloadParcels
+.esriCTimgDownloadParcels
 {
-    /*height: 17px;
+    height: 17px;
     width: 17px;
     cursor: pointer;
     position: absolute;
-    right: 45%;
-    top: 257px;
-    background-position: 0 center;
-    background-image: url('../images/download.png');
-    background-repeat: no-repeat;
-    vertical-align: bottom;
-    background-color: blue;*/
-
-   height: 17px;
-width: 17px;
-cursor: pointer;
-position: absolute;
-right: 74px;
-padding-top: 27px;
-
+    right: 74px;
+    padding-top: 27px;
 }
-.spanAdjacentParcels
+
+.adjacentParcels
 {
     text-decoration: underline;
     cursor: pointer;
@@ -1342,6 +1383,7 @@ padding-top: 27px;
     position: absolute;
     color: #6e6e6e;
 }
+
 .divDisplaySpan
 {
     padding-top: 9px;
@@ -1352,18 +1394,21 @@ padding-top: 27px;
     color: #6e6e6e !important;
     float: left !important;
     text-decoration: underline;
-    height: 20px;
     cursor: pointer;
-    width: 50%;
+    width: 40%;
     float: left;
+    display:table-column;
 }
 
 .tdSiteAddress
 {
     color: #6e6e6e !important;
     float: left !important;
-    height: 20px;
+    width: 50%;
+    padding:0 5px;
+    display:table-column;
 }
+
 .tblTransparent
 {
     display: table;
@@ -1389,7 +1434,9 @@ padding-top: 27px;
     width: 100%;
     float: left;
     padding: 5px 0;
+    display:table-row;
 }
+
 .esriCTtrBufferRow div.esriCTtrBufferCheckbox input
 {
     -webkit-appearance: checkbox;
@@ -1404,11 +1451,11 @@ padding-top: 27px;
     padding-top: 3px;
 }
 
-
 .scrollbar_footer
 {
     display: none;
 }
+
 .backBtn
 {
     align: center;
@@ -1416,12 +1463,12 @@ padding-top: 27px;
     color: white;
     font-size: 11px;
 }
+
 .divDetailsTab
 {
     display: table;
     width: 100%;
 }
-
 
 /* Loading indicator Styles */
 

@@ -45,14 +45,13 @@ define([], function () {
         ApplicationIcon: "/js/library/themes/images/publicnotification.png",
 
         // Set application Favicon path
-        ApplicationFavicon: "js/library/themes/images/favicon.png",
+        ApplicationFavicon: "/js/library/themes/images/favicon.ico",
 
         // Set URL of help page/portal
         HelpURL: "help.htm",
 
         //Set splash window content - Message that appears when the application starts
         SplashScreen: {
-            // splash screen Message is set in locale file in nls directory
             IsVisible: true
         },
 
@@ -64,29 +63,27 @@ define([], function () {
         // WidgetPath: path of the widget respective to the widgets package.
         // MapInstanceRequired: true if widget is dependent on the map instance.
 
-        AppHeaderWidgets: [
-           {
-               Title: "Search",
-               WidgetPath: "widgets/locator/locator",
-               MapInstanceRequired: true
-           }, {
-               Title: "Locate",
-               WidgetPath: "widgets/geoLocation/geoLocation",
-               MapInstanceRequired: true
-           }, {
-               Title: "Print",
-               WidgetPath: "widgets/print/print",
-               MapInstanceRequired: true
-           }, {
-               Title: "Share",
-               WidgetPath: "widgets/share/share",
-               MapInstanceRequired: true
-           }, {
-               Title: "Help",
-               WidgetPath: "widgets/help/help",
-               MapInstanceRequired: false
-           }
-        ],
+        AppHeaderWidgets: [{
+            Title: "Search",
+            WidgetPath: "widgets/locator/locator",
+            MapInstanceRequired: true
+        }, {
+            Title: "Locate",
+            WidgetPath: "widgets/geoLocation/geoLocation",
+            MapInstanceRequired: true
+        }, {
+            Title: "Print",
+            WidgetPath: "widgets/print/print",
+            MapInstanceRequired: true
+        }, {
+            Title: "Share",
+            WidgetPath: "widgets/share/share",
+            MapInstanceRequired: true
+        }, {
+            Title: "Help",
+            WidgetPath: "widgets/help/help",
+            MapInstanceRequired: false
+        }],
 
         // Set size of the info-Popup - select maximum height and width in pixels (not applicable for tabbed info-Popup)
         //minimum height should be 310 for the info-popup in pixels
@@ -163,9 +160,6 @@ define([], function () {
 
         //Buffer Distance
         DefaultBufferDistance: 100,
-
-        //Name of the occupant
-        OccupantName: "Occupant",
 
         // ------------------------------------------------------------------------------------------------------------------------
         // OPERATIONAL DATA SETTINGS
@@ -260,10 +254,10 @@ define([], function () {
                 width: 35,
                 height: 35
             }],
-            DefaultValue: "na",
             HintText: "Enter address/road/school district name",
             MultipleResults: "PARCELID,SITEADDRESS" //earlier key - AddressSearchFields
         },
+
         AveryLabelSettings: [{
             // Geoprocessing services for PDF creation
             PDFServiceTask: "http://ec2-54-214-169-132.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/PublicNotification/GPServer/GenerateAveryLabels",
@@ -274,16 +268,8 @@ define([], function () {
             //Label to be displayed for Occupant
             OccupantLabel: "Occupant", // earlier key-OccupantName
 
-            ResidentsLabel: "Resident",
-
             //Fields of the occupant
             OccupantFields: "PARCELID,SITEADDRESS",
-
-            PropertyOccupantsLabel: [
-                { name: "Property Residents", value: "PR" },
-                { name: "Property Occupants", value: "PO" },
-                { name: "Others", value: "OT" }
-            ],
 
             //Fields for Avery labels
             AveryFieldsCollection: ["PARCELID", "OWNERNME1", "OWNERNME2", "PSTLADDRESS", "PSTLCITY,PSTLSTATE,PSTLZIP5"],
@@ -298,6 +284,7 @@ define([], function () {
                 AliasParcelField: "Parcel Identification Number",
                 SiteAddress: "SITEADDRESS"
             },
+
             AveryLabelTemplates: [{
                 name: "5160",
                 value: "avery5160"

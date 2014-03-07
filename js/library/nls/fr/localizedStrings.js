@@ -24,11 +24,12 @@ define({
         overLayDisplayText: "OverLay Layers",
         ClickToLocate: "Click To Locate",
         spanAdjacentParcels: "Add adjacent parcel",
+
         backBtn: "Back",
         parcelsCount: "Parcels found at this location",
         navigation: "navigation",
         notify: "notify",
-        ToolTipContents: {
+        toolTipContents: {
             Parcel: "Press Ctrl + Map click to select parcel<br>Click on a selected parcel when done",
             Road: "Press Ctrl + Map click to select road<br>Click on a selected road when done"
         },
