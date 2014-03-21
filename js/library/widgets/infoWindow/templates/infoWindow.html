@@ -5,7 +5,7 @@
                 <div id="headderPanel" class="headderPanel">
                     <div data-dojo-attach-point="esriCTheadderPanel" class="esriCTheadderPanel">
                     </div>
-                    <div class="esriCTclosediv" data-dojo-attach-point="esriCTclosediv">
+                    <div class="esriCTclosediv" data-dojo-attach-point="esriCTclosediv" title="Close">
                     </div>
                     <div class="esriCTInfOIcon">
                         <img class="esriCTInfOptions" checked="info" title="Notify" data-dojo-attach-point="esriCTShowDetailsView" /></div>
@@ -90,13 +90,16 @@
                                     </div>
                                 </div>
                             </div>
-                            <div>
+                           <div class="esriCTtrBufferRow">
                                 <span class="spanFileUploadMessage" data-dojo-attach-point="spanFileUploadMessage"
                                     style="display: none; font-size: 11px; height: 20px;"></span>
                             </div>
-                            <div class="esriCTtrBufferRow" data-dojo-attach-point="btnSubmit">
+                            <div   class="downloadNotification"  >
+                                <div data-dojo-attach-point="btnSubmit">
                                 <img class="esriCTimgDownloadParcels" data-dojo-attach-point="btnSubmitImage" />
                                 <span class="esriCTspan">${nls.downloadNotification}</span></div>
+                           </div>
+
                         </div>
                     </div>
                 </div>

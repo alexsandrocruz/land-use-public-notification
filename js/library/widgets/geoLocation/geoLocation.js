@@ -1,4 +1,4 @@
-﻿/*global define, document, Modernizr */
+﻿/*global define,dojo,dojoConfig,Modernizr,navigator,alert */
 /*jslint sloppy:true */
 /** @license
 | Version 10.2
@@ -100,10 +100,10 @@ function (declare, lang, domConstruct, on, topic, _WidgetBase, GeometryService, 
                     mapPoint = newPoint[0];
                     self.map.centerAndZoom(mapPoint, dojo.configData.ZoomLevel);
                     self._addGraphic(mapPoint);
-                }, function (error) {
+                }, function () {
                     alert(nls.errorMessages.invalidProjection);
                 });
-            }, function (error) {
+            }, function () {
                 alert(nls.errorMessages.invalidLocation);
             });
         },

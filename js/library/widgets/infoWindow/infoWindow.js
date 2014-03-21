@@ -1,4 +1,4 @@
-﻿/*global define, document, Modernizr */
+﻿/*global dojo, define, document, Modernizr, dojoConfig */
 /*jslint sloppy:true */
 /** @license
 | Version 10.2
@@ -21,21 +21,15 @@ define([
         "dojo/_base/declare",
         "dojo/dom-construct",
         "dojo/dom-style",
-        "dojo/dom-attr",
         "dojo/_base/lang",
         "dojo/on",
-        "dojo/dom-geometry",
         "dojo/dom",
         "dojo/dom-class",
-        "dojo/string",
         "dojo/topic",
         "esri/domUtils",
         "esri/InfoWindowBase",
         "esri/tasks/BufferParameters",
         "../scrollBar/scrollBar",
-        "dijit/form/Button",
-        "dijit/form/ComboBox",
-        "dijit/form/CheckBox",
         "dojo/store/Memory",
          "dojo/i18n!nls/localizedStrings",
         "dojo/text!./templates/infoWindow.html",
@@ -44,7 +38,7 @@ define([
         "dijit/_WidgetsInTemplateMixin",
         "./infoWindowView"
 ],
-function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domClass, string, topic, domUtils, InfoWindowBase, BufferParameters, scrollBar, Button, ComboBox, CheckBox, ItemFileReadStore, nls, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, infoWindowView) {
+function (declare, domConstruct, domStyle,lang, on, dom, domClass, topic, domUtils, InfoWindowBase, BufferParameters, scrollBar, ItemFileReadStore, nls, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, infoWindowView) {
     return declare([infoWindowView], {
         templateString: template,
 
@@ -76,6 +70,9 @@ function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domC
                 dojo.interactiveParcel = false;
                 dojo.isSpanClicked = false;
                 dojo.displyOverlayInfo = true;
+                if (dojo.overlay) {
+                    dojo.overLayGraphicShare = true;
+                }
             })));
 
             this.own(on(this.btnSubmit, "click", lang.hitch(this, function () {
@@ -85,7 +82,7 @@ function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domC
             this.txtBuffer.onkeypress = lang.hitch(this, function (evt) {
                 return this.onlyNumbers(evt);
             });
-            this.btnSubmitImage.src = dojoConfig.baseURL + "/js/library/themes/images/download.png"
+            this.btnSubmitImage.src = dojoConfig.baseURL + "/js/library/themes/images/download.png";
             this.esriCTShowDetailsView.src = dojoConfig.baseURL + "/js/library/themes/images/navigation.png";
             this.esriCTShowDetailsView.title = nls.navigation;
             this.attachInfoWindowEvents();
@@ -105,15 +102,16 @@ function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domC
             domStyle.set(this.divInfoDetails, "display", "block");
             domStyle.set(this.divInfoNotify, "display", "none");
             this.setLocation(screenPoint);
-            if (this.infoContainerScrollbar) {
-                domClass.add(this.infoContainerScrollbar._scrollBarContent, "esriCTZeroHeight");
-                this.infoContainerScrollbar.removeScrollBar();
+            if (dojo.infoContainerScrollbar) {
+                domClass.add(dojo.infoContainerScrollbar._scrollBarContent, "esriCTZeroHeight");
+                dojo.infoContainerScrollbar.removeScrollBar();
             }
-            this.infoContainerScrollbar = new scrollBar({
+            dojo.infoContainerScrollbar = new scrollBar({
                 domNode: this.divInfoScrollContent
             });
-            this.infoContainerScrollbar.setContent(this.divInfoDetailsScroll);
-            this.infoContainerScrollbar.createScrollBar();
+            domClass.add(this.divInfoScrollContent, "esrCTInfoContainerScrollbar");
+            dojo.infoContainerScrollbar.setContent(this.divInfoDetailsScroll);
+            dojo.infoContainerScrollbar.createScrollBar();
         },
 
         resize: function (width, height) {
@@ -126,14 +124,14 @@ function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domC
         },
 
         setTitle: function (str) {
-            var len = 35;
-            var infoTitle = (str.length > len) ? str.substring(0, len) + "..." : str;
+            var infoTitle, len = 35;
+            infoTitle = (str.length > len) ? str.substring(0, len) + "..." : str;
             if (infoTitle.length > 0) {
                 this.esriCTheadderPanel.innerHTML = "";
                 this.esriCTheadderPanel.innerHTML = infoTitle;
                 this.esriCTheadderPanel.title = str;
             } else {
-                this.esriCTheadderPanel.innerHTML = dojo.configData.ShowNullValueAs;
+                this.esriCTheadderPanel.innerHTML = nls.showNullValueAs;
             }
 
         },

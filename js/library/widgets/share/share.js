@@ -25,7 +25,7 @@ define([
     "dojo/_base/array",
     "dojo/on",
     "dojo/dom",
-     "dojo/dom-attr",
+    "dojo/dom-attr",
     "dojo/dom-class",
     "dojo/dom-geometry",
     "dojo/string",
@@ -86,6 +86,18 @@ function (declare, domConstruct, domStyle, lang, array, on, dom, domAttr, domCla
                 topic.publish("toggleWidget", "share");
                 this._sharelink();
             })));
+            on(this.embedding, "click", lang.hitch(this, function () {
+                this._showembeddingContainer();
+            }));
+        },
+
+        _showembeddingContainer: function () {
+            if (domStyle.get(this.esriCTDivshareContainer, "display") === "none") {
+                domStyle.set(this.esriCTDivshareContainer, "display", "block");
+            }
+            else {
+                domStyle.set(this.esriCTDivshareContainer, "display", "none");
+            }
         },
 
         /**
@@ -110,8 +122,7 @@ function (declare, domConstruct, domStyle, lang, array, on, dom, domAttr, domCla
             + "$CSV=" + ((dijit.byId('chkCsv').checked) ? "checked" : false) + "$occupant=" + ((dijit.byId('chkOccupants').checked) ? "checked" : false)
              + "$owner=" + ((dijit.byId('chkOwners').checked) ? "checked" : false)
             + "$averyFormat=" + dijit.byId('selectAvery').item.id[0] + "$parcelID=" + dojo.parcelArray.join(",");
-                }
-                else {
+                } else {
                     urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$parcelID=" + dojo.parcelArray.join(",");
                 }
             } else if (dojo.roadArray.length > 0) {
@@ -139,6 +150,9 @@ function (declare, domConstruct, domStyle, lang, array, on, dom, domAttr, domCla
             + "$CSV=" + ((dijit.byId('chkCsv').checked) ? "checked" : false) + "$occupant=" + ((dijit.byId('chkOccupants').checked) ? "checked" : false)
              + "$owner=" + ((dijit.byId('chkOwners').checked) ? "checked" : false)
             + "$averyFormat=" + dijit.byId('selectAvery').item.id[0] + "$overlayID=" + dojo.overLayArray.join(",") + "$Where=" + dojo.overlay;
+                }
+                else if ((dojo.overLayGraphicShare) && (!this.map.getLayer("tempBufferLayer").graphics.length > 0)) {
+                    urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$overlayID=" + dojo.overLayArray.join(",") + "$Where=" + dojo.overlay;
                 } else {
                     urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$overlayID=" + dojo.overLayArray.join(",");
                 }
@@ -148,8 +162,7 @@ function (declare, domConstruct, domStyle, lang, array, on, dom, domAttr, domCla
 
             if ((dojo.overLayArray.length > 0) && dojo.displayInfo) {
                 urlStr = urlStr + "$displayInfo=" + dojo.displayInfo + "$point=" + dojo.selectedMapPoint.x + "," + dojo.selectedMapPoint.y + "$Where=" + dojo.overlay;
-            }
-            else if (dojo.displayInfo) {
+            } else if (dojo.displayInfo) {
                 urlStr = urlStr + "$displayInfo=" + dojo.displayInfo + "$point=" + dojo.selectedMapPoint.x + "," + dojo.selectedMapPoint.y;
             }
 
@@ -269,6 +282,7 @@ function (declare, domConstruct, domStyle, lang, array, on, dom, domAttr, domCla
                     parent.location = string.substitute(dojo.configData.MapSharingOptions.ShareByMailLink, [url]);
             }
         },
+
 
         getValuesToBuffer: function (parcel) {
             if (window.location.toString().split("$dist=").length > 1) {

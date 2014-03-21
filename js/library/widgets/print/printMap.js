@@ -23,20 +23,35 @@ define([
     "dojo/on",
     "dojo/topic",
     "dojo/_base/lang",
-    "dijit/_WidgetBase"
+    "dijit/_WidgetBase",
+    "esri/map",
+    "esri/layers/FeatureLayer",
+    "esri/tasks/geometry",
+    "dojo/text!./templates/print.html"
   ],
-function (declare, domConstruct, on, topic, lang, _WidgetBase) {
+function (declare, domConstruct, on, topic, lang, _WidgetBase, esriMap, FeatureLayer, Geometry, printMap, Print) {
 
     //========================================================================================================================//
 
     return declare([_WidgetBase], {
+
+        tempPushPinLayer: "tempPushPinLayer",
+        tempPolygonLayer: "tempPolygonLayer",
+        tempBuffer: "tempBuffer",
+        parcelLayer: null,
+        bufferLayer: null,
+        initialExtent: null,
         /**
-        * create help widget
+        * create printMap widget
         *
         * @class
-        * @name widgets/help/help
+        * @name widgets/printMap/printMap
         */
         postCreate: function () {
+            var params;
+            var rings;
+            var color = "#1C86EE";
+            var printmap;
             this.domNode = domConstruct.create("div", { "title": this.title, "class": "esriCTImgPrint" }, null);
 
             this.own(on(this.domNode, "click", lang.hitch(this, function () {
@@ -45,7 +60,26 @@ function (declare, domConstruct, on, topic, lang, _WidgetBase) {
                 * minimize other open header panel widgets and show help
                 */
                 topic.publish("toggleWidget", "print");
+                this._showModal();
             })));
+        },
+
+        _showModal: function () {
+            var dataObject = {
+                "ParcelLayer": this.map.getLayer("esriGraphicsLayerMapSettings"),
+                "Bufferlayer": this.map.getLayer("tempBufferLayer"),
+                "Extent": this.map.extent,
+                "Window": window,
+                "BaseMapLayerURL": dojo.configData.BaseMapLayers[0].MapURL
+            }
+
+
+            window.showModalDialog("js/library/widgets/print/templates/print.html", dataObject);
+        },
+
+        //Get current map extent
+        getPrintExtent: function () {
+            return this.map.extent;
         }
 
     });

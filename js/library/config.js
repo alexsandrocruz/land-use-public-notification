@@ -73,7 +73,7 @@ define([], function () {
             MapInstanceRequired: true
         }, {
             Title: "Print",
-            WidgetPath: "widgets/print/print",
+            WidgetPath: "widgets/print/printMap",
             MapInstanceRequired: true
         }, {
             Title: "Share",
@@ -91,9 +91,6 @@ define([], function () {
 
         // Minimum width should be 330 for the info-popup in pixels
         InfoPopupWidth: 350,
-
-        // Set string value to be shown for null or blank values
-        ShowNullValueAs: "N/A",
 
         // ------------------------------------------------------------------------------------------------------------------------
         // BASEMAP SETTINGS
@@ -128,7 +125,7 @@ define([], function () {
             Title: "SchoolBoundaries",
             index: "0",
             LayerUrl: "http://ec2-54-214-169-132.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/SchoolDistrictQuery/MapServer/0",
-            SearchDisplayFields: "DISTRCTNAME,NAME",
+            SearchDisplayFields: "DISTRCTNAME,NAME",           
             SearchExpression: "UPPER(DISTRCTNAME) LIKE '%${0}%' OR UPPER(NAME) LIKE '%${0}%'",
             InfoWindowSettings: [{
                 InfoWindowTitleFields: "NAME", //earlier key - InfoWindowTitle
@@ -172,7 +169,7 @@ define([], function () {
         ParcelLayerSettings: {
             ParcelHighlightColor: "#1C86EE", //earlier key - RendererColor
             ParcelHighlightAlpha: 0.5,
-            LayerUrl: "http://tryitlive.arcgis.com/arcgis/rest/services/TaxParcelQuery/MapServer/0",
+            LayerUrl: "http://tryitlive.arcgis.com/arcgis/rest/services/TaxParcelQuery/MapServer/0",           
             SearchDisplayFields: "PARCELID,SITEADDRESS",
             SearchExpression: "UPPER(PARCELID) LIKE '%${0}%' OR UPPER(SITEADDRESS) LIKE '%${0}%'", //earlier key -  AddressSearchFields
             InfoWindowSettings: [{
@@ -314,8 +311,8 @@ define([], function () {
         MapSharingOptions: {
             TinyURLServiceURL: "http://api.bit.ly/v3/shorten?login=esri&apiKey=R_65fd9891cd882e2a96b99d4bda1be00e&uri=${0}&format=json",
             TinyURLResponseAttribute: "data.url",
-            FacebookShareURL: "http://www.facebook.com/sharer.php?u=${0}&t=esri%Template",
-            TwitterShareURL: "http://mobile.twitter.com/compose/tweet?status=esri%Template ${0}",
+            FacebookShareURL: "http://www.facebook.com/sharer.php?u=${0}&t=Public%20Notification",
+            TwitterShareURL: "http://mobile.twitter.com/compose/tweet?status=Public%20Notification ${0}",
             ShareByMailLink: "mailto:%20?subject=Check%20out%20this%20map!&body=${0}"
         }
     }

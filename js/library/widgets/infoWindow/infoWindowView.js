@@ -97,12 +97,13 @@ define([
 
              _getAveryTemplates: function () {
                  var averyTemplates = dojo.configData.AveryLabelSettings[0].AveryLabelTemplates;
-                 var averyTypes = { identifier: 'id', items: [] };
-                 for (var i = 0; i < averyTemplates.length; i++) {
+                 var averyTypes, filteringSelect, itemstore, i;
+                 averyTypes = { identifier: 'id', items: [] };
+                 for (i = 0; i < averyTemplates.length; i++) {
                      averyTypes.items[i] = { id: averyTemplates[i].value, name: averyTemplates[i].name };
                  }
-                 var itemstore = new ItemFileReadStore({ data: averyTypes });
-                 var filteringSelect = new ComboBox({
+                 itemstore = new ItemFileReadStore({ data: averyTypes });
+                 filteringSelect = new ComboBox({
                      autocomplete: false,
                      hasdownarrow: true,
                      id: 'selectAvery',
@@ -117,19 +118,19 @@ define([
              },
 
              //Validate avery format
-             _validateAveryFormat: function (value) {
+             _validateAveryFormat: function () {
                  if (!dijit.byId('selectAvery').item) {
                      dijit.byId('selectAvery').setValue('');
                  }
              },
 
              createBuffer: function (evt) {
+                 var _this = this, geometryService, maxBufferDistance, params, polyLine, j;
                  topic.publish("hideMapTip");
                  this.map.getLayer("tempBufferLayer").clear();
-                 var _this = this;
-                 var geometryService = new GeometryService(dojo.configData.GeometryService);
-                 var maxBufferDistance = parseFloat(dojo.configData.MaxBufferDistance);
-                 var params = new BufferParameters();
+                 geometryService = new GeometryService(dojo.configData.GeometryService);
+                 maxBufferDistance = parseFloat(dojo.configData.MaxBufferDistance);
+                 params = new BufferParameters();
                  this.dist = this.txtBuffer;
                  this.pdfFormat = dijit.byId('chkPdf').checked;
                  this.csvFormat = dijit.byId('chkCsv').checked;
@@ -151,8 +152,8 @@ define([
                                  averyFormat = dijit.byId('selectAvery').item.id[0];
                                  if (this.map.getLayer("roadCenterLinesLayerID").getSelectedFeatures().length > 0) {
                                      if (this.map.getLayer("roadCenterLinesLayerID").graphics) {
-                                         var polyLine = new Geometry.Polyline(this.map.spatialReference);
-                                         for (var j = 0; j < this.map.getLayer("roadCenterLinesLayerID").graphics.length; j++) {
+                                         polyLine = new Geometry.Polyline(this.map.spatialReference);
+                                         for (j = 0; j < this.map.getLayer("roadCenterLinesLayerID").graphics.length; j++) {
                                              if (this.map.getLayer("roadCenterLinesLayerID").graphics[j].visible) {
                                                  polyLine.addPath(this.map.getLayer("roadCenterLinesLayerID").graphics[j].geometry.paths[0]);
                                              }
@@ -191,15 +192,15 @@ define([
              },
 
              _showBufferRoad: function (geometries) {
+                 var _this = this, taxParcelQueryUrl, qTask, symbol;
                  topic.publish("hideMapTip");
                  if (dojo.mouseMoveHandle) {
                      dojo.mouseMoveHandle.remove();
                  }
-                 var _this = this;
                  topic.publish("showProgressIndicator");
-                 var taxParcelQueryUrl = dojo.configData.ParcelLayerSettings.LayerUrl;
-                 var qTask = new QueryTask(taxParcelQueryUrl);
-                 var symbol = new Symbol.SimpleFillSymbol(Symbol.SimpleFillSymbol.STYLE_SOLID,
+                 taxParcelQueryUrl = dojo.configData.ParcelLayerSettings.LayerUrl;
+                 qTask = new QueryTask(taxParcelQueryUrl);
+                 symbol = new Symbol.SimpleFillSymbol(Symbol.SimpleFillSymbol.STYLE_SOLID,
                  new Symbol.SimpleLineSymbol(Symbol.SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0, 0.65]), 2), new Color([255, 0, 0, 0.35]));
                  array.forEach(geometries, lang.hitch(this, function (geometry) {
                      _this._addGraphic(_this.map.getLayer("tempBufferLayer"), symbol, geometry);
@@ -218,9 +219,8 @@ define([
 
              //Check if buffer range is valid
              _isBufferValid: function (dist) {
-                 var maxBufferDistance = parseFloat(dojo.configData.MaxBufferDistance);
-                 var isValid = true;
-                 var length = parseFloat(dist);
+                 var maxBufferDistance = parseFloat(dojo.configData.MaxBufferDistance), isValid = true, length;
+                 length = parseFloat(dist);
                  if ((length < 1) || (length > maxBufferDistance)) {
                      isValid = false;
                  }
@@ -239,7 +239,8 @@ define([
 
              //Validate the numeric text box control
              onlyNumbers: function (evt) {
-                 var charCode = (evt.which) ? evt.which : event.keyCode;
+                 var charCode;
+                 charCode = (evt.which) ? evt.which : event.keyCode;
                  if (charCode > 31 && (charCode < 48 || charCode > 57)) {
                      return false;
                  }
@@ -247,13 +248,14 @@ define([
              },
 
              _bufferParameters: function (dist) {
-                 var geometryService = new GeometryService(dojo.configData.GeometryService);
-                 var params = new BufferParameters();
+                 var geometryService, params, polygon, ringsLength, i, j;
+                 geometryService = new GeometryService(dojo.configData.GeometryService);
+                 params = new BufferParameters();
                  if (this.map.getLayer("esriGraphicsLayerMapSettings").graphics) {
-                     var polygon = new Geometry.Polygon(this.map.spatialReference);
-                     for (var i = 0; i < this.map.getLayer("esriGraphicsLayerMapSettings").graphics.length; i++) {
-                         var ringsLength = this.map.getLayer("esriGraphicsLayerMapSettings").graphics[i].geometry.rings.length;
-                         for (var j = 0; j < ringsLength; j++) {
+                     polygon = new Geometry.Polygon(this.map.spatialReference);
+                     for (i = 0; i < this.map.getLayer("esriGraphicsLayerMapSettings").graphics.length; i++) {
+                         ringsLength = this.map.getLayer("esriGraphicsLayerMapSettings").graphics[i].geometry.rings.length;
+                         for (j = 0; j < ringsLength; j++) {
                              polygon.addRing(this.map.getLayer("esriGraphicsLayerMapSettings").graphics[i].geometry.rings[j]);
                          }
                      }
@@ -275,16 +277,16 @@ define([
              },
 
              _showBuffer: function (geometries) {
+                 var _this = this, maxAllowableOffset, taxParcelQueryUrl, qTask, symbol;
                  dojo.displayInfo = null;
-                 var _this = this;
-                 var maxAllowableOffset = dojo.configData.MaxAllowableOffset;
+                 maxAllowableOffset = dojo.configData.MaxAllowableOffset;
                  dojo.selectedMapPoint = null;
                  topic.publish("showProgressIndicator");
-                 var taxParcelQueryUrl = dojo.configData.ParcelLayerSettings.LayerUrl;
-                 var qTask = new QueryTask(taxParcelQueryUrl);
+                 taxParcelQueryUrl = dojo.configData.ParcelLayerSettings.LayerUrl;
+                 qTask = new QueryTask(taxParcelQueryUrl);
                  query = new Query();
                  query.outFields = dojo.configData.QueryOutFields.split(",");
-                 var symbol = new Symbol.SimpleFillSymbol(Symbol.SimpleFillSymbol.STYLE_SOLID,
+                 symbol = new Symbol.SimpleFillSymbol(Symbol.SimpleFillSymbol.STYLE_SOLID,
                  new Symbol.SimpleLineSymbol(Symbol.SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0, 0.65]), 2), new Color([255, 0, 0, 0.35]));
                  array.forEach(geometries, lang.hitch(this, function (geometry) {
                      _this._addGraphic(_this.map.getLayer("tempBufferLayer"), symbol, geometry);
@@ -303,18 +305,19 @@ define([
 
              _addGraphic: function (layer, symbol, point, attr) {
                  var graphic = new Graphic(point, symbol, attr, null);
-                 var features = [];
+                 var featureSet, features = [];
                  features.push(graphic);
-                 var featureSet = new esri.tasks.FeatureSet();
+                 featureSet = new esri.tasks.FeatureSet();
                  featureSet.features = features;
                  layer.add(featureSet.features[0]);
              },
 
              _queryCallback: function (featureSet, road) {
+                 var features = featureSet.features,
+                 poly, feature, strAveryParam, strCsvParam;
                  if (this.map.getLayer("esriGraphicsLayerMapSettings")) {
                      this.map.getLayer("esriGraphicsLayerMapSettings").clear();
                  }
-                 var features = featureSet.features;
                  if (featureSet.features.length == 0) {
                      if (!road) {
                          alert(nls.errorMessages.noParcel);
@@ -324,15 +327,15 @@ define([
                      topic.publish("hideProgressIndicator");
                  } else {
                      try {
-                         var poly = new Geometry.Polygon(this.map.spatialReference);
-                         for (var feature in features) {
+                         poly = new Geometry.Polygon(this.map.spatialReference);
+                         for (feature in features) {
                              poly.addRing(features[feature].geometry.rings[0]);
                          }
                          this.map.setExtent(poly.getExtent().expand(3));
                          topic.publish("drawPolygon", features, false);
                          dojo.interactiveParcel = false;
-                         var strAveryParam = "";
-                         var strCsvParam = "";
+                         strAveryParam = "";
+                         strCsvParam = "";
                          if (this.pdfFormat == "checked" || this.pdfFormat) {
                              strAveryParam = this._createAveryParam(features);
                          }
@@ -384,7 +387,7 @@ define([
                              for (var fieldCount = 0; fieldCount < occupantFields.length; fieldCount++) {
                                  csvFields = occupantFields[fieldCount];
                                  if (fieldCount == 1) {
-                                     strCsvParam += str.trim(this.textoccupant.value) + ",";
+                                     strCsvParam += lang.trim(this.textoccupant.value) + ",";
                                  }
                                  if (csvFields.split(',').length > 1) {
                                      var subFields = csvFields.split(',');
@@ -449,7 +452,7 @@ define([
                                  for (fieldCount = 0; fieldCount < occupantFields.length; fieldCount++) {
                                      averyFields = occupantFields[fieldCount];
                                      if (fieldCount == 1) {
-                                         strAveryParam += this.textoccupant.value + "~";
+                                         strAveryParam += lang.trim(this.textoccupant.value) + "~";
                                      }
                                      if (averyFields.split(',').length > 1) {
                                          subFields = averyFields.split(',');
@@ -552,8 +555,7 @@ define([
              _downloadCSVFile: function (outputFile) {
                  if (navigator.appVersion.indexOf("Mac") != -1) {
                      window.open(outputFile.value.url);
-                 }
-                 else {
+                 } else {
                      this.window.location = outputFile.value.url;
                  }
              }

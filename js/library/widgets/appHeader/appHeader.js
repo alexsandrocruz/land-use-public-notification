@@ -1,4 +1,4 @@
-﻿/*global dojo,define,document */
+﻿/*global dojo,define,document,dojoConfig */
 /*jslint sloppy:true */
 /** @license
 | Version 10.2
@@ -21,7 +21,6 @@ define([
     "dojo/_base/declare",
     "dojo/dom-construct",
     "dojo/_base/lang",
-    "dojo/_base/array",
     "dojo/dom-attr",
     "dojo/dom",
     "dojo/text!./templates/appHeaderTemplate.html",
@@ -32,7 +31,7 @@ define([
      "dojo/topic",
     "dojo/i18n!nls/localizedStrings"
     ],
-     function (declare, domConstruct, lang, array, domAttr, dom, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, domClass, topic, nls) {
+     function (declare, domConstruct, lang, domAttr, dom, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, domClass, topic, nls) {
 
          //========================================================================================================================//
 
@@ -71,7 +70,7 @@ define([
                  * @private
                  * @memberOf widgets/appHeader/appHeader
                  */
-                 document["title"] = dojo.configData.ApplicationName;
+                 document.title = dojo.configData.ApplicationName;
                  domAttr.set(this.applicationHeaderName, "innerHTML", dojo.configData.ApplicationName);
              },
 
@@ -81,16 +80,18 @@ define([
              * @memberOf widgets/appHeader/appHeader
              */
              loadHeaderWidgets: function (widgets) {
-
+                 var i;
                  /**
                  * applicationHeaderWidgetsContainer container for header panel widgets
                  * @member {div} applicationHeaderWidgetsContainer
                  * @private
                  * @memberOf widgets/appHeader/appHeader
                  */
-                 for (var i in widgets) {
-                     if (widgets[i].domNode) {
-                         domConstruct.place(widgets[i].domNode, this.applicationHeaderWidgetsContainer);
+                 for (i in widgets) {
+                     if (widgets.hasOwnProperty(i)) {
+                         if (widgets[i].domNode) {
+                             domConstruct.place(widgets[i].domNode, this.applicationHeaderWidgetsContainer);
+                         }
                      }
                  }
              },

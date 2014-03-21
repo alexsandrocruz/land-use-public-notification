@@ -31,8 +31,9 @@ define({
         feet: "feet",
         details:"Details",
         navigation: "navigation",
-        notify: "Notify",
+        notify: "notify",
         webpageDispalyText: "Copy/paste HTML into your web page",
+        showNullValueAs: "N/A",
         toolTipContents: {
             Parcel: "Press Ctrl + Map click to select parcel<br>Click on a selected parcel when done",
             Road: "Press Ctrl + Map click to select road<br>Click on a selected road when done"
