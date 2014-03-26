@@ -1,5 +1,5 @@
-﻿/*global dojo, define, document */
-/*jslint sloppy:true */
+﻿/*global define,dojo,dojoConfig,window,setTimeout,alert,esri,dijit,query,Graphic */
+/*jslint sloppy:true,nomen:true,plusplus:true,unparam:true */
 /** @license
 | Version 10.2
 | Copyright 2013 Esri
@@ -49,7 +49,7 @@ define([
     "esri/renderers/Renderer",
     "dojo/domReady!"
     ],
-     function (declare, domConstruct, domStyle, lang, on, dom, dojoQuery, scrollBar, domClass, domGeom, Query, QueryTask, _WidgetBase, esriMap, FeatureLayer, GraphicsLayer, geometryExtent, baseMapGallery, nls, HomeButton, spatialReference, infoWindow, topic, Locator, Geometry, GeometryService, Color, Symbol, Renderer) {
+     function (declare, domConstruct, domStyle, lang, on, dom, dojoQuery, ScrollBar, domClass, domGeom, Query, QueryTask, _WidgetBase, EsriMap, FeatureLayer, GraphicsLayer, GeometryExtent, baseMapGallery, nls, HomeButton, spatialReference, InfoWindow, topic, Locator, Geometry, GeometryService, Color, Symbol, Renderer) {
          //========================================================================================================================//
 
          return declare([_WidgetBase], {
@@ -69,15 +69,14 @@ define([
              * @name widgets/mapSettings/mapSettings
              */
              postCreate: function () {
-                 dojo.graphicLayerClicked = false,     //Flag for storing state of Graphics Layer Clicked
-                 dojo.findTasksGraphicClicked = false, //flag for handling to draw polygon
+                 dojo.graphicLayerClicked = false;     //Flag for storing state of Graphics Layer Clicked
+                 dojo.findTasksGraphicClicked = false; //flag for handling to draw polygon
                  dojo.parcelArray = [];                //Array to store the shared parcels
                  dojo.roadArray = [];
                  dojo.overLayArray = [];               //Array to store shared overlay layer
                  dojo.polygon = true;
                  dojo.shareinfo = false;               //Flag set for info window display
-                 dojo.interactiveParcel = false,
-                 dojo.mouseMoveHandle;
+                 dojo.interactiveParcel = false;
                  topic.subscribe("clearAll", lang.hitch(this, this.clearAll));
                  topic.subscribe("addShareParcelsToMap", lang.hitch(this, this.addShareParcelsToMap));
                  topic.subscribe("addShareOverLayToMap", lang.hitch(this, this.addShareOverLayToMap));
@@ -92,26 +91,29 @@ define([
                  * set map extent to default extent specified in configuration file
                  * @param {string} dojo.configData.DefaultExtent Default extent of map specified in configuration file
                  */
-                 var extentPoints = dojo.configData && dojo.configData.DefaultExtent && dojo.configData.DefaultExtent.split(",");
+                 var extentPoints, layer, customInfoWindow, roadLineColor, gLayer, roadLineSymbol, roadLinefillColor, roadLineRenderer, roadCenterLinesLayer;
+                 extentPoints = dojo.configData && dojo.configData.DefaultExtent && dojo.configData.DefaultExtent.split(",");
 
                  /**
                  * load map
                  * @param {string} dojo.configData.BaseMapLayers Basemap settings specified in configuration file
                  */
-                 var layer = new esri.layers.ArcGISTiledMapServiceLayer(dojo.configData.BaseMapLayers[0].MapURL, { id: dojo.configData.BaseMapLayers[0].Key, visible: true });
 
-                 var customInfoWindow = new infoWindow({ infoWindowWidth: dojo.configData.InfoPopupWidth, infoWindowHeight: dojo.configData.InfoPopupHeight });
-                 this.map = new esriMap("esriCTParentDivContainer", {
+                 customInfoWindow = new InfoWindow({ infoWindowWidth: dojo.configData.InfoPopupWidth, infoWindowHeight: dojo.configData.InfoPopupHeight });
+                 this.map = new EsriMap("esriCTParentDivContainer", {
                      infoWindow: customInfoWindow,
-                     basemap: dojo.configData.BaseMapLayers[0].Key
+                     showAttribution: true
                  });
-                 this.map.addLayer(layer);
 
-                 var gLayer = new GraphicsLayer();
+                 layer = new esri.layers.ArcGISTiledMapServiceLayer(dojo.configData.BaseMapLayers[0].MapURL, { id: "esriCTbasemap", visible: true });
+                 this.map.addLayer(layer, 0);
+
+
+                 gLayer = new GraphicsLayer();
                  gLayer.id = this.tempBufferLayer;
                  this.map.addLayer(gLayer);
 
-                 var glayer = new GraphicsLayer();
+                 glayer = new GraphicsLayer();
                  glayer.id = this.tempGraphicsLayerId;
                  this.map.addLayer(glayer);
 
@@ -122,13 +124,13 @@ define([
                      this._executeQueryTask(evt);
                  }));
 
-                 var roadLineColor = dojo.configData.RoadCenterLayerSettings.RoadHighlightColor;
-                 var roadLineSymbol = new Symbol.SimpleLineSymbol();
+                 roadLineColor = dojo.configData.RoadCenterLayerSettings.RoadHighlightColor;
+                 roadLineSymbol = new Symbol.SimpleLineSymbol();
                  roadLineSymbol.setWidth(5);
-                 var roadLinefillColor = new Color(roadLineColor);
+                 roadLinefillColor = new Color(roadLineColor);
                  roadLineSymbol.setColor(roadLinefillColor);
-                 var roadLineRenderer = new esri.renderer.SimpleRenderer(roadLineSymbol);
-                 var roadCenterLinesLayer = new FeatureLayer(dojo.configData.RoadCenterLayerSettings.LayerUrl, {
+                 roadLineRenderer = new esri.renderer.SimpleRenderer(roadLineSymbol);
+                 roadCenterLinesLayer = new FeatureLayer(dojo.configData.RoadCenterLayerSettings.LayerUrl, {
                      mode: FeatureLayer.MODE_SELECTION,
                      outFields: ["*"]
                  });
@@ -138,21 +140,25 @@ define([
                  this.map.addLayer(roadCenterLinesLayer);
 
                  this.own(on(roadCenterLinesLayer, "click", lang.hitch(this, function (evt) {
+                     var roadLayerSettings = dojo.configData.RoadCenterLayerSettings;
                      evt.cancelBubble = true;
-                     if (evt.stopPropagation) evt.stopPropagation();
+                     if (evt.stopPropagation) {
+                         evt.stopPropagation();
+                     }
                      if (evt.ctrlKey) {
                          if (dijit.byId('toolTipDialogues')) {
                              dojo.publish("hideRoad", evt);
                          }
                      }
-                     var roadLayerSettings = dojo.configData.RoadCenterLayerSettings;
                      topic.publish("createInfoWindowContent", evt.graphic, evt.mapPoint, roadLayerSettings);
                      evt.cancelBubble = true;
-                     if (evt.stopPropagation) evt.stopPropagation();
+                     if (evt.stopPropagation) {
+                         evt.stopPropagation();
+                     }
                  })));
 
                  this.own(on(glayer, "click", function (evt) {
-                     dojo.graphicLayerClicked = true;
+                     dojo.graphicLayerClicked = true; //if graphic is clicked on map
                      dojo.findTasksGraphicClicked = false;
                  }));
 
@@ -165,25 +171,26 @@ define([
                  * @param {array} dojo.configData.OperationalLayers List of operational Layers specified in configuration file
                  */
                  this.map.on("load", lang.hitch(this, function () {
-                     _self = this;
-                     var taxParcelQueryUrl = dojo.configData.ParcelLayerSettings.LayerUrl;
-                     var extent = this._getQueryString('extent');
-                     if (extent == "") {
-                         var mapDefaultExtent = new geometryExtent({ "xmin": parseFloat(extentPoints[0]), "ymin": parseFloat(extentPoints[1]), "xmax": parseFloat(extentPoints[2]), "ymax": parseFloat(extentPoints[3]), "spatialReference": { "wkid": this.map.spatialReference.wkid} });
+                     var _self = this, polyLine,
+                      taxParcelQueryUrl = dojo.configData.ParcelLayerSettings.LayerUrl, extent, mapDefaultExtent, basMapObjectGallery, query,
+                      parcelGroup, p, qTask, numSegments, j, overLayQueryUrl;
+                     extent = this._getQueryString('extent');
+                     if (extent === "") {
+                         mapDefaultExtent = new GeometryExtent({ "xmin": parseFloat(extentPoints[0]), "ymin": parseFloat(extentPoints[1]), "xmax": parseFloat(extentPoints[2]), "ymax": parseFloat(extentPoints[3]), "spatialReference": { "wkid": this.map.spatialReference.wkid} });
                          this.map.setExtent(mapDefaultExtent);
                      } else {
-                         var mapDefaultExtent = extent.split(',');
-                         mapDefaultExtent = new geometryExtent({ "xmin": parseFloat(mapDefaultExtent[0]), "ymin": parseFloat(mapDefaultExtent[1]), "xmax": parseFloat(mapDefaultExtent[2]), "ymax": parseFloat(mapDefaultExtent[3]), "spatialReference": { "wkid": this.map.spatialReference.wkid} });
+                         mapDefaultExtent = extent.split(',');
+                         mapDefaultExtent = new GeometryExtent({ "xmin": parseFloat(mapDefaultExtent[0]), "ymin": parseFloat(mapDefaultExtent[1]), "xmax": parseFloat(mapDefaultExtent[2]), "ymax": parseFloat(mapDefaultExtent[3]), "spatialReference": { "wkid": this.map.spatialReference.wkid} });
                          this.map.setExtent(mapDefaultExtent);
                      }
                      domConstruct.place(home.domNode, dojoQuery(".esriSimpleSliderIncrementButton")[0], "after");
                      home.extent = mapDefaultExtent;
                      home.startup();
                      if (dojo.configData.BaseMapLayers.length > 1) {
-                         var basMapObjectGallery = this._addbasMapObjectGallery();
+                         basMapObjectGallery = this._addbasMapObjectGallery();
                      }
 
-                     var query;
+                     //to share overlay layer's graphic and infopopup
                      if (window.location.toString().split("$parcelID=").length > 1) {
                          topic.publish("getValuesToBuffer", true);
                          if (window.location.toString().split("$displayInfo=").length > 1) {
@@ -194,9 +201,9 @@ define([
                          }
 
                          query = new esri.tasks.Query();
-                         var parcelGroup = "";
-                         for (var p = 0; p < dojo.parcelArray.length; p++) {
-                             if (p == (dojo.parcelArray.length - 1)) {
+                         parcelGroup = "";
+                         for (p = 0; p < dojo.parcelArray.length; p++) {
+                             if (p === (dojo.parcelArray.length - 1)) {
                                  parcelGroup += "'" + dojo.parcelArray[p] + "'";
                              }
                              else {
@@ -206,11 +213,13 @@ define([
                          query.where = dojo.configData.AveryLabelSettings[0].ParcelInformation.ParcelIdentification + " in (" + parcelGroup + ")";
                          query.returnGeometry = true;
                          query.outFields = ["*"];
-                         var qTask = new QueryTask(taxParcelQueryUrl);
+                         qTask = new QueryTask(taxParcelQueryUrl);
                          qTask.execute(query, function (featureset) {
                              topic.publish("addShareParcelsToMap", featureset, 0);
                          });
                      }
+
+                     //to share RoadLine graphics and infopoup
                      else if (window.location.toString().split("$roadID=").length > 1) {
                          topic.publish("getValuesToBuffer", false);
                          if (window.location.toString().split("$displayInfo=").length > 1) {
@@ -225,9 +234,9 @@ define([
                          query.objectIds = [dojo.roadArray.join(",")];
                          _self.map.getLayer("roadCenterLinesLayerID").selectFeatures(query, esri.layers.FeatureLayer.SELECTION_ADD, function (featureSet) {
                              polyLine = new esri.geometry.Polyline(_self.map.spatialReference);
-                             var numSegments = _self.map.getLayer("roadCenterLinesLayerID").graphics.length;
+                             numSegments = _self.map.getLayer("roadCenterLinesLayerID").graphics.length;
                              if (0 < numSegments) {
-                                 for (var j = 0; j < numSegments; j++) {
+                                 for (j = 0; j < numSegments; j++) {
                                      if (_self.map.getLayer("roadCenterLinesLayerID").graphics[j]) {
                                          polyLine.addPath(_self.map.getLayer("roadCenterLinesLayerID").graphics[j].geometry.paths[0]);
                                      }
@@ -240,24 +249,26 @@ define([
                              alert(err.message);
                          });
                      }
+
+                     //to share overlay layer's graphic and infopopup
                      else if (window.location.toString().split("$overlayID=").length > 1) {
-                         var overLayQueryUrl = dojo.configData.OverlayLayerSettings[0].LayerUrl;
+                         overLayQueryUrl = dojo.configData.OverlayLayerSettings[0].LayerUrl;
                          topic.publish("getoverlayValuesToBuffer", true);
                          if (window.location.toString().split("$displayInfo=").length > 1) {
                              dojo.overLayArray = window.location.toString().split("$overlayID=")[1].split("$displayInfo=")[0].split(",");
                          }
                          else {
-                             if ((window.location.toString().split("$overlayID=")[1].split("$Where=")[0].split(",").length) == 1) {
-                                 dojo.overLayArray = window.location.toString().split("$overlayID=")[1].split("$Where=")[0].split(",")
+                             if ((window.location.toString().split("$overlayID=")[1].split("$Where=")[0].split(",").length) === 1) {
+                                 dojo.overLayArray = window.location.toString().split("$overlayID=")[1].split("$Where=")[0].split(",");
                              }
                              else {
                                  dojo.overLayArray = window.location.toString().split("$overlayID=")[1].split(",");
                              }
                          }
                          query = new esri.tasks.Query();
-                         var parcelGroup = "";
-                         for (var p = 0; p < dojo.overLayArray.length; p++) {
-                             if (p == (dojo.overLayArray.length - 1)) {
+                         parcelGroup = "";
+                         for (p = 0; p < dojo.overLayArray.length; p++) {
+                             if (p === (dojo.overLayArray.length - 1)) {
                                  parcelGroup += "" + dojo.overLayArray[p] + "";
                              }
                              else {
@@ -271,7 +282,7 @@ define([
                          query.where = dojo.whereclause + " = (" + parcelGroup + ")";
                          query.returnGeometry = true;
                          query.outFields = ["*"];
-                         var qTask = new QueryTask(overLayQueryUrl);
+                         qTask = new QueryTask(overLayQueryUrl);
                          qTask.execute(query, function (featureset) {
                              topic.publish("addShareOverLayToMap", featureset, 0);
                          });
@@ -288,13 +299,13 @@ define([
              },
 
              _getQueryString: function (key) {
-                 var _default;
+                 var _default, regex, qs;
                  if (!_default) {
                      _default = "";
                  }
                  key = key.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
-                 var regex = new RegExp("[\\?&]" + key + "=([^&#]*)");
-                 var qs = regex.exec(window.location.href);
+                 regex = new RegExp("[\\?&]" + key + "=([^&#]*)");
+                 qs = regex.exec(window.location.href);
                  if (!qs) {
                      return _default;
                  } else {
@@ -369,8 +380,8 @@ define([
 
                  if (evt.ctrlKey) {
                      if (!dojo.polygon) {
-                         selectedPoint = null;
-                         displayInfo = null;
+                         dojo.selectedPoint = null;
+                         dojo.displayInfo = null;
                          this.map.infoWindow.hide();
                          topic.publish("hideMapTip");
                          if (dojo.mouseMoveHandle) {
@@ -386,11 +397,11 @@ define([
              },
 
              _queryForParcel: function (evt) {
-                 var _this = this;
-                 var taxParcelQueryUrl = dojo.configData.ParcelLayerSettings.LayerUrl;
-                 var qTask = new QueryTask(taxParcelQueryUrl);
-                 var mapPointForQuery = new Geometry.Point(evt.mapPoint.x, evt.mapPoint.y, this.map.spatialReference);
-                 var query = new Query();
+                 var _this = this, taxParcelQueryUrl, qTask, mapPointForQuery, query;
+                 taxParcelQueryUrl = dojo.configData.ParcelLayerSettings.LayerUrl;
+                 qTask = new QueryTask(taxParcelQueryUrl);
+                 mapPointForQuery = new Geometry.Point(evt.mapPoint.x, evt.mapPoint.y, this.map.spatialReference);
+                 query = new Query();
                  query.returnGeometry = true;
                  query.outFields = dojo.configData.QueryOutFields.split(",");
                  query.geometry = mapPointForQuery;
@@ -398,7 +409,7 @@ define([
                      if (fset.features.length) {
                          _this._showFeatureSet(fset, evt);
                      }
-                     else {                        
+                     else {
                          topic.publish("hideProgressIndicator");
                      }
                  }, function (err) {
@@ -408,17 +419,16 @@ define([
              },
 
              queryForAdjacentRoad: function (evt) {
-                 var _self = this;
-                 var roadCenterLinesLayerURL = dojo.configData.RoadCenterLayerSettings.LayerUrl;
-                 var geometryService = new GeometryService(dojo.configData.GeometryService);
-                 var temp = evt.mapPoint.getExtent();
-                 var params = new esri.tasks.BufferParameters();
+                 var _self = this, roadCenterLinesLayerURL = dojo.configData.RoadCenterLayerSettings.LayerUrl, j,
+                 geometryService, params, query, polyLine, queryTask;
+                 geometryService = new GeometryService(dojo.configData.GeometryService);
+                 params = new esri.tasks.BufferParameters();
                  params.geometries = [evt.mapPoint];
                  params.distances = [50];
                  params.unit = GeometryService.UNIT_FOOT;
                  params.outSpatialReference = this.map.spatialReference;
                  geometryService.buffer(params, function (geometries) {
-                     var query = new Query();
+                     query = new Query();
                      query.geometry = geometries[0];
                      query.where = "1=1";
                      query.spatialRelationship = esri.tasks.Query.SPATIAL_REL_INTERSECTS;
@@ -427,11 +437,11 @@ define([
                      queryTask = new QueryTask(roadCenterLinesLayerURL);
                      queryTask.execute(query, function (featureset) {
                          if (featureset.features.length > 0) {
-                             var query = new Query();
+                             query = new Query();
                              query.where = dojo.configData.RoadCenterLayerSettings.SearchDisplayFields + "= '" + featureset.features[0].attributes[dojo.configData.RoadCenterLayerSettings.SearchDisplayFields] + "'";
                              _self.map.getLayer("roadCenterLinesLayerID").selectFeatures(query, esri.layers.FeatureLayer.SELECTION_ADD, function (featureSet) {
-                                 var polyLine = new esri.geometry.Polyline(_self.map.spatialReference);
-                                 for (var j = 0; j < _self.map.getLayer("roadCenterLinesLayerID").graphics.length; j++) {
+                                 polyLine = new esri.geometry.Polyline(_self.map.spatialReference);
+                                 for (j = 0; j < _self.map.getLayer("roadCenterLinesLayerID").graphics.length; j++) {
                                      _self.map.getLayer("roadCenterLinesLayerID").graphics[j].show();
                                      polyLine.addPath(_self.map.getLayer("roadCenterLinesLayerID").graphics[j].geometry.paths[0]);
                                      dojo.roadArray.push(_self.map.getLayer("roadCenterLinesLayerID").graphics[j].attributes[_self.map.getLayer("roadCenterLinesLayerID").objectIdField]);
@@ -453,26 +463,26 @@ define([
 
              _showFeatureSet: function (fset, evt) {
                  topic.publish("clearAll", evt);
-                 var rendererColor = dojo.configData.OverlayLayerSettings[0].OverlayHighlightColor;
-                 var centerPoint = evt.mapPoint;
+                 var rendererColor = dojo.configData.OverlayLayerSettings[0].OverlayHighlightColor, centerPoint = evt.mapPoint,
+                 featureSet, features, contentDiv, feature, layer, fillColor, lineColor, symbol;
                  if (fset.features.length > 1) {
-                     var featureSet = fset;
+                     featureSet = fset;
                      this.overlapCount = 0;
-                     var contentDiv = this._createContent(featureSet.features);
+                     contentDiv = this._createContent(featureSet.features);
                      this._showOverlappingParcels(featureSet.features, contentDiv, evt, featureSet.features[0].attributes[dojo.configData.AveryLabelSettings[0].ParcelInformation.ParcelIdentification]);
-                     var features = featureSet.features;
+                     features = featureSet.features;
                      topic.publish("drawPolygon", features, false);
                      this.map.setExtent(this._centerMapPoint(evt.mapPoint, fset.features[0].geometry.getExtent().expand(9)));
                  }
                  else {
-                     var feature = fset.features[0];
-                     var layer = this.map.getLayer("esriGraphicsLayerMapSettings");
-                     var lineColor = new Color();
+                     feature = fset.features[0];
+                     layer = this.map.getLayer("esriGraphicsLayerMapSettings");
+                     lineColor = new Color();
                      lineColor.setColor(rendererColor);
-                     var fillColor = new Color();
+                     fillColor = new Color();
                      fillColor.setColor(rendererColor);
                      fillColor.a = 0.25;
-                     var symbol = new Symbol.SimpleFillSymbol(Symbol.SimpleFillSymbol.STYLE_SOLID, new Symbol.SimpleLineSymbol(Symbol.SimpleLineSymbol.STYLE_SOLID, lineColor, 3), fillColor);
+                     symbol = new Symbol.SimpleFillSymbol(Symbol.SimpleFillSymbol.STYLE_SOLID, new Symbol.SimpleLineSymbol(Symbol.SimpleLineSymbol.STYLE_SOLID, lineColor, 3), fillColor);
                      feature.setSymbol(symbol);
                      dojo.parcelArray.push(feature.attributes[dojo.configData.AveryLabelSettings[0].ParcelInformation.ParcelIdentification]); //showfeatureset
                      dojo.displayInfo = feature.attributes[dojo.configData.AveryLabelSettings[0].ParcelInformation.ParcelIdentification] + "$infoParcel";
@@ -485,7 +495,7 @@ define([
              },
 
              _showUniqueParcel: function (feature, mapPoint, centerPoint) {
-                 var parcelLayerSettings = dojo.configData.ParcelLayerSettings;
+                 var parcelLayerSettings = dojo.configData.ParcelLayerSettings, evtMapPoint;
                  if (mapPoint.ctrlKey) {
                      if (dijit.byId('toolTipDialogues')) {
                          dojo.selectedMapPoint = null;
@@ -520,7 +530,7 @@ define([
 
              _createContent: function (featureList) {
                  var _this = this, adjacentLabel, customButtondiv, btnInnerDiv, btnTbody, divDisplayTable, attributes, divDisplayRow, divDisplayColumn,
-                 divParcelId, divDisplayColumn1, divInfoImg, divDisplayColumn2, divSpan;
+                 divParcelId, divDisplayColumn1, divInfoImg, divDisplayColumn2, divSpan, i;
                  domConstruct.empty(dojoQuery(".scrollbar_footer")[0]);
                  domConstruct.empty(dojoQuery(".esriCTAdjacentParcel")[0]);
                  adjacentLabel = dojoQuery(".esriCTAdjacentParcel")[0];
@@ -546,7 +556,7 @@ define([
                  domConstruct.create("div", { "class": "backBtn", "innerHTML": nls.backBtn }, btnTbody);
 
                  divDisplayTable = domConstruct.create("div", { "class": "tblTransparent" }, this.divParcelList);
-                 for (var i = 0; i < featureList.length; i++) {
+                 for (i = 0; i < featureList.length; i++) {
                      this.overlapCount++;
                      attributes = featureList[i].attributes;
                      divDisplayRow = domConstruct.create("div", { "class": "esriCTtrBufferRow" }, divDisplayTable);
@@ -566,7 +576,7 @@ define([
                      dojo.interactiveParcel = true;
                      dojo.selectedMapPoint = null;
                      dojo.displayInfo = null;
-                     if (dojo.isSpanClicked == true) {
+                     if (dojo.isSpanClicked === true) {
                          return;
                      }
                      dojo.mouseMoveHandle = this.map.on("mouse-move", lang.hitch(function (evt) {
@@ -584,7 +594,7 @@ define([
                      dojo.selectedMapPoint = null;
                      dojo.displayInfo = null;
                      this.map.infoWindow.hide();
-                     if (dojo.isSpanClicked == true) {
+                     if (dojo.isSpanClicked === true) {
                          return;
                      }
                      dojo.mouseMoveHandle = this.map.on("mouse-move", lang.hitch(function (evt) {
@@ -643,7 +653,7 @@ define([
                      dojo.interactiveParcel = true;
                      dojo.selectedMapPoint = null;
                      dojo.displayInfo = null;
-                     if (dojo.isSpanClicked == true) {
+                     if (dojo.isSpanClicked === true) {
                          return;
                      }
                  })));
@@ -657,7 +667,7 @@ define([
                      dojo.selectedMapPoint = null;
                      dojo.displayInfo = null;
                      this.map.infoWindow.hide();
-                     if (dojo.isSpanClicked == true) {
+                     if (dojo.isSpanClicked === true) {
                          return;
                      }
                      dojo.mouseMoveHandle = this.map.on("mouse-move", lang.hitch(function (evt) {
@@ -671,7 +681,7 @@ define([
 
              _showParcelDetail: function (attr) {
                  var adjacentParcel, imgAdjacentParcels, infoPopupFieldsCollection, parcelInformation, divParcelRow, divParcelInformation, divInfoPopupDisplayText,
-                 divInfoPopupField, fieldName, fieldNames, notApplicableCounter, key, i;
+                 divInfoPopupField, fieldName, fieldNames, notApplicableCounter, key, i, title;
                  dojo.infoContainerScrollbar.removeScrollBar();
                  if (dojoQuery(".esriCTCreateDivSpan")[0]) {
                      adjacentParcel = dojoQuery(".esriCTCreateDivSpan")[0];
@@ -706,7 +716,7 @@ define([
                                  notApplicableCounter++;
                              }
                          }
-                         if (notApplicableCounter == fieldNames.length) {
+                         if (notApplicableCounter === fieldNames.length) {
                              divInfoPopupField.innerHTML += nls.showNullValueAs;
                          } else {
                              for (i = 0; i < fieldNames.length; i++) {
@@ -717,7 +727,7 @@ define([
                              divInfoPopupField.innerHTML = divInfoPopupField.innerHTML.slice(0, -1);
                          }
                      } else {
-                         if (attr[fieldName] == null) {
+                         if (attr[fieldName] === null) {
                              divInfoPopupField.innerHTML = nls.showNullValueAs;
                          } else {
                              divInfoPopupField.innerHTML = attr[fieldName];
@@ -730,7 +740,7 @@ define([
                  this.content = divDescription;
                  if (attr[parcelInformation.SiteAddress]) {
                      if (attr[parcelInformation.SiteAddress].length > 35) {
-                         var title = attr[parcelInformation.SiteAddress];
+                         title = attr[parcelInformation.SiteAddress];
                          this.map.infoWindow.setTitle(title);
                      } else {
                          title = attr[parcelInformation.SiteAddress];
@@ -742,22 +752,22 @@ define([
              },
 
              _showParcel: function () {
-                 var infoTitle = this.overlapCount + " " + nls.parcelsCount;
+                 var infoTitle = this.overlapCount + " " + nls.parcelsCount, adjacentParcel, imgAdjacentParcels;
                  this.map.infoWindow.setTitle(infoTitle);
                  if (dojo.infoContainerScrollbar) {
                      domClass.add(dojo.infoContainerScrollbar._scrollBarContent, "esriCTZeroHeight");
                      dojo.infoContainerScrollbar.removeScrollBar();
                  }
-                 dojo.infoContainerScrollbar = new scrollBar({
+                 dojo.infoContainerScrollbar = new ScrollBar({
                      domNode: this.map.infoWindow.divInfoScrollContent
                  });
                  domClass.add(this.map.infoWindow.divInfoScrollContent, "esrCTInfoContainerScrollbar");
                  dojo.infoContainerScrollbar.setContent(this.map.infoWindow.divInfoDetailsScroll);
                  dojo.infoContainerScrollbar.createScrollBar();
                  if (dojoQuery(".esriCTCreateDivSpan")[0]) {
-                     var adjacentParcel = dojoQuery(".esriCTCreateDivSpan")[0];
+                     adjacentParcel = dojoQuery(".esriCTCreateDivSpan")[0];
                      domStyle.set(adjacentParcel, "display", "block");
-                     var imgAdjacentParcels = dojoQuery(".imgCreateAdjacentParcels")[0];
+                     imgAdjacentParcels = dojoQuery(".imgCreateAdjacentParcels")[0];
                      domStyle.set(imgAdjacentParcels, "display", "block");
                  }
                  domStyle.set(this.divParcelList, "display", "block");
@@ -767,31 +777,33 @@ define([
              },
 
              _showOverlappingParcels: function (feature, contentDiv, evt, parcelFeature) {
+                 var extentChanged, screenPoint, infoTitle;
                  if (evt.mapPoint) {
                      dojo.selectedMapPoint = evt.mapPoint;
                  }
                  else {
                      dojo.selectedMapPoint = evt;
                  }
-                 var extentChanged = this.map.setExtent(this._getBrowserMapExtent(dojo.selectedMapPoint));
+                 extentChanged = this.map.setExtent(this._getBrowserMapExtent(dojo.selectedMapPoint));
                  extentChanged.then(lang.hitch(this, function () {
-                     var screenPoint = this.map.toScreen(dojo.selectedMapPoint);
+                     screenPoint = this.map.toScreen(dojo.selectedMapPoint);
                      screenPoint.y = this.map.height - screenPoint.y;
                      this.map.infoWindow.show(contentDiv, screenPoint);
                  }));
-                 var infoTitle = this.overlapCount + " " + nls.parcelsCount;
+                 infoTitle = this.overlapCount + " " + nls.parcelsCount;
                  this.map.infoWindow.setTitle(infoTitle);
                  topic.publish("hideProgressIndicator");
              },
 
              //Get the extent of point
              _centerMapPoint: function (mapPoint, extent) {
-                 var width = extent.getWidth();
-                 var height = extent.getHeight();
-                 var xmin = mapPoint.x - (width / 2);
-                 var ymin = mapPoint.y - (height / 4);
-                 var xmax = xmin + width;
-                 var ymax = ymin + height;
+                 var width, height, xmin, ymin, xmax, ymax;
+                 width = extent.getWidth();
+                 height = extent.getHeight();
+                 xmin = mapPoint.x - (width / 2);
+                 ymin = mapPoint.y - (height / 4);
+                 xmax = xmin + width;
+                 ymax = ymin + height;
                  return new Geometry.Extent(xmin, ymin, xmax, ymax, this.map.spatialReference);
              },
 
@@ -805,19 +817,19 @@ define([
              },
 
              _getBrowserMapExtent: function (mapPoint) {
-                 var width = this.map.extent.getWidth();
-                 var height = this.map.extent.getHeight();
-                 var xmin = mapPoint.x - (width / 2);
-                 var ymin = mapPoint.y - (height / 2.7);
-                 var xmax = xmin + width;
-                 var ymax = ymin + height;
+                 var width, height, xmin, ymin, xmax, ymax;
+                 width = this.map.extent.getWidth();
+                 height = this.map.extent.getHeight();
+                 xmin = mapPoint.x - (width / 2);
+                 ymin = mapPoint.y - (height / 2.7);
+                 xmax = xmin + width;
+                 ymax = ymin + height;
                  return new Geometry.Extent(xmin, ymin, xmax, ymax, this.map.spatialReference);
              },
 
              _showFeatureDetails: function (feature, mapPoint) {
-                 var parcelLayerSettings = dojo.configData.ParcelLayerSettings;
-
-                 var parcelInformation = dojo.configData.AveryLabelSettings[0].ParcelInformation;
+                 var parcelLayerSettings = dojo.configData.ParcelLayerSettings,
+                 parcelInformation = dojo.configData.AveryLabelSettings[0].ParcelInformation;
                  if (feature.attributes) {
                      if (feature.attributes[parcelInformation.ParcelIdentification] ||
                          feature.attributes[parcelLayerSettings.SearchDisplayFields.split(",")[0]]) {
@@ -838,12 +850,11 @@ define([
              },
 
              createDataForOverlappedParcels: function (feature, mapPoint) {
-                 var parcelInformation = dojo.configData.AveryLabelSettings[0].ParcelInformation;
-                 overlapCount = 0;
-                 var contentDiv = this._createContentForGraphics(feature);
-
-                 for (var parcel in feature.attributes) {
-                     var attr = feature.attributes[parcel];
+                 var parcelInformation = dojo.configData.AveryLabelSettings[0].ParcelInformation,
+                  contentDiv, parcel, attr;
+                 contentDiv = this._createContentForGraphics(feature);
+                 for (parcel in feature.attributes) {
+                     attr = feature.attributes[parcel];
                      break;
                  }
                  dojo.displayInfo = attr[parcelInformation.ParcelIdentification] + "$infoParcel";
@@ -851,17 +862,18 @@ define([
              },
 
              clearAll: function (evt) {
+                 var i;
                  dojo.selectedMapPoint = null;
                  dojo.displayInfo = null;
                  this.map.infoWindow.hide();
                  this.map.graphics.clear();
-                 for (var i = 0; i < this.map.graphicsLayerIds.length; i++) {
+                 for (i = 0; i < this.map.graphicsLayerIds.length; i++) {
                      if (evt) {
                          if (evt.ctrlKey) {
-                             if (this.map.graphicsLayerIds[i] == "esriGraphicsLayerMapSettings") {
+                             if (this.map.graphicsLayerIds[i] === "esriGraphicsLayerMapSettings") {
                                  continue;
                              }
-                             if (this.map.graphicsLayerIds[i] == "roadCenterLinesLayerID") {
+                             if (this.map.graphicsLayerIds[i] === "roadCenterLinesLayerID") {
                                  continue;
                              }
                          }
@@ -871,7 +883,7 @@ define([
                          }
                      }
 
-                     if (this.map.graphicsLayerIds[i] == "roadCenterLinesLayerID") {
+                     if (this.map.graphicsLayerIds[i] === "roadCenterLinesLayerID") {
                          continue;
                      } else {
                          this.map.getLayer(this.map.graphicsLayerIds[i]).clear();
@@ -880,11 +892,10 @@ define([
              },
 
              addShareOverLayToMap: function (fset, q) {
-                 var _self = this;
-                 var rendererColor = dojo.configData.OverlayLayerSettings[0].OverlayHighlightColor;
-                 var overLayQueryUrl = dojo.configData.OverlayLayerSettings[0].LayerUrl;
-                 var queryTask = new QueryTask(overLayQueryUrl);
-                 var feature = fset.features[q];
+                 var _self = this
+                 , rendererColor = dojo.configData.OverlayLayerSettings[0].OverlayHighlightColor, overLayQueryUrl = dojo.configData.OverlayLayerSettings[0].LayerUrl,
+                 queryTask = new QueryTask(overLayQueryUrl), layer, lineColor, fillColor, symbol, geometryForBuffer,
+                 feature = fset.features[q];
                  if (fset.features[q]) {
                      if (fset.features.length > 1) {
                          topic.publish("drawPolygon", featureset.features, true);
@@ -893,13 +904,13 @@ define([
 
                      }
                      else {
-                         var layer = _self.map.getLayer("esriGraphicsLayerMapSettings");
-                         var lineColor = new dojo.Color();
+                         layer = _self.map.getLayer("esriGraphicsLayerMapSettings");
+                         lineColor = new dojo.Color();
                          lineColor.setColor(rendererColor);
-                         var fillColor = new dojo.Color();
+                         fillColor = new dojo.Color();
                          fillColor.setColor(rendererColor);
                          fillColor.a = 0.25;
-                         var symbol = new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID,
+                         symbol = new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID,
                     new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, lineColor, 3), fillColor);
                          feature.setSymbol(symbol);
                          layer.add(feature);
@@ -926,14 +937,15 @@ define([
              },
 
              addShareParcelsToMap: function (fset, q) {
-                 var _self = this;
-                 var parcelInformation = dojo.configData.AveryLabelSettings[0].ParcelInformation;
-                 var rendererColor = dojo.configData.ParcelLayerSettings.ParcelHighlightColor;
-                 var taxParcelQueryUrl = dojo.configData.ParcelLayerSettings.LayerUrl;
-                 var qTask = new QueryTask(taxParcelQueryUrl);
+                 var _self = this, parcelInformation, rendererColor, taxParcelQueryUrl, qTask, feature, query, layer, lineColor, fillColor,
+                  symbol;
+                 parcelInformation = dojo.configData.AveryLabelSettings[0].ParcelInformation;
+                 rendererColor = dojo.configData.ParcelLayerSettings.ParcelHighlightColor;
+                 taxParcelQueryUrl = dojo.configData.ParcelLayerSettings.LayerUrl;
+                 qTask = new QueryTask(taxParcelQueryUrl);
                  if (fset.features[q]) {
-                     var feature = fset.features[q];
-                     var query = new esri.tasks.Query();
+                     feature = fset.features[q];
+                     query = new esri.tasks.Query();
                      query.where = parcelInformation.LowParcelIdentification + " = '" + feature.attributes[parcelInformation.LowParcelIdentification] + "'";
                      query.returnGeometry = true;
                      query.outFields = ["*"];
@@ -944,13 +956,13 @@ define([
                              topic.publish("addShareParcelsToMap", fset, q);
 
                          } else {
-                             var layer = _self.map.getLayer("esriGraphicsLayerMapSettings");
-                             var lineColor = new dojo.Color();
+                             layer = _self.map.getLayer("esriGraphicsLayerMapSettings");
+                             lineColor = new dojo.Color();
                              lineColor.setColor(rendererColor);
-                             var fillColor = new dojo.Color();
+                             fillColor = new dojo.Color();
                              fillColor.setColor(rendererColor);
                              fillColor.a = 0.25;
-                             var symbol = new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID,
+                             symbol = new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID,
                     new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, lineColor, 3), fillColor);
                              feature.setSymbol(symbol);
                              layer.add(feature);
@@ -959,8 +971,7 @@ define([
                          }
                      });
                  }
-                 else {
-                     polygon = true;
+                 else {                    
                      geometryForBuffer = fset.features[q - 1].geometry;
                      if (window.location.toString().split("$dist=").length > 1) {
                          dojo.overLayerID = false;
@@ -980,23 +991,23 @@ define([
              },
 
              shareOverInfoWindow: function () {
-                 var parcelGroup = "";
-                 for (var p = 0; p < dojo.overLayArray.length; p++) {
-                     if (p == (dojo.overLayArray.length - 1)) {
+                 var parcelGroup = "", p, point, whereclause, overLayQueryUrl, qTask, roadTask;
+                 for (p = 0; p < dojo.overLayArray.length; p++) {
+                     if (p === (dojo.overLayArray.length - 1)) {
                          parcelGroup += "" + dojo.overLayArray[p] + "";
                      }
                      else {
                          parcelGroup += "" + dojo.overLayArray[p] + ",";
                      }
                  }
-                 var point = new esri.geometry.Point(Number(window.location.toString().split("$point=")[1].split(",")[0]), Number(window.location.toString().split("$point=")[1].split("$Where=")[0].split(",")[1]), this.map.spatialReference);
-                 var overLayQueryUrl = dojo.configData.OverlayLayerSettings[0].LayerUrl;
-                 var whereclause = window.location.toString().split("$Where=")[1];
+                 point = new esri.geometry.Point(Number(window.location.toString().split("$point=")[1].split(",")[0]), Number(window.location.toString().split("$point=")[1].split("$Where=")[0].split(",")[1]), this.map.spatialReference);
+                 overLayQueryUrl = dojo.configData.OverlayLayerSettings[0].LayerUrl;
+                 whereclause = window.location.toString().split("$Where=")[1];
                  query = new esri.tasks.Query();
                  query.where = whereclause + " = (" + parcelGroup + ")";
                  query.returnGeometry = true;
                  query.outFields = ["*"];
-                 var qTask = new QueryTask(overLayQueryUrl);
+                 qTask = new QueryTask(overLayQueryUrl);
                  if (window.location.toString().split("$displayInfo=")[1].split("$infoParcel").length > 1) {
                      qTask.execute(query, function (featureset) {
                          topic.publish("createInfoWindowContent", featureset.features[0], point, dojo.configData.OverlayLayerSettings[0]);
@@ -1007,7 +1018,7 @@ define([
                      query.returnGeometry = true;
                      query.outFields = ["*"];
                      query.objectIds = [window.location.toString().split("$displayInfo=")[1].split("$infoRoad")[0]];
-                     var roadTask = new esri.tasks.QueryTask(roadCenterLinesLayerURL);
+                     roadTask = new esri.tasks.QueryTask(roadCenterLinesLayerURL);
                      roadTask.execute(query, function (featureset) {
                          topic.publish("showRoadDetails", featureset.features[0].attributes, point);
                      });
@@ -1015,27 +1026,24 @@ define([
              },
 
              shareInfoWindow: function () {
-                 var roadCenterLinesLayerURL = dojo.configData.RoadCenterLayerSettings.LayerUrl;
-                 var _self = this;
-                 var parcelInformation = dojo.configData.AveryLabelSettings[0].ParcelInformation;
-                 var point = new esri.geometry.Point(Number(window.location.toString().split("$point=")[1].split(",")[0]), Number(window.location.toString().split("$point=")[1].split(",")[1]), this.map.spatialReference);
-                 var query;
-                 var taxParcelQueryUrl = dojo.configData.ParcelLayerSettings.LayerUrl;
-                 var qTask = new esri.tasks.QueryTask(taxParcelQueryUrl);
+                 var roadCenterLinesLayerURL = dojo.configData.RoadCenterLayerSettings.LayerUrl,
+                 _self = this, overlapQuery, parcelInformation = dojo.configData.AveryLabelSettings[0].ParcelInformation,
+                  point = new esri.geometry.Point(Number(window.location.toString().split("$point=")[1].split(",")[0]), Number(window.location.toString().split("$point=")[1].split(",")[1]), this.map.spatialReference),
+                 query, taxParcelQueryUrl = dojo.configData.ParcelLayerSettings.LayerUrl, qTask, contentDiv, roadTask;
+                 qTask = new esri.tasks.QueryTask(taxParcelQueryUrl);
                  if (window.location.toString().split("$displayInfo=")[1].split("$infoParcel").length > 1) {
                      query = new esri.tasks.Query();
                      query.where = parcelInformation.ParcelIdentification + " = '" + window.location.toString().split("$displayInfo=")[1].split("$infoParcel")[0] + "'";
                      query.returnGeometry = true;
                      query.outFields = ["*"];
                      qTask.execute(query, function (featureset) {
-                         var overlapQuery = new esri.tasks.Query();
+                         overlapQuery = new esri.tasks.Query();
                          overlapQuery.where = parcelInformation.LowParcelIdentification + " = '" + featureset.features[0].attributes[parcelInformation.LowParcelIdentification] + "'";
                          overlapQuery.returnGeometry = true;
                          overlapQuery.outFields = ["*"];
                          qTask.execute(overlapQuery, function (featureSet) {
                              if (featureSet.features.length > 1) {
-                                 overlapCount = 0;
-                                 var contentDiv = _self._createContent(featureSet.features);
+                                 contentDiv = _self._createContent(featureSet.features);
                                  _self._showOverlappingParcels(featureSet.features, contentDiv, point, featureSet.features[0].attributes[parcelInformation.ParcelIdentification]);
                              }
                              else {
@@ -1050,7 +1058,7 @@ define([
                      query.returnGeometry = true;
                      query.outFields = ["*"];
                      query.objectIds = [window.location.toString().split("$displayInfo=")[1].split("$infoRoad")[0]];
-                     var roadTask = new esri.tasks.QueryTask(roadCenterLinesLayerURL);
+                     roadTask = new esri.tasks.QueryTask(roadCenterLinesLayerURL);
                      roadTask.execute(query, function (featureset) {
                          topic.publish("showRoadDetails", featureset.features[0].attributes, point);
                      });
@@ -1058,9 +1066,10 @@ define([
              },
 
              showRoadDetails: function (attributes, mapPoint, geometry) {
+                 var attr, roadLayerSettings;
                  dojo.selectedMapPoint = mapPoint;
-                 var attr = attributes.attributes;
-                 var roadLayerSettings = dojo.configData.RoadCenterLayerSettings;
+                 attr = attributes.attributes;
+                 roadLayerSettings = dojo.configData.RoadCenterLayerSettings;
                  dojo.displayInfo = attr[this.map.getLayer("roadCenterLinesLayerID").objectIdField] + "$infoRoad";
                  topic.publish("createInfoWindowContent", attributes, mapPoint, roadLayerSettings, geometry);
              },
@@ -1070,10 +1079,10 @@ define([
              },
 
              addGraphic: function (layer, symbol, point, attr) {
-                 var graphic = new Graphic(point, symbol, attr, null);
-                 var features = [];
+                 var graphic = new Graphic(point, symbol, attr, null),
+                 features = [], featureSet;
                  features.push(graphic);
-                 var featureSet = new esri.tasks.FeatureSet();
+                 featureSet = new esri.tasks.FeatureSet();
                  featureSet.features = features;
                  layer.add(featureSet.features[0]);
              }

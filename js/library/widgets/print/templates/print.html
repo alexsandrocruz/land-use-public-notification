@@ -1,108 +1,13 @@
-﻿<!DOCTYPE HTML>
-<html>
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta charset="utf-8">
-    <!--
-     | Version 10.2
-     | Copyright 2012 Esri
-     |
-     | Licensed under the Apache License, Version 2.0 (the "License");
-     | you may not use this file except in compliance with the License.
-     | You may obtain a copy of the License at
-     |
-     |    http://www.apache.org/licenses/LICENSE-2.0
-     |
-     | Unless required by applicable law or agreed to in writing, software
-     | distributed under the License is distributed on an "AS IS" BASIS,
-     | WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     | See the License for the specific language governing permissions and
-     | limitations under the License.
-    -->
-    <!--[if IE 8]><meta http-equiv="X-UA-Compatible" content="IE=7"><![endif]-->
-    <!--The viewport meta tag is used to improve the presentation and behavior of the samples
-      on iOS devices-->
     <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no" />
-    <title></title>
+    <title>Loading...</title>
     <link rel="stylesheet" type="text/css" href="http://js.arcgis.com/3.8/js/esri/css/esri.css" />
     <link rel="stylesheet" type="text/css" href="http://js.arcgis.com/3.8/js/dojo/dijit/themes/claro/claro.css">
-    <script type="text/javascript">        var djConfig = { parseOnLoad: true };</script>
-    <script type="text/javascript" src="//js.arcgis.com/3.8"></script>
-    <script type="text/javascript">
-        dojo.require("esri.map");
-        dojo.require("esri.layers.FeatureLayer");
-        dojo.require("esri.tasks.geometry");
-
-        var window_opener = window.dialogArguments;
-        var tempPushPinLayer = 'tempPushPinLayer';
-        var tempPolygonLayer = 'tempPolygonLayer';
-        var tempBuffer = 'tempBuffer';
-        var params = dojo.byId("paramid");
-        var rings;
-        var color = "#1C86EE";
-        var printmap;
-        var parcelLayer;
-        var bufferLayer;
-        var initialExtent;
-
-        function Init() {
-            parcelLayer = window_opener.ParcelLayer;
-            bufferLayer = window_opener.Bufferlayer;
-            initialExtent = window_opener.Extent;
-            printmap = new esri.Map("mapPrint", { extent: initialExtent, slider: false });
-
-            /*Code for adding basemap layers to print*/
-            var layerUrl = window_opener.BaseMapLayerURL;
-            var baseMapLayer = new esri.layers.ArcGISTiledMapServiceLayer(layerUrl);
-            printmap.addLayer(baseMapLayer);
-
-            var params = new esri.layers.ImageServiceParameters();
-            params.format = "PNG24";
-            var imageServiceLayer = new esri.layers.ArcGISImageServiceLayer(layerUrl, { imageServiceParameters: params });
-            printmap.addLayer(imageServiceLayer);
-
-
-            dojo.connect(printmap, "onLoad", function () {
-                printmap.disablePan();
-                printmap.disableDoubleClickZoom();
-                printmap.disableKeyboardNavigation();
-                printmap.disableScrollWheelZoom();
-
-                var gLayer = new esri.layers.GraphicsLayer();
-                gLayer.id = tempBuffer;
-                printmap.addLayer(gLayer);
-                for (var i = 0; i < bufferLayer.graphics.length; i++) {
-                    var buffersymbol = new esri.symbol.SimpleFillSymbol(
-                    esri.symbol.SimpleFillSymbol.STYLE_SOLID,
-                    new esri.symbol.SimpleLineSymbol(
-                    esri.symbol.SimpleLineSymbol.STYLE_SOLID,
-                    new dojo.Color([255, 0, 0, 0.65]), 2
-                    ),
-                    new dojo.Color([255, 0, 0, 0.35]));
-
-                    var polygon = new esri.geometry.Polygon(bufferLayer.graphics[i].geometry.toJson());
-                    gLayer.add(new esri.Graphic(polygon, buffersymbol));
-                }
-
-                var gLayer = new esri.layers.GraphicsLayer();
-                gLayer.id = tempPolygonLayer;
-                printmap.addLayer(gLayer);
-                for (var i = 0; i < parcelLayer.graphics.length; i++) {
-                    var lineColor = new dojo.Color();
-                    lineColor.setColor(color);
-
-                    var fillColor = new dojo.Color();
-                    fillColor.setColor(color);
-                    fillColor.a = 0.25;
-                    var polygon = new esri.geometry.Polygon(parcelLayer.graphics[i].geometry.toJson());
-                    var polysymbol = new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID, new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, lineColor, 3), fillColor);
-
-                    gLayer.add(new esri.Graphic(polygon, polysymbol));
-                }
-                window.print();
-            });
-        }
-        dojo.addOnLoad(Init);
-    </script>
+    <script src="../../../coreLibrary/dojoConfiguration.js" type="text/javascript"></script>   
+    <script type="text/javascript" src="//js.arcgis.com/3.8compact/"></script>
+    <script src="../Print.js" type="text/javascript"></script>
 </head>
 <body class="claro">
     <div id="mapPrint" style="position: relative; width: 1000px; height: 600px; border: 1px solid #000;">

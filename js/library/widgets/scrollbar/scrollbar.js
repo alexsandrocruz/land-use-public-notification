@@ -1,4 +1,4 @@
-﻿/*global dojo,define,document */
+﻿/*global define, document, Modernizr,dojoConfig,dijit,dojo,alert,esri ,event,setTimeout,window,clearTimeout*/
 /*jslint sloppy:true */
 /** @license
 | Version 10.2
@@ -104,8 +104,6 @@ function (declare, WidgetBase) {
 
         createScrollBar: function (duration) {
             setTimeout(dojo.hitch(this, function () {
-                var pxLeft, pxTop, xCoord, yCoord;
-                var isHandleClicked = false;
                 this._scrollBarTrack = dojo.create("div", { "class": "scrollbar_track" }, this._scrollBarContent);
                 this._scrollBarTrack.style.height = this._containerHeight + "px";
                 this._scrollBarHandle = dojo.create("div", { "class": "scrollbar_handle esriCTRoundedCorner" }, this._scrollBarTrack);
@@ -147,10 +145,12 @@ function (declare, WidgetBase) {
         _onTouchMove: function (evt) {
             var touch = evt.touches[0];
             evt.cancelBubble = true;
-            if (evt.stopPropagation) evt.stopPropagation();
-            evt.preventDefault();
+            if (evt.stopPropagation) {
+                evt.stopPropagation();
+                evt.preventDefault();
 
-            dojo.stopEvent(evt);
+                dojo.stopEvent(evt);
+            }
 
             this._topPosition = this._scrollBarHandle.offsetTop;
             var y;
@@ -177,14 +177,14 @@ function (declare, WidgetBase) {
         },
 
         _setScroll: function (evt) {
+            var offsetY, coords, y;
             if (!this._dragStart) {
                 evt = (evt) ? evt : event;
                 evt.cancelBubble = true;
                 if (evt.stopPropagation)
                     evt.stopPropagation();
                 dojo.stopEvent(evt);
-                this._topPosition = this._scrollBarHandle.offsetTop // Sliders vertical position at start of slide.
-                var offsetY;
+                this._topPosition = this._scrollBarHandle.offsetTop // Sliders vertical position at start of slide.                
                 if (!evt.offsetY) {
                     var coords = dojo.coords(evt.target);
                     offsetY = evt.layerY - coords.t;
@@ -247,24 +247,25 @@ function (declare, WidgetBase) {
         },
 
         _scrollContent: function (evt) {
+            var delta, y;
             //code stop propogation of event while wheel Scrolling in Container
             evt = (evt) ? evt : event;
             evt.cancelBubble = true;
             if (evt.stopPropagation)
                 evt.stopPropagation();
             dojo.stopEvent(evt);
-            var delta = evt.detail ? evt.detail * (-120) : evt.wheelDelta //delta returns +120 when wheel is scrolled up, -120 when scrolled down
+            delta = evt.detail ? evt.detail * (-120) : evt.wheelDelta //delta returns +120 when wheel is scrolled up, -120 when scrolled down
             this._topPosition = this._scrollBarHandle.offsetTop;
 
             if (delta <= -120) {
-                var y = this._topPosition + 10;
+                y = this._topPosition + 10;
                 if (y > this._yMax) y = this._yMax // Limit vertical movement
                 if (y < 0) y = 0 // Limit vertical movement
                 this._scrollBarHandle.style.top = y + "px";
                 this._scrollBarContent.scrollTop = Math.round(this._scrollBarHandle.offsetTop / this._yMax * (this._scrollBarContent.scrollHeight - this._scrollBarContent.offsetHeight));
             }
             else {
-                var y = this._topPosition - 10;
+                y = this._topPosition - 10;
                 if (y > this._yMax) y = this._yMax // Limit vertical movement
                 if (y < 0) y = 0 // Limit vertical movement
                 this._scrollBarHandle.style.top = y + "px";

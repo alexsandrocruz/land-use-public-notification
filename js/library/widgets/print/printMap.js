@@ -1,4 +1,4 @@
-﻿/*global dojo,define,document */
+﻿/*global dojo,define,document,window */
 /*jslint sloppy:true */
 /** @license
 | Version 10.2
@@ -24,12 +24,10 @@ define([
     "dojo/topic",
     "dojo/_base/lang",
     "dijit/_WidgetBase",
-    "esri/map",
-    "esri/layers/FeatureLayer",
-    "esri/tasks/geometry",
+    "esri/map",     
     "dojo/text!./templates/print.html"
   ],
-function (declare, domConstruct, on, topic, lang, _WidgetBase, esriMap, FeatureLayer, Geometry, printMap, Print) {
+function (declare, domConstruct, on, topic, lang, _WidgetBase, esriMap, printMap, Print) {
 
     //========================================================================================================================//
 
@@ -47,11 +45,7 @@ function (declare, domConstruct, on, topic, lang, _WidgetBase, esriMap, FeatureL
         * @class
         * @name widgets/printMap/printMap
         */
-        postCreate: function () {
-            var params;
-            var rings;
-            var color = "#1C86EE";
-            var printmap;
+        postCreate: function () {                      
             this.domNode = domConstruct.create("div", { "title": this.title, "class": "esriCTImgPrint" }, null);
 
             this.own(on(this.domNode, "click", lang.hitch(this, function () {
@@ -70,10 +64,8 @@ function (declare, domConstruct, on, topic, lang, _WidgetBase, esriMap, FeatureL
                 "Bufferlayer": this.map.getLayer("tempBufferLayer"),
                 "Extent": this.map.extent,
                 "Window": window,
-                "BaseMapLayerURL": dojo.configData.BaseMapLayers[0].MapURL
+                "BaseMapLayer": this.map.getLayer("esriCTbasemap")
             }
-
-
             window.showModalDialog("js/library/widgets/print/templates/print.html", dataObject);
         },
 
@@ -81,6 +73,7 @@ function (declare, domConstruct, on, topic, lang, _WidgetBase, esriMap, FeatureL
         getPrintExtent: function () {
             return this.map.extent;
         }
+
 
     });
 });

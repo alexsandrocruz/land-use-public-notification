@@ -1,5 +1,5 @@
-﻿/*global dojo,define,document */
-/*jslint sloppy:true */
+﻿/*global define,dojo,window,alert,esri,parent:true,dijit,location */
+/*jslint sloppy:true,nomen:true,plusplus:true,unparam:true */
 /** @license
 | Version 10.2
 | Copyright 2013 Esri
@@ -58,7 +58,7 @@ function (declare, domConstruct, domStyle, lang, array, on, dom, domAttr, domCla
             * @param {string} widget Key of the newly opened widget
             */
             topic.subscribe("toggleWidget", lang.hitch(this, function (widgetID) {
-                if (widgetID != "share") {
+                if (widgetID !== "share") {
                     /**
                     * divAppContainer Sharing Options Container
                     * @member {div} divAppContainer
@@ -106,15 +106,15 @@ function (declare, domConstruct, domStyle, lang, array, on, dom, domAttr, domCla
         * @memberOf widgets/share/share
         */
         _sharelink: function () {
+            var mapExtent, url, urlStr, x, applicationHeaderDiv, tinyUrl, attr;
             domAttr.set(this.esriCTDivshareCodeContainer, "innerHTML", nls.webpageDispalyText);
             this.esriCTDivshareCodeContent.value = "<iframe width='100%' height='100%' src='" + location.href + "'></iframe> ";
             /**
             * get current map extent to be shared
             */
 
-            var mapExtent = this._getMapExtent(),
-             url = esri.urlToObject(window.location.toString()),
-             urlStr;
+            mapExtent = this._getMapExtent();
+            url = esri.urlToObject(window.location.toString());
 
             if ((dojo.parcelArray.length > 0) && (dojo.roadArray.length <= 0) && (dojo.overLayArray.length <= 0)) {
                 if (this.map.getLayer("tempBufferLayer").graphics.length > 0) {
@@ -175,13 +175,13 @@ function (declare, domConstruct, domStyle, lang, array, on, dom, domAttr, domCla
                     url: url,
                     callbackParamName: "callback",
                     load: lang.hitch(this, function (data) {
-                        var tinyUrl = data;
-                        var attr = dojo.configData.MapSharingOptions.TinyURLResponseAttribute.split(".");
-                        for (var x = 0; x < attr.length; x++) {
+                        tinyUrl = data;
+                        attr = dojo.configData.MapSharingOptions.TinyURLResponseAttribute.split(".");
+                        for (x = 0; x < attr.length; x++) {
                             tinyUrl = tinyUrl[attr[x]];
                         }
 
-                        var applicationHeaderDiv = domConstruct.create("div", { "class": "esriCTApplicationShareicon" }, dom.byId("esriCTParentDivContainer"));
+                        applicationHeaderDiv = domConstruct.create("div", { "class": "esriCTApplicationShareicon" }, dom.byId("esriCTParentDivContainer"));
                         applicationHeaderDiv.appendChild(this.divAppContainer);
 
                         if (html.coords(this.divAppContainer).h > 0) {
@@ -234,7 +234,7 @@ function (declare, domConstruct, domStyle, lang, array, on, dom, domAttr, domCla
         */
         _getMapExtent: function () {
             var extents = Math.round(this.map.extent.xmin).toString() + "," + Math.round(this.map.extent.ymin).toString() + "," + Math.round(this.map.extent.xmax).toString() + "," + Math.round(this.map.extent.ymax).toString();
-            return (extents);
+            return extents;
         },
 
         /**
@@ -280,23 +280,23 @@ function (declare, domConstruct, domStyle, lang, array, on, dom, domAttr, domCla
                     break;
                 case "email":
                     parent.location = string.substitute(dojo.configData.MapSharingOptions.ShareByMailLink, [url]);
+                    break;
             }
         },
 
-
         getValuesToBuffer: function (parcel) {
+            var annotation, str;
             if (window.location.toString().split("$dist=").length > 1) {
                 this.map.infoWindow.txtBuffer.value = Number(window.location.toString().split("$dist=")[1].split("$ocupntTxt=")[0]);
-                var str = window.location.toString().split("$PDF=")[1].split("$CSV=")[0];
-                dijit.byId('chkPdf').checked = (str == "false") ? "" : str;
+                str = window.location.toString().split("$PDF=")[1].split("$CSV=")[0];
+                dijit.byId('chkPdf').checked = (str === "false") ? "" : str;
                 str = window.location.toString().split("$CSV=")[1].split("$occupant=")[0];
-                dijit.byId('chkCsv').checked = (str == "false") ? "" : str;
+                dijit.byId('chkCsv').checked = (str === "false") ? "" : str;
                 str = window.location.toString().split("$occupant=")[1].split("$owner=")[0];
-                dijit.byId('chkOccupants').checked = (str == "false") ? "" : str;
+                dijit.byId('chkOccupants').checked = (str === "false") ? "" : str;
                 str = window.location.toString().split("$owner=")[1].split("$averyFormat=")[0];
-                dijit.byId('chkOwners').checked = (str == "false") ? "" : str;
+                dijit.byId('chkOwners').checked = (str === "false") ? "" : str;
                 this.map.infoWindow.textoccupant.value = (window.location.toString().split("$ocupntTxt=")[1].split("$PDF")[0]);
-                var annotation;
                 if (parcel) {
                     annotation = "$parcelID=";
                 }
@@ -314,18 +314,18 @@ function (declare, domConstruct, domStyle, lang, array, on, dom, domAttr, domCla
         },
 
         getoverlayValuesToBuffer: function (overlay) {
+            var annotation, str;
             if (window.location.toString().split("$dist=").length > 1) {
                 this.map.infoWindow.txtBuffer.value = Number(window.location.toString().split("$dist=")[1].split("$ocupntTxt=")[0]);
-                var str = window.location.toString().split("$PDF=")[1].split("$CSV=")[0];
-                dijit.byId('chkPdf').checked = (str == "false") ? "" : str;
+                str = window.location.toString().split("$PDF=")[1].split("$CSV=")[0];
+                dijit.byId('chkPdf').checked = (str === "false") ? "" : str;
                 str = window.location.toString().split("$CSV=")[1].split("$occupant=")[0];
-                dijit.byId('chkCsv').checked = (str == "false") ? "" : str;
+                dijit.byId('chkCsv').checked = (str === "false") ? "" : str;
                 str = window.location.toString().split("$occupant=")[1].split("$owner=")[0];
-                dijit.byId('chkOccupants').checked = (str == "false") ? "" : str;
+                dijit.byId('chkOccupants').checked = (str === "false") ? "" : str;
                 str = window.location.toString().split("$owner=")[1].split("$averyFormat=")[0];
-                dijit.byId('chkOwners').checked = (str == "false") ? "" : str;
+                dijit.byId('chkOwners').checked = (str === "false") ? "" : str;
                 this.map.infoWindow.textoccupant.value = (window.location.toString().split("$ocupntTxt=")[1].split("$PDF")[0]);
-                var annotation;
                 if (overlay) {
                     annotation = "$overlayID=";
                 }

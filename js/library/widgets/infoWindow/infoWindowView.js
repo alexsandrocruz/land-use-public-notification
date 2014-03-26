@@ -1,5 +1,5 @@
-﻿/*global define, document, Modernizr */
-/*jslint sloppy:true */
+﻿/*global define, document, Modernizr,dojoConfig,dijit,dojo,alert,esri ,event,_self,navigator*/
+/*jslint sloppy:true,nomen:true,plusplus:true,unparam:true */
 /** @license
 | Version 10.2
 | Copyright 2013 Esri
@@ -32,7 +32,6 @@ define([
         "dojo/topic",
         "esri/tasks/query",
         "esri/tasks/QueryTask",
-        "../scrollBar/scrollBar",
         "dojo/query",
         "dojo/_base/array",
         "dojo/Deferred",
@@ -59,15 +58,14 @@ define([
         "dijit/_WidgetsInTemplateMixin"
 
     ],
-     function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domClass, string, window, topic, Query, QueryTask, scrollBar, query, array, Deferred, DeferredList, all, Color, Symbol, Geometry, TaskFeatureSet, SpatialReference, Graphic, nls, Button, ComboBox, CheckBox, BufferParameters, GeometryService, Geoprocessor, ItemFileReadStore, InfoWindowBase, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin) {
+     function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domClass, string, window, topic, Query, QueryTask, query, array, Deferred, DeferredList, all, Color, Symbol, Geometry, TaskFeatureSet, SpatialReference, Graphic, nls, Button, ComboBox, CheckBox, BufferParameters, GeometryService, Geoprocessor, ItemFileReadStore, InfoWindowBase, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin) {
 
          //========================================================================================================================//
          return declare([InfoWindowBase, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
              nls: nls,
-
              attachInfoWindowEvents: function () {
-                 this.own(on(this.esriCTShowDetailsView, "click", lang.hitch(this, function (evt) {
-                     if (this.esriCTShowDetailsView.getAttribute("checked") == "info") {
+                 this.own(on(this.esriCTShowDetailsView, "click", lang.hitch(this, function () {
+                     if (this.esriCTShowDetailsView.getAttribute("checked") === "info") {
                          this.esriCTShowDetailsView.setAttribute("checked", "notify");
                          domStyle.set(this.divInfoDetails, "display", "none");
                          domStyle.set(this.divInfoNotify, "display", "block");
@@ -96,21 +94,21 @@ define([
              },
 
              _getAveryTemplates: function () {
-                 var averyTemplates = dojo.configData.AveryLabelSettings[0].AveryLabelTemplates;
-                 var averyTypes, filteringSelect, itemstore, i;
+                 var averyTemplates = dojo.configData.AveryLabelSettings[0].AveryLabelTemplates,
+                  averyTypes, itemstore, i;
                  averyTypes = { identifier: 'id', items: [] };
                  for (i = 0; i < averyTemplates.length; i++) {
                      averyTypes.items[i] = { id: averyTemplates[i].value, name: averyTemplates[i].name };
                  }
                  itemstore = new ItemFileReadStore({ data: averyTypes });
-                 filteringSelect = new ComboBox({
+                 new ComboBox({
                      autocomplete: false,
                      hasdownarrow: true,
                      id: 'selectAvery',
                      store: itemstore,
                      searchAttr: "name",
                      style: "width: 130px;color: #FFF !important",
-                     onChange: lang.hitch(this, function (evt) {
+                     onChange: lang.hitch(this, function () {
                          this._validateAveryFormat();
                      })
                  }, this.cmbAveryLabels);
@@ -124,7 +122,7 @@ define([
                  }
              },
 
-             createBuffer: function (evt) {
+             createBuffer: function () {
                  var _this = this, geometryService, maxBufferDistance, params, polyLine, j;
                  topic.publish("hideMapTip");
                  this.map.getLayer("tempBufferLayer").clear();
@@ -136,7 +134,7 @@ define([
                  this.csvFormat = dijit.byId('chkCsv').checked;
                  this.occupants = dijit.byId('chkOccupants').checked;
                  this.owners = dijit.byId('chkOwners').checked;
-                 if (this.dist.value != "") {
+                 if (this.dist.value !== "") {
                      if (!(this.isNumeric)) {
                          this.dist.value = "";
                          this.dist.focus();
@@ -146,10 +144,10 @@ define([
                          return;
                      }
 
-                     if ((this.owners == "checked" || this.owners) || (this.occupants == "checked" || this.occupants)) {
-                         if ((this.pdfFormat == "checked" || this.pdfFormat) || (this.csvFormat == "checked" || this.csvFormat)) {
-                             if (dijit.byId('selectAvery').item != null) {
-                                 averyFormat = dijit.byId('selectAvery').item.id[0];
+                     if ((this.owners === "checked" || this.owners) || (this.occupants === "checked" || this.occupants)) {
+                         if ((this.pdfFormat === "checked" || this.pdfFormat) || (this.csvFormat === "checked" || this.csvFormat)) {
+                             if (dijit.byId('selectAvery').item !== null) {
+                                 this.averyFormat = dijit.byId('selectAvery').item.id[0];
                                  if (this.map.getLayer("roadCenterLinesLayerID").getSelectedFeatures().length > 0) {
                                      if (this.map.getLayer("roadCenterLinesLayerID").graphics) {
                                          polyLine = new Geometry.Polyline(this.map.spatialReference);
@@ -229,12 +227,15 @@ define([
 
              //Check for valid numeric strings
              isNumeric: function (dist) {
-                 if (!/\D/.test(dist))
+                 if (!/\D/.test(dist)) {
                      return true;
-                 else if (/^\d+\.\d+$/.test(dist))
+                 }
+                 else if (/^\d+\.\d+$/.test(dist)) {
                      return true;
-                 else
+                 }
+                 else {
                      return false;
+                 }
              },
 
              //Validate the numeric text box control
@@ -304,8 +305,7 @@ define([
              },
 
              _addGraphic: function (layer, symbol, point, attr) {
-                 var graphic = new Graphic(point, symbol, attr, null);
-                 var featureSet, features = [];
+                 var graphic = new Graphic(point, symbol, attr, null), featureSet, features = [];
                  features.push(graphic);
                  featureSet = new esri.tasks.FeatureSet();
                  featureSet.features = features;
@@ -318,7 +318,7 @@ define([
                  if (this.map.getLayer("esriGraphicsLayerMapSettings")) {
                      this.map.getLayer("esriGraphicsLayerMapSettings").clear();
                  }
-                 if (featureSet.features.length == 0) {
+                 if (featureSet.features.length === 0) {
                      if (!road) {
                          alert(nls.errorMessages.noParcel);
                      } else {
@@ -336,10 +336,10 @@ define([
                          dojo.interactiveParcel = false;
                          strAveryParam = "";
                          strCsvParam = "";
-                         if (this.pdfFormat == "checked" || this.pdfFormat) {
+                         if (this.pdfFormat === "checked" || this.pdfFormat) {
                              strAveryParam = this._createAveryParam(features);
                          }
-                         if (this.csvFormat == "checked" || this.csvFormat) {
+                         if (this.csvFormat === "checked" || this.csvFormat) {
                              strCsvParam = this._createCsvParam(features);
                          }
                          this._executeGPTask(this.pdfFormat, this.csvFormat, strAveryParam, strCsvParam);
@@ -350,18 +350,17 @@ define([
              },
 
              _createCsvParam: function (features) {
-                 var csvFieldsCollection = dojo.configData.AveryLabelSettings[0].CsvFieldsCollection;
-                 var occupantFields = dojo.configData.AveryLabelSettings[0].OccupantFields.split(",");
-                 var strCsvParam = '';
-                 for (var featureCount = 0; featureCount < features.length; featureCount++) {//looping through populated features for owners
-                     var csvFields;
-                     if (this.owners == "checked" || this.owners) {
-                         for (var fieldCount = 0; fieldCount < csvFieldsCollection.length; fieldCount++) { //looping through configurable avery fields
+                 var csvFieldsCollection = dojo.configData.AveryLabelSettings[0].CsvFieldsCollection,
+                  occupantFields = dojo.configData.AveryLabelSettings[0].OccupantFields.split(","), strCsvParam = '',
+                  featureCount, fieldCount, i, csvFields, subFields, count;
+                 for (featureCount = 0; featureCount < features.length; featureCount++) {//looping through populated features for owners
+                     if (this.owners === "checked" || this.owners) {
+                         for (fieldCount = 0; fieldCount < csvFieldsCollection.length; fieldCount++) { //looping through configurable avery fields
                              csvFields = csvFieldsCollection[fieldCount];
                              if (csvFields.split(',').length > 1) {
-                                 var subFields = csvFields.split(',');
+                                 subFields = csvFields.split(',');
                                  strCsvParam += "\"";
-                                 for (var i = 0; i < subFields.length; i++) {
+                                 for (i = 0; i < subFields.length; i++) {
                                      if (features[featureCount].attributes[subFields[i]]) {
                                          strCsvParam += features[featureCount].attributes[subFields[i]].replace(',', '') + " ";
                                      } else {
@@ -381,18 +380,18 @@ define([
                          strCsvParam += "$";
                      }
                  }
-                 for (var featureCount = 0; featureCount < features.length; featureCount++) {
-                     if (this.occupants == "checked" || this.occupants) {
+                 for (featureCount = 0; featureCount < features.length; featureCount++) {
+                     if (this.occupants === "checked" || this.occupants) {
                          if (features[featureCount].attributes[occupantFields[1]]) {
-                             for (var fieldCount = 0; fieldCount < occupantFields.length; fieldCount++) {
+                             for (fieldCount = 0; fieldCount < occupantFields.length; fieldCount++) {
                                  csvFields = occupantFields[fieldCount];
-                                 if (fieldCount == 1) {
+                                 if (fieldCount === 1) {
                                      strCsvParam += lang.trim(this.textoccupant.value) + ",";
                                  }
                                  if (csvFields.split(',').length > 1) {
-                                     var subFields = csvFields.split(',');
+                                     subFields = csvFields.split(',');
                                      strCsvParam += "\"";
-                                     for (var i = 0; i < subFields.length; i++) {
+                                     for (i = 0; i < subFields.length; i++) {
                                          strCsvParam += features[featureCount].attributes[subFields[i]].replace(',', '') + " ";
                                      }
                                      strCsvParam = strCsvParam.slice(0, -1) + "\",";
@@ -406,7 +405,7 @@ define([
                                  }
                              }
                              //Additional loop for appending additional commas
-                             for (var count = 0; count < (csvFieldsCollection.length - occupantFields.length); count++) {
+                             for (count = 0; count < (csvFieldsCollection.length - occupantFields.length); count++) {
                                  strCsvParam += ",";
                              }
                              strCsvParam = strCsvParam.slice(0, -1);
@@ -419,18 +418,19 @@ define([
              },
 
              _createAveryParam: function (features) {
-                 var averyFieldsCollection = dojo.configData.AveryLabelSettings[0].AveryFieldsCollection;
-                 var occupantFields = dojo.configData.AveryLabelSettings[0].OccupantFields.split(",");
+                 var averyFieldsCollection = dojo.configData.AveryLabelSettings[0].AveryFieldsCollection, featureCount, fieldCount, occupantFields, strAveryParam
+                 , averyFields, subFields,i;
+                 occupantFields = dojo.configData.AveryLabelSettings[0].OccupantFields.split(",");
                  try {
-                     var strAveryParam = '';
-                     for (var featureCount = 0; featureCount < features.length; featureCount++) {
-                         var averyFields;
-                         if (this.owners == "checked" || this.owners) {
-                             for (var fieldCount = 0; fieldCount < averyFieldsCollection.length; fieldCount++) {
+                     strAveryParam = '';
+                     for (featureCount = 0; featureCount < features.length; featureCount++) {
+                         averyFields;
+                         if (this.owners === "checked" || this.owners) {
+                             for (fieldCount = 0; fieldCount < averyFieldsCollection.length; fieldCount++) {
                                  averyFields = averyFieldsCollection[fieldCount];
                                  if (averyFields.split(',').length > 1) {
-                                     var subFields = averyFields.split(',');
-                                     for (var i = 0; i < subFields.length; i++) {
+                                     subFields = averyFields.split(',');
+                                     for (i = 0; i < subFields.length; i++) {
                                          if (features[featureCount].attributes[subFields[i]]) {
                                              strAveryParam += features[featureCount].attributes[subFields[i]].replace(',', '') + " ";
                                          }
@@ -447,11 +447,11 @@ define([
                          }
                      }
                      for (featureCount = 0; featureCount < features.length; featureCount++) {
-                         if (this.occupants == "checked" || this.occupants) {
+                         if (this.occupants === "checked" || this.occupants) {
                              if (features[featureCount].attributes[occupantFields[1]]) {
                                  for (fieldCount = 0; fieldCount < occupantFields.length; fieldCount++) {
                                      averyFields = occupantFields[fieldCount];
-                                     if (fieldCount == 1) {
+                                     if (fieldCount === 1) {
                                          strAveryParam += lang.trim(this.textoccupant.value) + "~";
                                      }
                                      if (averyFields.split(',').length > 1) {
@@ -481,17 +481,18 @@ define([
              },
 
              _executeGPTask: function (pdf, csv, strAveryParam, strCsvParam) {
-                 var gpTaskAvery = new Geoprocessor(dojo.configData.AveryLabelSettings[0].PDFServiceTask);
-                 var gpTaskCsv = new Geoprocessor(dojo.configData.AveryLabelSettings[0].CSVServiceTask);
+                 var gpTaskAvery, gpTaskCsv,params, csvParams;
+                 gpTaskAvery = new Geoprocessor(dojo.configData.AveryLabelSettings[0].PDFServiceTask);
+                 gpTaskCsv = new Geoprocessor(dojo.configData.AveryLabelSettings[0].CSVServiceTask);
                  topic.publish("showProgressIndicator");
                  if (pdf) {
                      _self = this;
-                     var params = { "Label_Format": averyFormat, "Address_Items": strAveryParam };
+                     params = { "Label_Format": this.averyFormat, "Address_Items": strAveryParam };
                      gpTaskAvery.submitJob(params, _self._completeGPJob, _self._statusCallback, _self._errCallback);
                  }
                  if (csv) {
                      _self = this;
-                     var csvParams = { "Address_Items": strCsvParam };
+                     csvParams = { "Address_Items": strCsvParam };
                      gpTaskCsv.submitJob(csvParams, _self._completeCsvGPJob, _self._statusCallback);
                  }
                  topic.publish("hideProgressIndicator");
@@ -500,7 +501,7 @@ define([
              //PDF generation callback completion event handler
              _completeGPJob: function (jobInfo) {
                  var gpTaskAvery = new Geoprocessor(dojo.configData.AveryLabelSettings[0].PDFServiceTask);
-                 if (jobInfo.jobStatus != "esriJobFailed") {
+                 if (jobInfo.jobStatus !== "esriJobFailed") {
                      gpTaskAvery.getResultData(jobInfo.jobId, "Output_File", _self._downloadFile);
                      if (this.window.location.toString().split("$displayInfo=").length > 1) {
                          if (!dojo.shareinfo) {
@@ -514,7 +515,7 @@ define([
 
              _completeCsvGPJob: function (jobInfo) {
                  var gpTaskAvery = new Geoprocessor(dojo.configData.AveryLabelSettings[0].CSVServiceTask);
-                 if (jobInfo.jobStatus != "esriJobFailed") {
+                 if (jobInfo.jobStatus !== "esriJobFailed") {
                      gpTaskAvery.getResultData(jobInfo.jobId, "Output_File", _self._downloadCSVFile);
                      if (this.window.location.toString().split("$displayInfo=").length > 1) {
                          if (!dojo.shareinfo) {
@@ -530,7 +531,7 @@ define([
              //Pdf generation status callback event handler
              _statusCallback: function (jobInfo) {
                  var status = jobInfo.jobStatus;
-                 if (status == "esriJobFailed") {
+                 if (status === "esriJobFailed") {
                      alert(nls.errorMessages.noDataAvailable);
                  }
              },
@@ -553,7 +554,7 @@ define([
              },
 
              _downloadCSVFile: function (outputFile) {
-                 if (navigator.appVersion.indexOf("Mac") != -1) {
+                 if (navigator.appVersion.indexOf("Mac") !== -1) {
                      window.open(outputFile.value.url);
                  } else {
                      this.window.location = outputFile.value.url;

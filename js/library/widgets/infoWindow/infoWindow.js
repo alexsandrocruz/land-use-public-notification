@@ -1,5 +1,5 @@
-﻿/*global dojo, define, document, Modernizr, dojoConfig */
-/*jslint sloppy:true */
+﻿/*global define, document, Modernizr,dojoConfig,dijit,dojo,alert,esri ,event*/
+/*jslint sloppy:true,nomen:true,plusplus:true,unparam:true */
 /** @license
 | Version 10.2
 | Copyright 2013 Esri
@@ -27,18 +27,12 @@ define([
         "dojo/dom-class",
         "dojo/topic",
         "esri/domUtils",
-        "esri/InfoWindowBase",
-        "esri/tasks/BufferParameters",
         "../scrollBar/scrollBar",
-        "dojo/store/Memory",
          "dojo/i18n!nls/localizedStrings",
         "dojo/text!./templates/infoWindow.html",
-        "dijit/_WidgetBase",
-        "dijit/_TemplatedMixin",
-        "dijit/_WidgetsInTemplateMixin",
         "./infoWindowView"
 ],
-function (declare, domConstruct, domStyle,lang, on, dom, domClass, topic, domUtils, InfoWindowBase, BufferParameters, scrollBar, ItemFileReadStore, nls, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, infoWindowView) {
+function (declare, domConstruct, domStyle, lang, on, dom, domClass, topic, domUtils, ScrollBar, nls, template, infoWindowView) {
     return declare([infoWindowView], {
         templateString: template,
 
@@ -106,7 +100,7 @@ function (declare, domConstruct, domStyle,lang, on, dom, domClass, topic, domUti
                 domClass.add(dojo.infoContainerScrollbar._scrollBarContent, "esriCTZeroHeight");
                 dojo.infoContainerScrollbar.removeScrollBar();
             }
-            dojo.infoContainerScrollbar = new scrollBar({
+            dojo.infoContainerScrollbar = new ScrollBar({
                 domNode: this.divInfoScrollContent
             });
             domClass.add(this.divInfoScrollContent, "esrCTInfoContainerScrollbar");

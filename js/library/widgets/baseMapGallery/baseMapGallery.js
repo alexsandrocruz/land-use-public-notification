@@ -26,15 +26,14 @@ define([
     "dojo/text!./templates/baseMapGalleryTemplate.html",
     "dijit/_WidgetBase",
     "dijit/_TemplatedMixin",
-    "dijit/_WidgetsInTemplateMixin",
-     "dojo/i18n!nls/localizedStrings"
-], function (declare, domConstruct, lang, on, dom, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, nls) {
+    "dijit/_WidgetsInTemplateMixin"
+
+], function (declare, domConstruct, lang, on, dom, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin) {
 
     //========================================================================================================================//
 
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
         templateString: template,
-        nls: nls,
 
         /**
         * create baseMapGallery widget
@@ -43,28 +42,23 @@ define([
         * @name widgets/baseMapGallery/baseMapGallery
         */
         postCreate: function () {
-            var i, basemapContainer, layer,
+            var i, basemapContainer,
                 baseMapURL = 0,
                 baseMapURLCount = 0,
                 baseMapLayers = dojo.configData.BaseMapLayers;
 
             for (i = 0; i < baseMapLayers.length; i++) {
                 if (baseMapLayers[i].MapURL) {
-                    this.map.addLayer(this._createBaseMapLayer(baseMapLayers[i].MapURL, baseMapLayers[i].Key));
                     if (baseMapURLCount === 0) {
                         baseMapURL = i;
                     }
                     baseMapURLCount++;
                 }
             }
+
             basemapContainer = domConstruct.create("div", {}, dom.byId("esriCTParentDivContainer"));
             basemapContainer.appendChild(this.esriCTDivLayerContainer);
             this.layerList.appendChild(this._createBaseMapElement(baseMapURL, baseMapURLCount));
-
-            if (baseMapURLCount >= 1) {
-                layer = this.map.getLayer(baseMapLayers[baseMapURL].Key);
-                layer.show();
-            }
         },
 
         _createBaseMapLayer: function (layerURL, layerId) {
@@ -98,16 +92,18 @@ define([
         },
 
         _changeBaseMap: function (spanControl) {
-            var layer;
+            var layer, basemap;
+            basemap = this.map.getLayer("esriCTbasemap");
+            this.map.removeLayer(basemap);
 
-            this._hideMapLayers();
-            layer = this.map.getLayer(dojo.configData.BaseMapLayers[spanControl].Key);
-            layer.show();
+            layer = new esri.layers.ArcGISTiledMapServiceLayer(dojo.configData.BaseMapLayers[spanControl].MapURL, { id: "esriCTbasemap", visible: true });
+            this.map.addLayer(layer);
+
+
         },
 
         _hideMapLayers: function () {
             var i, layer;
-
             for (i = 0; i < dojo.configData.BaseMapLayers.length; i++) {
                 if (dojo.configData.BaseMapLayers[i].MapURL) {
                     layer = this.map.getLayer(dojo.configData.BaseMapLayers[i].Key);

@@ -96,18 +96,15 @@ define([], function () {
         // BASEMAP SETTINGS
         // ------------------------------------------------------------------------------------------------------------------------
         // Set baseMap layers
-        BaseMapLayers: [{
-            Key: "parcelMap",
+        BaseMapLayers: [{          
             ThumbnailSource: "js/library/themes/images/parcelmap.png",
             Name: "Parcel Map",
             MapURL: "http://tryitlive.arcgis.com/arcgis/rest/services/ParcelPublicAccessMI/MapServer"
-        }, {
-            Key: "taxMap",
+        }, {           
             ThumbnailSource: "js/library/themes/images/taxmap.png",
             Name: "Tax Map",
             MapURL: "http://tryitlive.arcgis.com/arcgis/rest/services/TaxParcelMI/MapServer"
-        }, {
-            Key: "imagery",
+        }, {           
             ThumbnailSource: "js/library/themes/images/imagery.png",
             Name: "Imagery",
             MapURL: "http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer"

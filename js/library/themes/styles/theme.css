@@ -68,9 +68,12 @@
     color: #007AC2;
     float: left;
     font-size: 22px;
-    padding: 10px 15px;
+    padding: 10px 10px;
     text-shadow: 0 0 1px #AAAAAA;
+    width: 35%;
+    overflow: hidden;
     white-space: nowrap;
+    text-overflow: ellipsis; 
 }
 
 .esriCTRightTab
@@ -249,7 +252,7 @@
 
 .esriCTAddressContent
 {
-    min-height: 71px;
+    min-height: 81px;
     border-right: 1px solid #007ac2;
     border-left: 1px solid #007ac2;
     border-bottom: 1px solid #007ac2;
@@ -377,6 +380,11 @@
 .esriCTAddressContainerHeight
 {
     height: 300px !important;
+}
+
+.esriCTAddressResultHeight
+{
+    min-height: 146px;
 }
 
 .esriCTHideContainerHeight
