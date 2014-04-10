@@ -28,7 +28,7 @@ require([
         //========================================================================================================================//
 
         try {
-            esriConfig.defaults.io.proxyUrl = "proxy.ashx";
+            esriConfig.defaults.io.proxyUrl = "proxy/proxy.ashx";
             esriConfig.defaults.io.alwaysUseProxy = false;
             esriConfig.defaults.io.timeout = 180000;
             /**
