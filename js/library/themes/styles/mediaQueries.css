@@ -1,0 +1,312 @@
+﻿
+
+@media screen and (min-width: 321px) and (max-width: 680px)
+{
+    html, body
+    {
+        font-size: 14px !important;
+    }
+
+    input
+    {
+        font-size: 14px !important;
+    }
+
+    .esriCTDivAppHolder
+    {
+        width: 100% !important;
+    }
+
+    .divAppContent
+    {
+        width: 287px;
+        margin: 0 auto;
+    }
+
+
+
+    .esriCTShareCursor, .facebook, .twitter, .email
+    {
+        height: 44px !important;
+        width: 44px !important;
+        padding: 8px 0 !important;
+        background-size: 44px;
+    }
+
+    .esriCTApplicationHeaderTextTD
+    {
+        display: none;
+    }
+
+    .esriCTApplicationHeaderIcon
+    {
+        display: none;
+    }
+
+    .esriCTTdHeaderSearch, .esriCTTdHeaderSearch-select, .esriCTTdGeolocation, .esriCTImgSocialMedia-select, .esriCTImgSocialMedia, .esriCTRouteImg, .esriCTRouteImg-select, .esriCTHelpImg, .esriCTImgPrint
+    {
+        height: 44px !important;
+        width: 44px !important;
+        background-size: 44px !important;
+        width: 20% !important;
+        padding: 8px 0 !important;
+        margin: 0px 0px;
+    }
+
+    .esriCTRightTab
+    {
+        width: 100%;
+    }
+
+    .esriCTApplicationHeader
+    {
+        height: 60px;
+    }
+
+
+
+    .esriCTApplicationHeaderIcon
+    {
+        display: none;
+    }
+
+    .legendbox
+    {
+        display: none;
+    }
+
+    /* Address container */
+
+   
+
+    .esriCTAddressContent
+    {
+        height: 300px;
+        border-right: 1px solid #007ac2;
+        border-left: 1px solid #007ac2;
+        border-bottom: 1px solid #007ac2;
+    }
+
+
+
+
+    /* End of Address container Styles */
+    /* Splash Screen */
+    .customButton
+    {
+        border: none;
+        color: #fff;
+        cursor: pointer;
+        background: #007ac2;
+        overflow: hidden;
+        width: 75px;
+        height: 25px !important;
+        margin: 24PX AUTO;
+        position: absolute;
+        left: 40%;
+        bottom: 0px;
+    }
+
+    .esriCTSplashScreenDialog
+    {
+        height: 95% !important;
+        width: 95% !important;
+        margin-top: 1% !important;
+    }
+
+    .divSplashScreenContent
+    {
+        width: 95% !important;
+    }
+
+    .esriCTFullWidth
+    {
+        width: 100% !important;
+    }
+
+    .splashScreenScrollBarContainer
+    {
+        width: 100% !important;
+    }
+
+    .scrollbar_content
+    {
+        width: 100% !important;
+    }
+    /* End of Splash Screen */
+
+    .esriCTbaseMapContainerNode
+    {
+        display: none !important;
+    }
+
+
+    .esriCTTxtShare
+    {
+        border-top: 1px solid #007AC2;
+        outline: medium none;
+        height: 50% !important;
+        width: 80% !important;
+        vertical-align: middle !important;
+        border-bottom: 1px solid #007AC2;
+        border-left: 1px solid #007AC2;
+        border-right: 1px solid #007AC2;
+        cursor: default !important;
+        border-style: dotted;
+        border-color: #808080;
+        margin: 20px;
+    }
+
+    .esriCTDivshareContainer
+    {
+        height: 45% !important;
+        position: relative !important;
+        width: 100% !important;
+    }
+
+    .esriCTTxtShare
+    {
+        width: 90% !important;
+    }
+    .esriCTAddressHolder, .esriCTDivAppContainer{width:100%; top:60px;}
+}
+
+/* Portrait */
+@media screen and (max-width: 320px)
+{
+    html, body
+    {
+        font-size: 14px !important;
+    }
+
+    input
+    {
+        font-size: 14px !important;
+    }
+
+
+    .esriCTDivAppHolder
+    {
+        width: 100% !important;
+    }
+
+
+
+    .esriCTShareCursor, .facebook, .twitter, .email
+    {
+        height: 44px !important;
+        width: 44px !important;
+        padding: 8px 0 !important;
+        background-size: 44px;
+    }
+
+ 
+    .esriCTTdHeaderSearch, .esriCTTdHeaderSearch-select, .esriCTTdGeolocation, .esriCTImgSocialMedia-select, .esriCTImgSocialMedia, .esriCTRouteImg, .esriCTRouteImg-select, .esriCTHelpImg, .esriCTImgPrint
+    {
+        height: 44px !important;
+        width: 44px !important;
+        background-size: 44px !important;
+        width: 20% !important;
+        padding: 8px 0 !important;
+         margin: 0px 0px;
+    }
+
+    .esriCTApplicationHeaderIcon
+    {
+        display: none;
+    }
+
+    .esriCTRightTab
+    {
+        width: 100% !important;
+    }
+    .legendbox
+    {
+        display: none;
+    }
+    /* Splash Screen */
+    .customButton
+    {
+        border: none;
+        color: #fff;
+        cursor: pointer;
+        background: #007ac2;
+        overflow: hidden;
+        width: 75px;
+        height: 25px !important;
+        margin: 24PX AUTO;
+        position: absolute;
+        left: 40%;
+        bottom: 0px;
+    }
+    .esriCTSplashScreenDialog
+    {
+        height: 95% !important;
+        width: 95% !important;
+        margin-top: 1% !important;
+    }
+    .divSplashScreenContent
+    {
+        width: 95% !important;
+    }
+    .esriCTApplicationHeader
+    {
+        height: 60px !important;
+    }
+    .sriGovtSplashContent
+    {
+        width: 100% !important;
+    }
+    .splashScreenScrollBarContainer
+    {
+        width: 100% !important;
+    }
+    .scrollbar_content
+    {
+        width: 100% !important;
+    }
+    .esriCTApplicationHeaderTextTD
+    {
+        display: none;
+    }
+
+    /* End of Splash Screen */
+    .esriCTbaseMapContainerNode
+    {
+        display: none !important;
+    }
+    .esriCTSearchClose
+    {
+        right: 75px;
+    }
+
+    .esriCTTxtShare
+    {
+        border-top: 1px solid #007AC2;
+        outline: medium none;
+        height: 50% !important;
+        width: 80% !important;
+        vertical-align: middle !important;
+        border-bottom: 1px solid #007AC2;
+        border-left: 1px solid #007AC2;
+        border-right: 1px solid #007AC2;
+        cursor: default !important;
+        border-style: dotted;
+        border-color: #808080;
+        margin: 20px;
+    }
+
+    .esriCTDivshareContainer
+    {
+        height: 45% !important;
+        position: relative !important;
+        width: 100% !important;
+    }
+    .esriCTTxtShare
+    {
+        width: 80% !important;
+    }
+     .esriCTAddressHolder, .esriCTDivAppContainer{width:100%; top:60px;}
+}
+
+/* Landscape */

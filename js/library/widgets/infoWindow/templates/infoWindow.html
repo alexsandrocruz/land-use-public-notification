@@ -1,0 +1,109 @@
+﻿<div data-dojo-attach-point="esriCTinfoWindow" class="esriCTinfoWindow">
+    <div id="divInfoContainer" align="center" class="esriCTInfoContainer esriCTopacityHideAnimation">
+        <div align="left" id="divInfoContent" class="esriCTInfoContent">
+            <div id="esriCTFullHeightWidth" class="esriCTFullHeightWidth">
+                <div id="headderPanel" class="headderPanel">
+                    <div data-dojo-attach-point="esriCTheadderPanel" class="esriCTheadderPanel">
+                    </div>
+                    <div class="esriCTclosediv" data-dojo-attach-point="esriCTclosediv" title="Close">
+                    </div>
+                    <div class="esriCTInfOIcon">
+                        <img class="esriCTInfOptions" checked="info" title="Notify" data-dojo-attach-point="esriCTShowDetailsView" /></div>
+                </div>
+                <div data-dojo-attach-point="divInfoDetails" class="esriCTAddressList">
+                    <div data-dojo-attach-point="divInfoScrollContainer" class="divInfoScrollContainer"
+                        align="left">
+                        <div data-dojo-attach-point="divInfoScrollContent" class="esriCTInfoScrollContent">
+                            <div data-dojo-attach-point="divInfoDetailsScroll" class="esriCTFullWidth">
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                    </div>
+                    <div class="divDataDisplay">
+                    </div>
+                    <div class="scrollbar_footer">
+                    </div>
+                    <div class="esriCTAdjacentParcel">
+                    </div>
+                </div>
+                <div data-dojo-attach-point="divInfoNotify" class="divInfoComments" style="color: #fff;
+                    display: none;">
+                    <div id="divNotifyNeighborsContainer" class="esriCTnotifyTest">
+                        <div data-dojo-attach-point="tblNotify" class="esriCTtblNotify">
+                            <div data-dojo-attach-point="trBuffer" class="esriCTtrBuffer">
+                                <div class="esriCTtrBufferRow">
+                                    <div class="esriCTBufferDistanc">
+                                        <span class="spanTxt">${nls.bufferDistance}</span><span class="mandatory">*</span>
+                                    </div>
+                                    <div class="esriCTInputDistanc">
+                                        <input type="text" data-dojo-attach-point="txtBuffer" class="esriCTtxtBuffer" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="esriCTtrBufferRow">
+                                <div class="esriCTBufferDistanc">
+                                    <span class="spanTxt">${nls.findNotify} </span><span class="mandatory">*</span>
+                                </div>
+                            </div>
+                            <div class="esriCTtrBufferRow">
+                                <div class="esriCTBufferDistanc">
+                                    <div class="esriCTtrBufferCheckbox">
+                                        <input id="chkOwners" name="chkOwners" dojotype="dijit.form.CheckBox" /></div>
+                                    <div class="esriCTtrBufferCheckboxlabel">
+                                        <span class="">${nls.propertyOwners}</span></div>
+                                </div>
+                                <div class="esriCTInputDistanc">
+                                    <div class="esriCTtrBufferCheckbox">
+                                        <input id="chkOccupants" name="chkOccupants" dojotype="dijit.form.CheckBox" /></div>
+                                    <div class="esriCTtrBufferCheckboxlabel">
+                                        <span class="">${nls.propertyOccupants}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="esriCTtrBufferRow">
+                                <div class="esriCTBufferDistanc">
+                                    <span class="spanTxt">${nls.occupantLabel}</span>
+                                </div>
+                                <div class="esriCTInputDistanc">
+                                    <input type="text" data-dojo-attach-point="textoccupant" class="esriCTtxtBuffer" />
+                                </div>
+                            </div>
+                            <div class="esriCTtrBufferRow">
+                                <div class="esriCTBufferDistanc">
+                                    <div class="esriCTtrBufferCheckbox">
+                                        <input id="chkPdf" name="chkPDF" dojotype="dijit.form.CheckBox" /></div>
+                                    <div class="esriCTtrBufferCheckboxlabel">
+                                        <span class="">${nls.averyLabelsFormat}</span>
+                                    </div>
+                                </div>
+                                <div class="esriCTInputDistanc">
+                                    <input data-dojo-attach-point="cmbAveryLabels" />
+                                </div>
+                            </div>
+                            <div class="esriCTtrBufferRow">
+                                <div class="esriCTBufferDistanc">
+                                    <div class="esriCTtrBufferCheckbox">
+                                        <input id="chkCsv" name="chkCSV" dojotype="dijit.form.CheckBox" /></div>
+                                    <div class="esriCTtrBufferCheckboxlabel">
+                                        <span class="">${nls.csvFormat}</span>
+                                    </div>
+                                </div>
+                            </div>
+                           <div class="esriCTtrBufferRow">
+                                <span class="spanFileUploadMessage" data-dojo-attach-point="spanFileUploadMessage"
+                                    style="display: none; font-size: 11px; height: 20px;"></span>
+                            </div>
+                            <div   class="downloadNotification"  >
+                                <div data-dojo-attach-point="btnSubmit">
+                                <img class="esriCTimgDownloadParcels" data-dojo-attach-point="btnSubmitImage" />
+                                <span class="esriCTspan">${nls.downloadNotification}</span></div>
+                           </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
