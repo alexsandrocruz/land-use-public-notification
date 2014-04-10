@@ -20,7 +20,7 @@
 
 require([
         "coreLibrary/widgetLoader",
-        "application/js/library/config",
+        "application/js/config",
         "dojo/domReady!",
          "esri/config"
     ], function (widgetLoader, config, domReady, esriConfig) {

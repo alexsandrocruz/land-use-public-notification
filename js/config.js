@@ -96,15 +96,15 @@ define([], function () {
         // BASEMAP SETTINGS
         // ------------------------------------------------------------------------------------------------------------------------
         // Set baseMap layers
-        BaseMapLayers: [{          
+        BaseMapLayers: [{
             ThumbnailSource: "js/library/themes/images/parcelmap.png",
             Name: "Parcel Map",
             MapURL: "http://tryitlive.arcgis.com/arcgis/rest/services/ParcelPublicAccessMI/MapServer"
-        }, {           
+        }, {
             ThumbnailSource: "js/library/themes/images/taxmap.png",
             Name: "Tax Map",
             MapURL: "http://tryitlive.arcgis.com/arcgis/rest/services/TaxParcelMI/MapServer"
-        }, {           
+        }, {
             ThumbnailSource: "js/library/themes/images/imagery.png",
             Name: "Imagery",
             MapURL: "http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer"
@@ -122,7 +122,7 @@ define([], function () {
             Title: "SchoolBoundaries",
             index: "0",
             LayerUrl: "http://ec2-54-214-169-132.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/SchoolDistrictQuery/MapServer/0",
-            SearchDisplayFields: "DISTRCTNAME,NAME",           
+            SearchDisplayFields: "DISTRCTNAME,NAME",
             SearchExpression: "UPPER(DISTRCTNAME) LIKE '%${0}%' OR UPPER(NAME) LIKE '%${0}%'",
             InfoWindowSettings: [{
                 InfoWindowTitleFields: "NAME", //earlier key - InfoWindowTitle
@@ -166,7 +166,7 @@ define([], function () {
         ParcelLayerSettings: {
             ParcelHighlightColor: "#1C86EE", //earlier key - RendererColor
             ParcelHighlightAlpha: 0.5,
-            LayerUrl: "http://tryitlive.arcgis.com/arcgis/rest/services/TaxParcelQuery/MapServer/0",           
+            LayerUrl: "http://tryitlive.arcgis.com/arcgis/rest/services/TaxParcelQuery/MapServer/0",
             SearchDisplayFields: "PARCELID,SITEADDRESS",
             SearchExpression: "UPPER(PARCELID) LIKE '%${0}%' OR UPPER(SITEADDRESS) LIKE '%${0}%'", //earlier key -  AddressSearchFields
             InfoWindowSettings: [{
