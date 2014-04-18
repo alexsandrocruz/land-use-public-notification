@@ -53,7 +53,7 @@ function (declare, domConstruct, on, topic, lang, _WidgetBase) {
         * @memberOf widgets/help/help
         */
         _showHelpPage: function () {
-            window.open();
+            window.open(dojo.configData.HelpURL);
         }
     });
 });

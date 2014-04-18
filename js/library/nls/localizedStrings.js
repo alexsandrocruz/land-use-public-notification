@@ -18,26 +18,7 @@
 define({
     root: {
         okButtonText: "OK",
-        splashScreenContent: "Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.",
-        parcelDisplayText: "ParcelID/Address",
-        roadDisplayText: "Road Centerline",
-        overLayDisplayText: "OverLay Layers",
-        clickToLocate: "Click To Locate",
-        adjacentParcels: "Add adjacent parcel",
-        adjacentRoad: "Add adjacent road",
-        backBtn: "Back",
-        parcelsCount: "Parcels found at this location",
-        noAdjacentParcel: "There are no parcels adjacent to the road within",
-        feet: "feet",
-        details:"Details",
-        navigation: "navigation",
-        notify: "notify",
         webpageDispalyText: "Copy/paste HTML into your web page",
-        showNullValueAs: "N/A",
-        toolTipContents: {
-            Parcel: "Press Ctrl + Map click to select parcel<br>Click on a selected parcel when done",
-            Road: "Press Ctrl + Map click to select road<br>Click on a selected road when done"
-        },
         bufferDistance: "Enter buffer distance (feet)",
         findNotify: "Who do you want to Notify?",
         propertyOwners: "Property Owners",
@@ -46,6 +27,7 @@ define({
         averyLabelsFormat: "Avery labels in PDF format ",
         csvFormat: "Download in CSV format",
         downloadNotification: "Download",
+        clickToLocate: "Click To Locate",
         errorMessages: {
             invalidSearch: "No results found",
             falseConfigParams: "Required configuration key values are either null or not exactly matching with layer attributes, This message may appear multiple times.",
@@ -55,7 +37,7 @@ define({
             shareLoadingFailed: "Unable to load share options.",
             shareFailed: "Unable to share.",
             noParcel: "Parcel not found at current location",
-            noRoad:"Road not found at current location",
+            noRoad: "Road not found at current location",
             unableToPerform: "Unable to perform operation: invalid geometry.",
             enterNumeric: "Please enter numeric value.",
             createBuffer: "Geometry for buffer is null in create buffer.",
@@ -66,8 +48,22 @@ define({
             fileSelect: "Select at least one file format to download.",
             noDataAvailable: "Data not available for this particular location."
 
+        },
+        buttons: {
+            embedding: "Embedding", //Shown next to icon for sharing the map embedding in website
+            email: "Email",  // Shown next to icon for sharing the current map extents via email; works with shareViaEmail tooltip
+            facebook: "Facebook",  // Shown next to icon for sharing the current map extents via a Facebook post; works with shareViaFacebook tooltip
+            twitter: "Twitter"  // Shown next to icon for sharing the current map extents via a Twitter tweet; works with shareViaTwitter tooltip
+        },
+        tooltips: {
+            locate: "Locate",
+            share: "Share",
+            help: "Help",
+            clear: "Clear",
+            search: "Search",
+            exit: "Exit",
+            locateAddress: "LocateAddress"
         }
     },
-
     es: true, fr: true, it: true
 });

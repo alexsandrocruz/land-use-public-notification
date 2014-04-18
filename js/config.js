@@ -1,4 +1,4 @@
-﻿/*global dojo */
+﻿/*global define */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
 /*
  | Copyright 2013 Esri
@@ -50,8 +50,36 @@ define([], function () {
         // Set URL of help page/portal
         HelpURL: "help.htm",
 
+        ParcelDisplayText: "ParcelID/Address",
+
+        RoadDisplayText: "Road Centerline",
+
+        OverLayDisplayText: "OverLay Layers",
+
+        AdjacentParcels: "Add adjacent parcel",
+
+        AdjacentRoad: "Add adjacent road",
+
+        BackBtn: "Back",
+
+        ParcelsCount: "Parcels found at this location",
+
+        NoAdjacentParcel: "There are no parcels adjacent to the road within",
+
+        FeetCaption: "feet",
+
+        Details: "Details",
+
+        Notify: "notify",
+
+        ToolTipContents: {
+            Parcel: "Press Ctrl + Map click to select parcel<br>Click on a selected parcel when done",
+            Road: "Press Ctrl + Map click to select road<br>Click on a selected road when done"
+        },
+
         //Set splash window content - Message that appears when the application starts
         SplashScreen: {
+            SplashScreenContent: "Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.",
             IsVisible: true
         },
 
@@ -92,24 +120,18 @@ define([], function () {
         // Minimum width should be 330 for the info-popup in pixels
         InfoPopupWidth: 350,
 
-        // ------------------------------------------------------------------------------------------------------------------------
-        // BASEMAP SETTINGS
-        // ------------------------------------------------------------------------------------------------------------------------
-        // Set baseMap layers
-        BaseMapLayers: [{
-            ThumbnailSource: "js/library/themes/images/parcelmap.png",
-            Name: "Parcel Map",
-            MapURL: "http://tryitlive.arcgis.com/arcgis/rest/services/ParcelPublicAccessMI/MapServer"
-        }, {
-            ThumbnailSource: "js/library/themes/images/taxmap.png",
-            Name: "Tax Map",
-            MapURL: "http://tryitlive.arcgis.com/arcgis/rest/services/TaxParcelMI/MapServer"
-        }, {
-            ThumbnailSource: "js/library/themes/images/imagery.png",
-            Name: "Imagery",
-            MapURL: "http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer"
-        }],
+        // Set string value to be shown for null or blank values
+        ShowNullValueAs: "N/A",
 
+        GroupURL: "http://www.arcgis.com/sharing/rest/",
+
+        SearchURL: "http://www.arcgis.com/sharing/rest/search?q=group:",
+
+        BasemapGroupTitle: "Land Use Public Notification", //CyberTech Systems and Software Limited
+
+        BasemapGroupOwner: "sagarnair_cssl", //cybertechagol
+
+        WebmapThumbnail: "js/library/themes/images/not-available.png",
 
         // Initial map extent. Use comma (,) to separate values and dont delete the last comma
         DefaultExtent: "-9273520, 5249870, -9270620, 5251510",
@@ -300,17 +322,20 @@ define([], function () {
         // Set geometry service URL
         GeometryService: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer",
 
+        // Set proxy url
+        ProxyUrl: "/proxy/proxy.ashx",
+
         // ------------------------------------------------------------------------------------------------------------------------
         // SETTINGS FOR MAP SHARING
         // ------------------------------------------------------------------------------------------------------------------------
 
         // Set URL for TinyURL service, and URLs for social media
         MapSharingOptions: {
-            TinyURLServiceURL: "http://api.bit.ly/v3/shorten?login=esri&apiKey=R_65fd9891cd882e2a96b99d4bda1be00e&uri=${0}&format=json",
+            TinyURLServiceURL: "https://api-ssl.bitly.com/v3/shorten?longUrl=${0}",
             TinyURLResponseAttribute: "data.url",
             FacebookShareURL: "http://www.facebook.com/sharer.php?u=${0}&t=Public%20Notification",
             TwitterShareURL: "http://mobile.twitter.com/compose/tweet?status=Public%20Notification ${0}",
             ShareByMailLink: "mailto:%20?subject=Check%20out%20this%20map!&body=${0}"
         }
-    }
+    };
 });

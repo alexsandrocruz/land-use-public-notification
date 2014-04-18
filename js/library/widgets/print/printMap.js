@@ -64,7 +64,7 @@ function (declare, domConstruct, on, topic, lang, _WidgetBase, esriMap, printMap
                 "Extent": this.map.extent,
                 "Window": window,
                 "BaseMapLayer": this.map.getLayer("esriCTbasemap")
-            }
+            };
             window.showModalDialog("js/library/widgets/print/templates/print.html", dataObject);
         },
 

@@ -16,33 +16,49 @@
  | limitations under the License.
  */
 define({
-    root: {
+    okButtonText: "OK",
+    webpageDispalyText: "Copy/paste HTML into your web page",
+    bufferDistance: "Enter buffer distance (feet)", //from here all these contents are for infowindow display text need to chkk
+    findNotify: "Who do you want to Notify?",
+    propertyOwners: "Property Owners",
+    propertyOccupants: "Property Occupants",
+    occupantLabel: "Occupant Label",
+    averyLabelsFormat: "Avery labels in PDF format ",
+    csvFormat: "Download in CSV format",
+    downloadNotification: "Download",
 
-        okButtonText: "OK",
-        splashScreenContent: "Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.",
-        parcelDisplayText: "ParcelID/Address",
-        roadDisplayText: "Road Centerline",
-        overLayDisplayText: "OverLay Layers",
-        ClickToLocate: "Click To Locate",
-        errorMessages: {
-            invalidSearch: "No results found",
-            falseConfigParams: "Required configuration key values are either null or not exactly matching with layer attributes, This message may appear multiple times.",
-            invalidLocation: "Current Location not found.",
-            invalidProjection: "Unable to plot current location on the map.",
-            widgetNotLoaded: "Fail to load widgets.",
-            shareLoadingFailed: "Unable to load share options.",
-            shareFailed: "Unable to share.",
-            noParcel: "Parcel not found at current location",
-            unableToPerform: "Unable to perform operation: invalid geometry.",
-            enterNumeric: "Please enter numeric value.",
-            createBuffer: "Geometry for buffer is null in create buffer.",
-            selectProperty: "Select Property Owners or Occupants to notify.",
-            enterBufferDist: "Please enter the buffer distance.",
-            inValidAveryFormat: "Invalid Avery format. Please select a valid format from the dropdown list.",
-            fileSelect: "Select at least one file format to download.",
-            noDataAvailable: "Data not available for this particular location."
+    errorMessages: {
+        invalidSearch: "No results found",
+        falseConfigParams: "Required configuration key values are either null or not exactly matching with layer attributes, This message may appear multiple times.",
+        invalidLocation: "Current Location not found.",
+        invalidProjection: "Unable to plot current location on the map.",
+        widgetNotLoaded: "Fail to load widgets.",
+        shareLoadingFailed: "Unable to load share options.",
+        shareFailed: "Unable to share.",
+        noParcel: "Parcel not found at current location",
+        unableToPerform: "Unable to perform operation: invalid geometry.",
+        enterNumeric: "Please enter numeric value.",
+        createBuffer: "Geometry for buffer is null in create buffer.",
+        selectProperty: "Select Property Owners or Occupants to notify.",
+        enterBufferDist: "Please enter the buffer distance.",
+        inValidAveryFormat: "Invalid Avery format. Please select a valid format from the dropdown list.",
+        fileSelect: "Select at least one file format to download.",
+        noDataAvailable: "Data not available for this particular location."
 
-        }
+    },
+    buttons: {
+        embedding: "Embedding", //Shown next to icon for sharing the map embedding in website
+        email: "Email",  // Shown next to icon for sharing the current map extents via email; works with shareViaEmail tooltip
+        facebook: "Facebook",  // Shown next to icon for sharing the current map extents via a Facebook post; works with shareViaFacebook tooltip
+        twitter: "Twitter"  // Shown next to icon for sharing the current map extents via a Twitter tweet; works with shareViaTwitter tooltip
+    },
+    tooltips: {
+        locate: "Locate",
+        share: "Share",
+        help: "Help",
+        clear: "Clear",
+        search: "Search",
+        exit: "Exit",
+        locateAddress: "LocateAddress"
     }
-
 });

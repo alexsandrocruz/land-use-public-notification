@@ -1,4 +1,4 @@
-﻿/*global define,Modernizr */
+﻿/*global define,Modernizr,require,dojo,alert,console */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
 /*
  | Copyright 2013 Esri
@@ -25,16 +25,19 @@ define([
     "dojo/_base/array",
     "dojo/_base/lang",
     "dojo/Deferred",
+    "dojo/DeferredList",
+    "esri/request",
+    "esri/arcgis/utils",
     "dojo/promise/all",
-    "dojo/i18n!nls/localizedStrings",
+    "dojo/i18n!application/js/library/nls/localizedStrings",
     "dojo/domReady!"
     ],
-function (declare, _WidgetBase, Map, SplashScreen, appHeader, array, lang, Deferred, all, nls) {
+function (declare, _WidgetBase, Map, SplashScreen, AppHeader, array, lang, Deferred, DeferredList, esriRequest, esriUtils, all, sharedNls) {
 
     //========================================================================================================================//
 
     return declare([_WidgetBase], {
-        nls: nls,
+        sharedNls: sharedNls,
 
         /**
         * load widgets specified in Header Widget Settings of configuration file
@@ -43,37 +46,42 @@ function (declare, _WidgetBase, Map, SplashScreen, appHeader, array, lang, Defer
         * @name coreLibrary/widgetLoader
         */
         startup: function () {
-            var widgets = {},
-            deferredArray = [];
+            var widgets = {}, splashScreen, basemapDeferred,
+            deferredArray = [], mapInstance;
             if (dojo.configData.SplashScreen.IsVisible) {
-                var splashScreen = new SplashScreen();
+                splashScreen = new SplashScreen();
                 splashScreen._showSplashScreenDialog();
             }
-            var mapInstance = this._initializeMap();
-            /**
-            * create an object with widgets specified in Header Widget Settings of configuration file
-            * @param {array} dojo.configData.AppHeaderWidgets Widgets specified in configuration file
-            */
-            array.forEach(dojo.configData.AppHeaderWidgets, function (widgetConfig, index) {
-                var deferred = new Deferred();
-                widgets[widgetConfig.WidgetPath] = null;
-                require([widgetConfig.WidgetPath], function (widget) {
-                    widgets[widgetConfig.WidgetPath] = new widget({ map: widgetConfig.MapInstanceRequired ? mapInstance : undefined, title: widgetConfig.Title });
+            basemapDeferred = new Deferred();
+            this._fetchBasemapCollection(basemapDeferred);
+            basemapDeferred.then(lang.hitch(this, function (baseMapLayers) {
+                dojo.configData.BaseMapLayers = baseMapLayers;
+                mapInstance = this._initializeMap();
+                /**
+                * create an object with widgets specified in Header Widget Settings of configuration file
+                * @param {array} dojo.configData.AppHeaderWidgets Widgets specified in configuration file
+                */
+                array.forEach(dojo.configData.AppHeaderWidgets, function (widgetConfig, index) {
+                    var deferred = new Deferred();
+                    widgets[widgetConfig.WidgetPath] = null;
+                    require([widgetConfig.WidgetPath], function (Widget) {
+                        widgets[widgetConfig.WidgetPath] = new Widget({ map: widgetConfig.MapInstanceRequired ? mapInstance : undefined, title: widgetConfig.Title });
 
-                    deferred.resolve(widgetConfig.WidgetPath);
+                        deferred.resolve(widgetConfig.WidgetPath);
+                    });
+                    deferredArray.push(deferred.promise);
                 });
-                deferredArray.push(deferred.promise);
-            });
-            all(deferredArray).then(lang.hitch(this, function () {
-                try {
-                    /**
-                    * create application header
-                    */
-                    this._createApplicationHeader(widgets);
+                all(deferredArray).then(lang.hitch(this, function () {
+                    try {
+                        /**
+                        * create application header
+                        */
+                        this._createApplicationHeader(widgets);
 
-                } catch (ex) {
-                    alert(nls.errorMessages.widgetNotLoaded);
-                }
+                    } catch (ex) {
+                        alert(sharedNls.errorMessages.widgetNotLoaded);
+                    }
+                }));
             }));
         },
 
@@ -94,9 +102,82 @@ function (declare, _WidgetBase, Map, SplashScreen, appHeader, array, lang, Defer
         * @memberOf coreLibrary/widgetLoader
         */
         _createApplicationHeader: function (widgets) {
-            var applicationHeader = new appHeader();
+            var applicationHeader = new AppHeader();
             applicationHeader.loadHeaderWidgets(widgets);
-        }
+        },
 
+        _fetchBasemapCollection: function (basemapDeferred) {
+            var dListResult, groupUrl, searchUrl, webmapRequest, groupRequest, deferred, thumbnailSrc, baseMapArray = [], deferredArray = [];
+            groupUrl = dojo.configData.GroupURL + "community/groups?q=title:\"" + dojo.configData.BasemapGroupTitle + "\" AND owner:" + dojo.configData.BasemapGroupOwner + "&f=json";
+            groupRequest = esriRequest({
+                url: groupUrl,
+                callbackParamName: "callback"
+            });
+            groupRequest.then(function (groupInfo) {
+                searchUrl = dojo.configData.SearchURL + groupInfo.results[0].id + "&sortField=name&sortOrder=desc&num=50&f=json";
+                webmapRequest = esriRequest({
+                    url: searchUrl,
+                    callbackParamName: "callback"
+                });
+                webmapRequest.then(function (groupInfo) {
+                    array.forEach(groupInfo.results, lang.hitch(this, function (info, index) {
+                        if (info.type === "Map Service") {
+                            thumbnailSrc = (groupInfo.results[index].thumbnail === null) ? dojo.configData.webmapThumbnail : dojo.configData.GroupURL + "content/items/" + info.id + "/info/" + info.thumbnail;
+                            baseMapArray.push({
+                                ThumbnailSource: thumbnailSrc,
+                                Name: info.title,
+                                MapURL: info.url
+                            });
+                        } else if (info.type === "Web Map") {
+                            var mapDeferred = esriUtils.getItem(info.id);
+                            mapDeferred.then(lang.hitch(this, function () {
+                                deferred = new Deferred();
+                                deferred.resolve();
+                            }));
+                            deferredArray.push(mapDeferred);
+                        }
+                    }));
+                    dListResult = new DeferredList(deferredArray);
+                    dListResult.then(function (res) {
+                        if (res[1].length === 0) {
+                            basemapDeferred.resolve(baseMapArray);
+                            return;
+                        }
+                        array.forEach(res, function (data, innerIdx) {
+                            if (innerIdx === 0) {
+                                array.forEach(data[1].itemData.baseMap.baseMapLayers, function (baseMapLayer, idx) {
+                                    if (baseMapLayer.url) {
+                                        thumbnailSrc = (data[1].item.thumbnail === null) ? dojo.configData.WebmapThumbnail : dojo.configData.GroupURL + "content/items/" + data[1].item.id + "/info/" + data[1].item.thumbnail;
+                                        baseMapArray.push({
+                                            ThumbnailSource: thumbnailSrc,
+                                            Name: data[1].itemData.baseMap.title,
+                                            MapURL: baseMapLayer.url
+                                        });
+                                    }
+                                });
+                            } else {
+                                array.some(baseMapArray, function (arrayBasemap) {
+                                    array.forEach(data[1].itemData.baseMap.baseMapLayers, function (baseMapLayer, idx) {
+                                        if (baseMapLayer.url && arrayBasemap.MapURL !== baseMapLayer.url) {
+                                            thumbnailSrc = (data[1].item.thumbnail === null) ? dojo.configData.WebmapThumbnail : data[1].item.thumbnail;
+                                            baseMapArray.push({
+                                                ThumbnailSource: thumbnailSrc,
+                                                Name: data[1].itemData.baseMap.title,
+                                                MapURL: baseMapLayer.url
+                                            });
+                                        }
+                                    });
+                                });
+                            }
+                        });
+                        basemapDeferred.resolve(baseMapArray);
+                    });
+                }, function (err) {
+                    console.log(err);
+                });
+            }, function (err) {
+                console.log(err);
+            });
+        }
     });
 });
