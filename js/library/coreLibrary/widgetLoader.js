@@ -31,8 +31,7 @@ define([
     "dojo/promise/all",
     "dojo/i18n!application/js/library/nls/localizedStrings",
     "dojo/domReady!"
-    ],
-function (declare, _WidgetBase, Map, SplashScreen, AppHeader, array, lang, Deferred, DeferredList, esriRequest, esriUtils, all, sharedNls) {
+], function (declare, _WidgetBase, Map, SplashScreen, AppHeader, array, lang, Deferred, DeferredList, esriRequest, esriUtils, all, sharedNls) {
 
     //========================================================================================================================//
 
@@ -47,7 +46,7 @@ function (declare, _WidgetBase, Map, SplashScreen, AppHeader, array, lang, Defer
         */
         startup: function () {
             var widgets = {}, splashScreen, basemapDeferred,
-            deferredArray = [], mapInstance;
+                deferredArray = [], mapInstance;
             if (dojo.configData.SplashScreen.IsVisible) {
                 splashScreen = new SplashScreen();
                 splashScreen._showSplashScreenDialog();
@@ -92,7 +91,7 @@ function (declare, _WidgetBase, Map, SplashScreen, AppHeader, array, lang, Defer
         */
         _initializeMap: function () {
             var map = new Map(),
-               mapInstance = map.getMapInstance();
+                mapInstance = map.getMapInstance();
             return mapInstance;
         },
 

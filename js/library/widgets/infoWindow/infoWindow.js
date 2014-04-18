@@ -17,21 +17,20 @@
  */
 //============================================================================================================================//
 define([
-        "dojo/_base/declare",
-        "dojo/dom-construct",
-        "dojo/dom-style",
-        "dojo/_base/lang",
-        "dojo/on",
-        "dojo/dom",
-        "dojo/dom-class",
-        "dojo/topic",
-        "esri/domUtils",
-        "esri/urlUtils",
-        "../scrollBar/scrollBar",
-        "dojo/text!./templates/infoWindow.html",
-        "./infoWindowView"
-],
-function (declare, domConstruct, domStyle, lang, on, dom, domClass, topic, domUtils, urlUtils, ScrollBar, template, infoWindowView) {
+    "dojo/_base/declare",
+    "dojo/dom-construct",
+    "dojo/dom-style",
+    "dojo/_base/lang",
+    "dojo/on",
+    "dojo/dom",
+    "dojo/dom-class",
+    "dojo/topic",
+    "esri/domUtils",
+    "esri/urlUtils",
+    "../scrollBar/scrollBar",
+    "dojo/text!./templates/infoWindow.html",
+    "./infoWindowView"
+], function (declare, domConstruct, domStyle, lang, on, dom, domClass, topic, domUtils, urlUtils, ScrollBar, template, infoWindowView) {
     return declare([infoWindowView], {
 
         templateString: template,

@@ -65,5 +65,7 @@ define({
             locateAddress: "LocateAddress"
         }
     },
-    es: true, fr: true, it: true
+    es: true,
+    fr: true,
+    it: true
 });

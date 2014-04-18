@@ -15,8 +15,7 @@
  | See the License for the specific language governing permissions and
  | limitations under the License.
  */
-define(
-{
+define({
     okButtonText: "OK",
     webpageDispalyText: "Copy/paste HTML into your web page",
     bufferDistance: "Enter buffer distance (feet)",

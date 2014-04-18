@@ -25,8 +25,7 @@ define([
     "dijit/_WidgetBase",
     "esri/map",
     "dojo/text!./templates/print.html"
-  ],
-function (declare, domConstruct, on, topic, lang, _WidgetBase, esriMap, printMap, Print) {
+], function (declare, domConstruct, on, topic, lang, _WidgetBase, esriMap, printMap, Print) {
 
     //========================================================================================================================//
 

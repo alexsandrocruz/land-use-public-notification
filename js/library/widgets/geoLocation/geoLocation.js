@@ -29,8 +29,7 @@ define([
     "esri/SpatialReference",
     "esri/graphic",
     "dojo/i18n!application/js/library/nls/localizedStrings"
-  ],
-function (declare, lang, domConstruct, on, topic, _WidgetBase, GeometryService, Point, PictureMarkerSymbol, SpatialReference, Graphic, sharedNls) {
+], function (declare, lang, domConstruct, on, topic, _WidgetBase, GeometryService, Point, PictureMarkerSymbol, SpatialReference, Graphic, sharedNls) {
 
     //========================================================================================================================//
 
@@ -70,8 +69,8 @@ function (declare, lang, domConstruct, on, topic, _WidgetBase, GeometryService, 
         */
         _showCurrentLocation: function () {
             var mapPoint, self = this, currentBaseMap,
-            geometryServiceURL = dojo.configData.GeometryService,
-            geometryService = new GeometryService(geometryServiceURL);
+                geometryServiceURL = dojo.configData.GeometryService,
+                geometryService = new GeometryService(geometryServiceURL);
 
             /**
             * get device location using geolocation service
@@ -114,8 +113,8 @@ function (declare, lang, domConstruct, on, topic, _WidgetBase, GeometryService, 
         */
         _addGraphic: function (mapPoint) {
             var geoLocationPushpin = dojoConfig.baseURL + dojo.configData.SearchSettings.DefaultLocatorSymbol,
-            locatorMarkupSymbol = new PictureMarkerSymbol(geoLocationPushpin, "35", "35"),
-            graphic = new Graphic(mapPoint, locatorMarkupSymbol, null, null);
+                locatorMarkupSymbol = new PictureMarkerSymbol(geoLocationPushpin, "35", "35"),
+                graphic = new Graphic(mapPoint, locatorMarkupSymbol, null, null);
             this.map.getLayer("esriGraphicsLayerMapSettings").clear();
             this.map.getLayer("esriGraphicsLayerMapSettings").add(graphic);
         }

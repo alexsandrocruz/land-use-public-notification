@@ -23,8 +23,7 @@ define([
     "dojo/topic",
     "dojo/_base/lang",
     "dijit/_WidgetBase"
-  ],
-function (declare, domConstruct, on, topic, lang, _WidgetBase) {
+], function (declare, domConstruct, on, topic, lang, _WidgetBase) {
 
     //========================================================================================================================//
 

@@ -18,77 +18,79 @@
 //============================================================================================================================//
 
 require([
-   "esri/map",
-   "esri/layers/ImageServiceParameters",
-   "esri/layers/ArcGISImageServiceLayer",
-   "../../../config.js"
-  ],
- function (esriMap, ImageServiceParameters, ArcGISImageServiceLayer, config) {
-     var window_opener = window.dialogArguments,
-     tempPolygonLayer = 'tempPolygonLayer',
-     tempBuffer = 'tempBuffer',
-     params = dojo.byId("paramid"),
-     color = "#1C86EE",
-     printmap,
-     parcelLayer,
-     bufferLayer,
-     initialExtent, layerUrl, baseMapLayer, imageServiceLayer;
-     parcelLayer = window_opener.ParcelLayer;
-     bufferLayer = window_opener.Bufferlayer;
-     baseMapLayer = window_opener.BaseMapLayer;
-     initialExtent = window_opener.Extent;
+    "esri/map",
+    "esri/layers/ImageServiceParameters",
+    "esri/layers/ArcGISImageServiceLayer",
+    "../../../config.js"
+], function (esriMap, ImageServiceParameters, ArcGISImageServiceLayer, config) {
+    var window_opener = window.dialogArguments,
+        tempPolygonLayer = 'tempPolygonLayer',
+        tempBuffer = 'tempBuffer',
+        params = dojo.byId("paramid"),
+        color = "#1C86EE",
+        printmap,
+        parcelLayer,
+        bufferLayer,
+        initialExtent,
+        baseMapLayer,
+        imageServiceLayer;
+    parcelLayer = window_opener.ParcelLayer;
+    bufferLayer = window_opener.Bufferlayer;
+    baseMapLayer = window_opener.BaseMapLayer;
+    initialExtent = window_opener.Extent;
 
-     printmap = new esri.Map("mapPrint", { extent: initialExtent, slider: false });
+    printmap = new esri.Map("mapPrint", { extent: initialExtent, slider: false });
 
-     layerUrl = window_opener.BaseMapLayerURL;
-     baseMapLayer = new esri.layers.ArcGISTiledMapServiceLayer(baseMapLayer.url);
-     printmap.addLayer(baseMapLayer);
+    baseMapLayer = new esri.layers.ArcGISTiledMapServiceLayer(baseMapLayer.url);
+    printmap.addLayer(baseMapLayer);
 
-     params = new ImageServiceParameters();
-     params.format = "PNG24";
-     imageServiceLayer = new ArcGISImageServiceLayer(baseMapLayer.url, { imageServiceParameters: params });
-     printmap.addLayer(imageServiceLayer);
-     document.title = config.ApplicationName;
-     dojo.connect(printmap, "onLoad", function () {
-         var gLayer, i, buffersymbol, polygon, lineColor, fillColor, polysymbol;
-         printmap.disablePan();
-         printmap.disableDoubleClickZoom();
+    params = new ImageServiceParameters();
+    params.format = "PNG24";
+    imageServiceLayer = new ArcGISImageServiceLayer(baseMapLayer.url, { imageServiceParameters: params });
+    printmap.addLayer(imageServiceLayer);
+    document.title = config.ApplicationName;
+    dojo.connect(printmap, "onLoad", function () {
+        var gLayer, i, buffersymbol, polygon, lineColor, fillColor, polysymbol;
+        printmap.disablePan();
+        printmap.disableDoubleClickZoom();
 
-         printmap.disableKeyboardNavigation();
-         printmap.disableScrollWheelZoom();
+        printmap.disableKeyboardNavigation();
+        printmap.disableScrollWheelZoom();
 
-         gLayer = new esri.layers.GraphicsLayer();
-         gLayer.id = tempBuffer;
-         printmap.addLayer(gLayer);
-         for (i = 0; i < bufferLayer.graphics.length; i++) {
-             buffersymbol = new esri.symbol.SimpleFillSymbol(
-                    esri.symbol.SimpleFillSymbol.STYLE_SOLID,
-                    new esri.symbol.SimpleLineSymbol(
+        gLayer = new esri.layers.GraphicsLayer();
+        gLayer.id = tempBuffer;
+        printmap.addLayer(gLayer);
+        for (i = 0; i < bufferLayer.graphics.length; i++) {
+            buffersymbol = new esri.symbol.SimpleFillSymbol(
+                esri.symbol.SimpleFillSymbol.STYLE_SOLID,
+                new esri.symbol.SimpleLineSymbol(
                     esri.symbol.SimpleLineSymbol.STYLE_SOLID,
-                    new dojo.Color([255, 0, 0, 0.65]), 2
-                    ),
-                    new dojo.Color([255, 0, 0, 0.35]));
+                    new dojo.Color([255, 0, 0, 0.65]),
+                    2
+                ),
+                new dojo.Color([255, 0, 0, 0.35])
+            );
 
-             polygon = new esri.geometry.Polygon(bufferLayer.graphics[i].geometry.toJson());
-             gLayer.add(new esri.Graphic(polygon, buffersymbol));
-         }
+            polygon = new esri.geometry.Polygon(bufferLayer.graphics[i].geometry.toJson());
+            gLayer.add(new esri.Graphic(polygon, buffersymbol));
+        }
 
-         gLayer = new esri.layers.GraphicsLayer();
-         gLayer.id = tempPolygonLayer;
-         printmap.addLayer(gLayer);
-         for (i = 0; i < parcelLayer.graphics.length; i++) {
-             lineColor = new dojo.Color();
-             lineColor.setColor(color);
+        gLayer = new esri.layers.GraphicsLayer();
+        gLayer.id = tempPolygonLayer;
+        printmap.addLayer(gLayer);
+        for (i = 0; i < parcelLayer.graphics.length; i++) {
+            lineColor = new dojo.Color();
+            lineColor.setColor(color);
 
-             fillColor = new dojo.Color();
-             fillColor.setColor(color);
-             fillColor.a = 0.25;
-             polygon = new esri.geometry.Polygon(parcelLayer.graphics[i].geometry.toJson());
-             polysymbol = new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID, new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, lineColor, 3), fillColor);
+            fillColor = new dojo.Color();
+            fillColor.setColor(color);
+            fillColor.a = 0.25;
+            polygon = new esri.geometry.Polygon(parcelLayer.graphics[i].geometry.toJson());
+            polysymbol = new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID, new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, lineColor, 3), fillColor);
 
-             gLayer.add(new esri.Graphic(polygon, polysymbol));
-         }
-         window.print();
-     });
+            gLayer.add(new esri.Graphic(polygon, polysymbol));
+        }
+        window.print();
+    });
 
- });
+});

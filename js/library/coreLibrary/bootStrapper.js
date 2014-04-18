@@ -18,26 +18,26 @@
 //============================================================================================================================//
 
 require([
-        "coreLibrary/widgetLoader",
-        "application/js/config",
-        "dojo/domReady!",
-         "esri/config"
-    ], function (WidgetLoader, config, domReady, esriConfig) {
+    "coreLibrary/widgetLoader",
+    "application/js/config",
+    "dojo/domReady!",
+    "esri/config"
+], function (WidgetLoader, config, domReady, esriConfig) {
 
-        //========================================================================================================================//
+    //========================================================================================================================//
 
-        try {
-            dojo.configData = config;
-            esriConfig.defaults.io.proxyUrl = dojoConfig.baseURL + dojo.configData.ProxyUrl;
-            esriConfig.defaults.io.timeout = 180000;
-            /**
-            * load application configuration settings from configuration file
-            * create an object of widget loader class
-            */
-            var applicationWidgetLoader = new WidgetLoader();
-            applicationWidgetLoader.startup();
+    try {
+        dojo.configData = config;
+        esriConfig.defaults.io.proxyUrl = dojoConfig.baseURL + dojo.configData.ProxyUrl;
+        esriConfig.defaults.io.timeout = 180000;
+        /**
+        * load application configuration settings from configuration file
+        * create an object of widget loader class
+        */
+        var applicationWidgetLoader = new WidgetLoader();
+        applicationWidgetLoader.startup();
 
-        } catch (ex) {
-            alert(ex.message);
-        }
-    });
+    } catch (ex) {
+        alert(ex.message);
+    }
+});

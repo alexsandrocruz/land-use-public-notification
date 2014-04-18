@@ -36,8 +36,7 @@ define([
     "dojo/i18n!nls/localizedStrings",
     "dojo/topic",
     "esri/request"
-  ],
-function (declare, domConstruct, domStyle, lang, array, on, dom, domAttr, domClass, domGeom, string, html, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, esriRequest) {
+], function (declare, domConstruct, domStyle, lang, array, on, dom, domAttr, domClass, domGeom, string, html, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, esriRequest) {
 
     //========================================================================================================================//
 
@@ -94,8 +93,7 @@ function (declare, domConstruct, domStyle, lang, array, on, dom, domAttr, domCla
         _showembeddingContainer: function () {
             if (domStyle.get(this.esriCTDivshareContainer, "display") === "none") {
                 domStyle.set(this.esriCTDivshareContainer, "display", "block");
-            }
-            else {
+            } else {
                 domStyle.set(this.esriCTDivshareContainer, "display", "none");
             }
         },
@@ -118,10 +116,22 @@ function (declare, domConstruct, domStyle, lang, array, on, dom, domAttr, domCla
 
             if ((dojo.parcelArray.length > 0) && (dojo.roadArray.length <= 0) && (dojo.overLayArray.length <= 0)) {
                 if (this.map.getLayer("tempBufferLayer").graphics.length > 0) {
-                    urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$dist=" + this.map.infoWindow.txtBuffer.value + "$ocupntTxt=" + this.map.infoWindow.textoccupant.value + "$PDF=" + ((dijit.byId('chkPdf').checked) ? "checked" : false)
-            + "$CSV=" + ((dijit.byId('chkCsv').checked) ? "checked" : false) + "$occupant=" + ((dijit.byId('chkOccupants').checked) ? "checked" : false)
-             + "$owner=" + ((dijit.byId('chkOwners').checked) ? "checked" : false)
-            + "$averyFormat=" + dijit.byId('selectAvery').item.id[0] + "$parcelID=" + dojo.parcelArray.join(",");
+                    urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$dist="
+                        + this.map.infoWindow.txtBuffer.value
+                        + "$ocupntTxt="
+                        + this.map.infoWindow.textoccupant.value
+                        + "$PDF="
+                        + ((dijit.byId('chkPdf').checked) ? "checked" : false)
+                        + "$CSV="
+                        + ((dijit.byId('chkCsv').checked) ? "checked" : false)
+                        + "$occupant="
+                        + ((dijit.byId('chkOccupants').checked) ? "checked" : false)
+                        + "$owner="
+                        + ((dijit.byId('chkOwners').checked) ? "checked" : false)
+                        + "$averyFormat="
+                        + dijit.byId('selectAvery').item.id[0]
+                        + "$parcelID="
+                        + dojo.parcelArray.join(",");
                 } else {
                     urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$parcelID=" + dojo.parcelArray.join(",");
                 }
@@ -130,28 +140,61 @@ function (declare, domConstruct, domStyle, lang, array, on, dom, domAttr, domCla
                     this.map.infoWindow.txtBuffer.value = dojo.configData.DefaultBufferDistance;
                 }
                 if (!(dijit.byId('selectAvery').item)) {
-                    dijit.byId('selectAvery').store.fetch({ query: { name: "5160" }, onComplete: function (items) {
-                        dijit.byId('selectAvery').setDisplayedValue(items[0].name[0]);
-                        dijit.byId('selectAvery').item = items[0];
-                    }
+                    dijit.byId('selectAvery').store.fetch({
+                        query: { name: "5160" },
+                        onComplete: function (items) {
+                            dijit.byId('selectAvery').setDisplayedValue(items[0].name[0]);
+                            dijit.byId('selectAvery').item = items[0];
+                        }
                     });
                     dijit.byId('chkOwners').checked = true;
                     dijit.byId('chkPdf').checked = true;
                 }
 
-                urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$dist=" + this.map.infoWindow.txtBuffer.value + "$ocupntTxt=" + this.map.infoWindow.textoccupant.value + "$PDF=" + ((dijit.byId('chkPdf').checked) ? "checked" : false)
-            + "$CSV=" + ((dijit.byId('chkCsv').checked) ? "checked" : false) + "$occupant=" + ((dijit.byId('chkOccupants').checked) ? "checked" : false)
-             + "$owner=" + ((dijit.byId('chkOwners').checked) ? "checked" : false)
-            + "$averyFormat=" + dijit.byId('selectAvery').item.id[0] + "$roadID=" + dojo.roadArray.join(",");
+                urlStr = encodeURI(url.path)
+                    + "?extent="
+                    + mapExtent
+                    + "$dist="
+                    + this.map.infoWindow.txtBuffer.value
+                    + "$ocupntTxt="
+                    + this.map.infoWindow.textoccupant.value
+                    + "$PDF="
+                    + ((dijit.byId('chkPdf').checked) ? "checked" : false)
+                    + "$CSV="
+                    + ((dijit.byId('chkCsv').checked) ? "checked" : false)
+                    + "$occupant="
+                    + ((dijit.byId('chkOccupants').checked) ? "checked" : false)
+                    + "$owner="
+                    + ((dijit.byId('chkOwners').checked) ? "checked" : false)
+                    + "$averyFormat="
+                    + dijit.byId('selectAvery').item.id[0]
+                    + "$roadID="
+                    + dojo.roadArray.join(",");
             } else if (dojo.overLayArray.length > 0) {
 
                 if (this.map.getLayer("tempBufferLayer").graphics.length > 0) {
-                    urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$dist=" + this.map.infoWindow.txtBuffer.value + "$ocupntTxt=" + this.map.infoWindow.textoccupant.value + "$PDF=" + ((dijit.byId('chkPdf').checked) ? "checked" : false)
-            + "$CSV=" + ((dijit.byId('chkCsv').checked) ? "checked" : false) + "$occupant=" + ((dijit.byId('chkOccupants').checked) ? "checked" : false)
-             + "$owner=" + ((dijit.byId('chkOwners').checked) ? "checked" : false)
-            + "$averyFormat=" + dijit.byId('selectAvery').item.id[0] + "$overlayID=" + dojo.overLayArray.join(",") + "$Where=" + dojo.overlay;
-                }
-                else if ((dojo.overLayGraphicShare) && (this.map.getLayer("tempBufferLayer").graphics.length === 0)) {
+                    urlStr = encodeURI(url.path)
+                        + "?extent="
+                        + mapExtent
+                        + "$dist="
+                        + this.map.infoWindow.txtBuffer.value
+                        + "$ocupntTxt="
+                        + this.map.infoWindow.textoccupant.value
+                        + "$PDF="
+                        + ((dijit.byId('chkPdf').checked) ? "checked" : false)
+                        + "$CSV="
+                        + ((dijit.byId('chkCsv').checked) ? "checked" : false)
+                        + "$occupant="
+                        + ((dijit.byId('chkOccupants').checked) ? "checked" : false)
+                        + "$owner="
+                        + ((dijit.byId('chkOwners').checked) ? "checked" : false)
+                        + "$averyFormat="
+                        + dijit.byId('selectAvery').item.id[0]
+                        + "$overlayID="
+                        + dojo.overLayArray.join(",")
+                        + "$Where="
+                        + dojo.overlay;
+                } else if ((dojo.overLayGraphicShare) && (this.map.getLayer("tempBufferLayer").graphics.length === 0)) {
                     urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$overlayID=" + dojo.overLayArray.join(",") + "$Where=" + dojo.overlay;
                 } else {
                     urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$overlayID=" + dojo.overLayArray.join(",");
@@ -203,28 +246,27 @@ function (declare, domConstruct, domStyle, lang, array, on, dom, domAttr, domCla
                         domClass.replace(this.divAppContainer, "esriCTFullHeight", "esriCTZeroHeight");
                     }
 
-                        /**
-                        * remove event handlers from sharing options
-                        */
-                        if (this.facebookHandle) {
-                            this.facebookHandle.remove();
-                            this.twitterHandle.remove();
-                            this.emailHandle.remove();
-                        }
-                        /**
-                        * add event handlers to sharing options
-                        */
-                        this.facebookHandle = on(this.tdFacebook, "click", lang.hitch(this, function () { this._share("facebook", tinyUrl, urlStr); }));
-                        this.twitterHandle = on(this.tdTwitter, "click", lang.hitch(this, function () { this._share("twitter", tinyUrl, urlStr); }));
-                        this.emailHandle = on(this.tdMail, "click", lang.hitch(this, function () { this._share("email", tinyUrl, urlStr); }));
+                    /**
+                    * remove event handlers from sharing options
+                    */
+                    if (this.facebookHandle) {
+                        this.facebookHandle.remove();
+                        this.twitterHandle.remove();
+                        this.emailHandle.remove();
+                    }
+                    /**
+                    * add event handlers to sharing options
+                    */
+                    this.facebookHandle = on(this.tdFacebook, "click", lang.hitch(this, function () { this._share("facebook", tinyUrl, urlStr); }));
+                    this.twitterHandle = on(this.tdTwitter, "click", lang.hitch(this, function () { this._share("twitter", tinyUrl, urlStr); }));
+                    this.emailHandle = on(this.tdMail, "click", lang.hitch(this, function () { this._share("email", tinyUrl, urlStr); }));
 
                 }), lang.hitch(this, function (error) {
                     domClass.replace(this.domNode, "esriCTImgSocialMedia-select", "esriCTImgSocialMedia");
                     alert(sharedNls.errorMessages.shareLoadingFailed);
 
                 }));
-            }
-            catch (err) {
+            } catch (err) {
                 alert(sharedNls.errorMessages.shareLoadingFailed);
             }
         },
@@ -274,15 +316,15 @@ function (declare, domConstruct, domStyle, lang, array, on, dom, domAttr, domCla
         _shareOptions: function (site, url) {
             domClass.replace(this.domNode, "esriCTImgSocialMedia", "esriCTImgSocialMedia-select");
             switch (site) {
-                case "facebook":
-                    window.open(string.substitute(dojo.configData.MapSharingOptions.FacebookShareURL, [url]));
-                    break;
-                case "twitter":
-                    window.open(string.substitute(dojo.configData.MapSharingOptions.TwitterShareURL, [url]));
-                    break;
-                case "email":
-                    parent.location = string.substitute(dojo.configData.MapSharingOptions.ShareByMailLink, [url]);
-                    break;
+            case "facebook":
+                window.open(string.substitute(dojo.configData.MapSharingOptions.FacebookShareURL, [url]));
+                break;
+            case "twitter":
+                window.open(string.substitute(dojo.configData.MapSharingOptions.TwitterShareURL, [url]));
+                break;
+            case "email":
+                parent.location = string.substitute(dojo.configData.MapSharingOptions.ShareByMailLink, [url]);
+                break;
             }
         },
 
@@ -301,8 +343,7 @@ function (declare, domConstruct, domStyle, lang, array, on, dom, domAttr, domCla
                 this.map.infoWindow.textoccupant.value = (window.location.toString().split("$ocupntTxt=")[1].split("$PDF")[0]);
                 if (parcel) {
                     annotation = "$parcelID=";
-                }
-                else {
+                } else {
                     annotation = "$roadID=";
                 }
                 dijit.byId('selectAvery').store.fetch({
