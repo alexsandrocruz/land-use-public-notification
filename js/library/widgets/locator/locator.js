@@ -1,4 +1,4 @@
-﻿/*global define,dojo,dojoConfig,window,setTimeout,clearTimeout,alert,esri,dijit */
+﻿/*global define,dojo,dojoConfig,alert,esri,dijit */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
 /*
  | Copyright 2013 Esri
@@ -512,7 +512,7 @@ define([
 
             _displayRoadLineContent: function (nameArray, i) {
                 var previousFoundName, searchString = lang.trim(this.txtAddress.value).toLowerCase(), divDisplayRow, divDisplayColumn, _this = this,
-		roadLineLayerSettings = dojo.configData.RoadCenterLayerSettings;
+        roadLineLayerSettings = dojo.configData.RoadCenterLayerSettings;
                 if (0 === i || searchString !== nameArray[i].attributes[roadLineLayerSettings.SearchDisplayFields].toLowerCase()) {
                     if (i > 0) {
                         previousFoundName = nameArray[i - 1].attributes[roadLineLayerSettings.SearchDisplayFields];

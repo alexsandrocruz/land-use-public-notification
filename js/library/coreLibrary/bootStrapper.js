@@ -1,4 +1,4 @@
-﻿/*global define,dojo,esri,document,require,dojoConfig,alert */
+﻿/*global define,dojo,esri,require,dojoConfig,alert */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
 /*
  | Copyright 2013 Esri

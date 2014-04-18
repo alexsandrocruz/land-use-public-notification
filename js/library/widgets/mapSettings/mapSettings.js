@@ -1,4 +1,4 @@
-﻿/*global define,dojo,dojoConfig,window,setTimeout,alert,esri,dijit,query,Graphic */
+﻿/*global define,dojo,dojoConfig,alert,esri,dijit,query,Graphic */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
 /*
  | Copyright 2013 Esri
@@ -883,7 +883,7 @@ define([
 
              addShareOverLayToMap: function (fset, q) {
                  var _self = this,
-		 rendererColor = dojo.configData.OverlayLayerSettings[0].OverlayHighlightColor,
+         rendererColor = dojo.configData.OverlayLayerSettings[0].OverlayHighlightColor,
                   layer, lineColor, fillColor, symbol, geometryForBuffer, feature = fset.features[q];
                  if (fset.features[q]) {
                      if (fset.features.length > 1) {

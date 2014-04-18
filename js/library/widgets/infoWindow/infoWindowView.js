@@ -1,4 +1,4 @@
-﻿/*global define, document, Modernizr,dojoConfig,dijit,dojo,alert,esri ,event,navigator*/
+﻿/*global define,Modernizr,dojoConfig,dijit,dojo,alert,esri ,event*/
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
 /*
  | Copyright 2013 Esri
@@ -422,7 +422,7 @@ define([
 
              _createAveryParam: function (features) {
                  var averyFieldsCollection = dojo.configData.AveryLabelSettings[0].AveryFieldsCollection, featureCount, fieldCount, occupantFields, strAveryParam,
-		 averyFields, subFields, i;
+         averyFields, subFields, i;
                  occupantFields = dojo.configData.AveryLabelSettings[0].OccupantFields.split(",");
                  try {
                      strAveryParam = '';
