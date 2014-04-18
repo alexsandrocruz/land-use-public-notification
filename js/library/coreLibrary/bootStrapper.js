@@ -1,4 +1,4 @@
-﻿/*global require */
+﻿/*global define,dojo,esri,document,require,dojoConfig,alert */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
 /*
  | Copyright 2013 Esri
@@ -22,20 +22,19 @@ require([
         "application/js/config",
         "dojo/domReady!",
          "esri/config"
-    ], function (widgetLoader, config, domReady, esriConfig) {
+    ], function (WidgetLoader, config, domReady, esriConfig) {
 
         //========================================================================================================================//
 
         try {
-            esriConfig.defaults.io.proxyUrl = "proxy/proxy.ashx";
-            esriConfig.defaults.io.alwaysUseProxy = false;
+            dojo.configData = config;
+            esriConfig.defaults.io.proxyUrl = dojoConfig.baseURL + dojo.configData.ProxyUrl;
             esriConfig.defaults.io.timeout = 180000;
             /**
             * load application configuration settings from configuration file
             * create an object of widget loader class
             */
-            dojo.configData = config;
-            var applicationWidgetLoader = new widgetLoader();
+            var applicationWidgetLoader = new WidgetLoader();
             applicationWidgetLoader.startup();
 
         } catch (ex) {

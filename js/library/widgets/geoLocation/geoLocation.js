@@ -1,4 +1,4 @@
-﻿/*global define,dojo,dojoConfig,Modernizr,alert */
+﻿/*global define,dojo,dojoConfig,Modernizr,navigator,alert */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
 /*
  | Copyright 2013 Esri
@@ -28,14 +28,14 @@ define([
     "esri/symbols/PictureMarkerSymbol",
     "esri/SpatialReference",
     "esri/graphic",
-    "dojo/i18n!nls/localizedStrings"
+    "dojo/i18n!application/js/library/nls/localizedStrings"
   ],
-function (declare, lang, domConstruct, on, topic, _WidgetBase, GeometryService, Point, PictureMarkerSymbol, SpatialReference, Graphic, nls) {
+function (declare, lang, domConstruct, on, topic, _WidgetBase, GeometryService, Point, PictureMarkerSymbol, SpatialReference, Graphic, sharedNls) {
 
     //========================================================================================================================//
 
     return declare([_WidgetBase], {
-        nls: nls,
+        sharedNls: sharedNls,
 
         /**
         * create geolocation widget
@@ -50,7 +50,7 @@ function (declare, lang, domConstruct, on, topic, _WidgetBase, GeometryService, 
             * if browser is not supported, geolocation widget is not created
             */
             if (Modernizr.geolocation) {
-                this.domNode = domConstruct.create("div", { "title": this.title, "class": "esriCTTdGeolocation" }, null);
+                this.domNode = domConstruct.create("div", { "title": sharedNls.tooltips.locate, "class": "esriCTTdGeolocation" }, null);
 
                 this.own(on(this.domNode, "click", lang.hitch(this, function () {
 
@@ -92,7 +92,7 @@ function (declare, lang, domConstruct, on, topic, _WidgetBase, GeometryService, 
                     currentBaseMap = self.map.getLayer(self.map.visibleLayerID);
                     if (currentBaseMap.visible) {
                         if (!currentBaseMap.fullExtent.contains(newPoint[0])) {
-                            alert(nls.errorMessages.invalidLocation);
+                            alert(sharedNls.errorMessages.invalidLocation);
                             return;
                         }
                     }
@@ -100,10 +100,10 @@ function (declare, lang, domConstruct, on, topic, _WidgetBase, GeometryService, 
                     self.map.centerAndZoom(mapPoint, dojo.configData.ZoomLevel);
                     self._addGraphic(mapPoint);
                 }, function () {
-                    alert(nls.errorMessages.invalidProjection);
+                    alert(sharedNls.errorMessages.invalidProjection);
                 });
             }, function () {
-                alert(nls.errorMessages.invalidLocation);
+                alert(sharedNls.errorMessages.invalidLocation);
             });
         },
 

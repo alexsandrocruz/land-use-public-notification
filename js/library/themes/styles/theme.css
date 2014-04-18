@@ -73,7 +73,7 @@
     width: 35%;
     overflow: hidden;
     white-space: nowrap;
-    text-overflow: ellipsis; 
+    text-overflow: ellipsis;
 }
 
 .esriCTRightTab
@@ -98,89 +98,49 @@
     z-index: 1000;
     background-repeat: no-repeat;
 }
-
-.esriCTTdHeaderSearch
+.esriCTTdHeaderSearch, .esriCTTdHeaderSearch-select, .esriCTTdGeolocation, .esriCTImgSocialMedia-select, .esriCTImgSocialMedia, .esriCTRouteImg, .esriCTRouteImg-select, .esriCTHelpImg, .esriCTImgPrint
 {
     margin: 12px 24px;
-    background-image: url("../images/locate.png");
     background-repeat: no-repeat;
     background-position: center;
     float: left;
-    height: 26px;
-    width: 26px;
+    height: 24px;
+    width: 24px;
     float: left;
     cursor: pointer;
-    background-size: 26px;
+}
+.esriCTTdHeaderSearch
+{
+    background-image: url("../images/img24x24/search-24.png");
 }
 
 .esriCTTdHeaderSearch-select
 {
-    margin: 12px 24px;
-    background-image: url("../images/locate-select.png");
-    background-repeat: no-repeat;
-    background-position: center;
-    float: left;
-    height: 26px;
-    width: 26px;
-    float: left;
-    cursor: pointer;
-    background-size: 26px;
+    background-image: url("../images/img24x24/search-select-24.png");
 }
 
 .esriCTTdGeolocation
 {
-    margin: 12px 24px;
-    background-image: url("../images/imgGeolocation.png");
-    background-repeat: no-repeat;
-    background-position: center;
-    float: left;
-    height: 26px;
-    width: 26px;
-    float: left;
-    cursor: pointer;
-    background-size: 26px;
+    background-image: url("../images/img24x24/imgGeolocation-24.png");
 }
 
 .esriCTImgSocialMedia-select
 {
-    margin: 12px 24px;
-    background-image: url("../images/imgSocialMedia-select.png");
-    background-repeat: no-repeat;
-    background-position: center;
-    float: left;
-    height: 26px;
-    width: 26px;
-    float: left;
-    cursor: pointer;
-    background-size: 26px;
+    background-image: url("../images/img24x24/imgSocialMedia-select-24.png");
 }
 
 .esriCTImgSocialMedia
 {
-    margin: 12px 24px;
-    background-image: url("../images/imgSocialMedia.png");
-    background-repeat: no-repeat;
-    background-position: center;
-    float: left;
-    height: 26px;
-    width: 26px;
-    float: left;
-    cursor: pointer;
-    background-size: 26px;
+    background-image: url("../images/img24x24/imgSocialMedia-24.png");
 }
 
 .esriCTHelpImg
 {
-    margin: 12px 24px;
-    background-image: url("../images/help.png");
-    background-repeat: no-repeat;
-    background-position: center;
-    float: left;
-    height: 26px;
-    width: 26px;
-    float: left;
-    cursor: pointer;
-    background-size: 26px;
+    background-image: url("../images/img24x24/help-24.png");
+}
+.esriCTImgPrint
+{
+    background-image: url("../images/img24x24/imgPrint-24.png");
 }
 
 .esriCTSearchByAddress, .esriCTSearchByUnSelectedFeature, .esriCTSearchByUnSelectedActivity, .esriCTSearchByUnSelectedAddress, .esriCTSearchByFeature, .esriCTSearchByActivity
@@ -599,52 +559,32 @@
     margin: 0 auto;
     text-align: center;
 }
-
-.facebook
+.facebook, .twitter, .email, .embedding
 {
-    background-image: url('../images/img_facebook.png') !important;
     background-repeat: no-repeat;
     background-position: center;
-    height: 26px !important;
-    width: 26px;
+    height: 24px !important;
+    width: 24px;
     margin: 0 auto;
     cursor: pointer;
-    background-size: 26px;
+}
+.facebook
+{
+    background-image: url('../images/img24x24/img_facebook-24.png');
 }
 
 .twitter
 {
-    background-image: url('../images/img_twitter.png') !important;
-    background-repeat: no-repeat;
-    background-position: center;
-    height: 26px !important;
-    width: 26px;
-    margin: 0 auto;
-    cursor: pointer;
-    background-size: 26px;
+    background-image: url('../images/img24x24/img_twitter-24.png');
 }
 
 .email
 {
-    background-image: url('../images/img_email.png') !important;
-    background-repeat: no-repeat;
-    background-position: center;
-    height: 26px !important;
-    width: 26px;
-    margin: 0 auto;
-    cursor: pointer;
-    background-size: 26px;
+    background-image: url('../images/img24x24/img_email-24.png');
 }
 .embedding
 {
-    background-image: url("../images/embedding.png") !important;
-    background-repeat: no-repeat;
-    background-position: center;
-    height: 26px !important;
-    width: 26px;
-    margin: 0 auto;
-    cursor: pointer;
-    background-size: 26px;
+    background-image: url("../images/img24x24/embedding-24.png");
 }
 
 /* End of Share Container Styles */
@@ -720,7 +660,6 @@
 
 .BasemapToggle .toggleButton
 {
-    border-radius: 0px !important;
     border: 2px solid #007ac2 !important;
 }
 
@@ -797,19 +736,6 @@
 
 /* End of CSS for Loading Indicator */
 
-.esriCTImgPrint
-{
-    margin: 12px 24px;
-    background-image: url("../images/imgPrint.png");
-    background-repeat: no-repeat;
-    background-position: center;
-    float: left;
-    height: 26px !important;
-    width: 26px;
-    float: left;
-    cursor: pointer;
-    background-size: 26px;
-}
 
 .esritbl
 {
@@ -1073,10 +999,15 @@
 {
     color: #007ac2;
     cursor: pointer;
-    float : left;
+    float: left;
     margin: 2px;
 }
-.downloadNotification{position:absolute; bottom:8px; right:10px}
+.downloadNotification
+{
+    position: absolute;
+    bottom: 8px;
+    right: 10px;
+}
 
 .esrictDivRoadSpan
 {

@@ -1,4 +1,4 @@
-﻿/*global define,Modernizr,dojoConfig,dijit,dojo,alert,esri ,event*/
+﻿/*global define, document, Modernizr,dojoConfig,dijit,dojo,alert,esri ,event*/
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
 /*
  | Copyright 2013 Esri
@@ -26,16 +26,32 @@ define([
         "dojo/dom-class",
         "dojo/topic",
         "esri/domUtils",
+        "esri/urlUtils",
         "../scrollBar/scrollBar",
-         "dojo/i18n!nls/localizedStrings",
         "dojo/text!./templates/infoWindow.html",
         "./infoWindowView"
 ],
-function (declare, domConstruct, domStyle, lang, on, dom, domClass, topic, domUtils, ScrollBar, nls, template, infoWindowView) {
+function (declare, domConstruct, domStyle, lang, on, dom, domClass, topic, domUtils, urlUtils, ScrollBar, template, infoWindowView) {
     return declare([infoWindowView], {
-        templateString: template,
 
+        templateString: template,
         postCreate: function () {
+
+            urlUtils.addProxyRule({
+                urlPrefix: dojo.configData.AveryLabelSettings[0].PDFServiceTask,
+                proxyUrl: dojoConfig.baseURL + dojo.configData.ProxyUrl
+            });
+
+            urlUtils.addProxyRule({
+                urlPrefix: dojo.configData.AveryLabelSettings[0].CSVServiceTask,
+                proxyUrl: dojoConfig.baseURL + dojo.configData.ProxyUrl
+            });
+
+            urlUtils.addProxyRule({
+                urlPrefix: dojo.configData.GeometryService,
+                proxyUrl: dojoConfig.baseURL + dojo.configData.ProxyUrl
+            });
+
             if (!this.infoWindowWidth) {
                 this.infoWindowWidth = "100px";
             }
@@ -77,7 +93,6 @@ function (declare, domConstruct, domStyle, lang, on, dom, domClass, topic, domUt
             });
             this.btnSubmitImage.src = dojoConfig.baseURL + "/js/library/themes/images/download.png";
             this.esriCTShowDetailsView.src = dojoConfig.baseURL + "/js/library/themes/images/navigation.png";
-            this.esriCTShowDetailsView.title = nls.navigation;
             this.attachInfoWindowEvents();
             this._getAveryTemplates();
         },
@@ -91,7 +106,6 @@ function (declare, domConstruct, domStyle, lang, on, dom, domClass, topic, domUt
             this.divInfoDetailsScroll.appendChild(detailsTab);
             this.esriCTShowDetailsView.setAttribute("checked", "info");
             this.esriCTShowDetailsView.src = dojoConfig.baseURL + "/js/library/themes/images/navigation.png";
-            this.esriCTShowDetailsView.title = nls.notify;
             domStyle.set(this.divInfoDetails, "display", "block");
             domStyle.set(this.divInfoNotify, "display", "none");
             this.setLocation(screenPoint);
@@ -124,7 +138,7 @@ function (declare, domConstruct, domStyle, lang, on, dom, domClass, topic, domUt
                 this.esriCTheadderPanel.innerHTML = infoTitle;
                 this.esriCTheadderPanel.title = str;
             } else {
-                this.esriCTheadderPanel.innerHTML = nls.showNullValueAs;
+                this.esriCTheadderPanel.innerHTML = dojo.configData.ShowNullValueAs;
             }
 
         },

@@ -1,4 +1,4 @@
-﻿/*global dojo,define */
+﻿/*global dojo,define,document */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
 /*
  | Copyright 2013 Esri
@@ -53,7 +53,7 @@ function (declare, domConstruct, on, topic, lang, _WidgetBase) {
         * @memberOf widgets/help/help
         */
         _showHelpPage: function () {
-            window.open();
+            window.open(dojo.configData.HelpURL);
         }
     });
 });

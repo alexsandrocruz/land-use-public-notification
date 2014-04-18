@@ -1,4 +1,4 @@
-﻿/*global define,Modernizr,dojoConfig,dijit,dojo,alert,esri ,event,_self*/
+﻿/*global define, document, Modernizr,dojoConfig,dijit,dojo,alert,esri ,event,navigator*/
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
 /*
  | Copyright 2013 Esri
@@ -42,7 +42,7 @@ define([
         "esri/tasks/FeatureSet",
         "esri/SpatialReference",
         "esri/graphic",
-        "dojo/i18n!nls/localizedStrings",
+        "dojo/i18n!application/js/library/nls/localizedStrings",
         "dijit/form/Button",
         "dijit/form/ComboBox",
         "dijit/form/CheckBox",
@@ -57,11 +57,11 @@ define([
         "dijit/_WidgetsInTemplateMixin"
 
     ],
-     function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domClass, string, window, topic, Query, QueryTask, query, array, Deferred, DeferredList, all, Color, Symbol, Geometry, TaskFeatureSet, SpatialReference, Graphic, nls, Button, ComboBox, CheckBox, BufferParameters, GeometryService, Geoprocessor, ItemFileReadStore, InfoWindowBase, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin) {
+     function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domClass, string, window, topic, Query, QueryTask, query, array, Deferred, DeferredList, all, Color, Symbol, Geometry, TaskFeatureSet, SpatialReference, Graphic, sharedNls, Button, ComboBox, CheckBox, BufferParameters, GeometryService, Geoprocessor, ItemFileReadStore, InfoWindowBase, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin) {
 
          //========================================================================================================================//
          return declare([InfoWindowBase, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
-             nls: nls,
+             sharedNls: sharedNls,
              attachInfoWindowEvents: function () {
                  this.own(on(this.esriCTShowDetailsView, "click", lang.hitch(this, function () {
                      if (this.esriCTShowDetailsView.getAttribute("checked") === "info") {
@@ -69,7 +69,7 @@ define([
                          domStyle.set(this.divInfoDetails, "display", "none");
                          domStyle.set(this.divInfoNotify, "display", "block");
                          this.esriCTShowDetailsView.src = dojoConfig.baseURL + "/js/library/themes/images/details.png";
-                         this.esriCTShowDetailsView.title = nls.details;
+                         this.esriCTShowDetailsView.title = dojo.configData.Details;
                          dijit.byId('selectAvery').store.fetch({ query: { name: "5160" }, onComplete: function (items) {
                              dijit.byId('selectAvery').setDisplayedValue(items[0].name[0]);
                              dijit.byId('selectAvery').item = items[0];
@@ -85,7 +85,7 @@ define([
                      } else {
                          this.esriCTShowDetailsView.setAttribute("checked", "info");
                          this.esriCTShowDetailsView.src = dojoConfig.baseURL + "/js/library/themes/images/navigation.png";
-                         this.esriCTShowDetailsView.title = "Notify";
+                         this.esriCTShowDetailsView.title = dojo.configData.Notify;
                          domStyle.set(this.divInfoDetails, "display", "block");
                          domStyle.set(this.divInfoNotify, "display", "none");
                      }
@@ -93,14 +93,14 @@ define([
              },
 
              _getAveryTemplates: function () {
-                 var averyTemplates = dojo.configData.AveryLabelSettings[0].AveryLabelTemplates,
+                 var averyTemplates = dojo.configData.AveryLabelSettings[0].AveryLabelTemplates, averyComboBox,
                   averyTypes, itemstore, i;
                  averyTypes = { identifier: 'id', items: [] };
                  for (i = 0; i < averyTemplates.length; i++) {
                      averyTypes.items[i] = { id: averyTemplates[i].value, name: averyTemplates[i].name };
                  }
                  itemstore = new ItemFileReadStore({ data: averyTypes });
-                 new ComboBox({
+                 averyComboBox = new ComboBox({
                      autocomplete: false,
                      hasdownarrow: true,
                      id: 'selectAvery',
@@ -137,7 +137,7 @@ define([
                      if (!(this.isNumeric)) {
                          this.dist.value = "";
                          this.dist.focus();
-                         topic.publish("showErrorMessage", 'spanFileUploadMessage', nls.errorMessages.enterNumeric, '#FF0000');
+                         topic.publish("showErrorMessage", 'spanFileUploadMessage', sharedNls.errorMessages.enterNumeric, '#FF0000');
                      } else if (!(this._isBufferValid(this.dist.value))) {
                          topic.publish("showErrorMessage", 'spanFileUploadMessage', 'Valid buffer range is between 1 to ' + maxBufferDistance + ' feet.', '#FF0000');
                          return;
@@ -157,7 +157,7 @@ define([
                                          }
                                          params.geometries = [polyLine];
                                      } else {
-                                         alert(nls.errorMessages.createBuffer);
+                                         alert(sharedNls.errorMessages.createBuffer);
                                      }
                                      params.distances = [this.dist.value];
                                      params.unit = GeometryService.UNIT_FOOT;
@@ -171,19 +171,19 @@ define([
                                      this._bufferParameters(this.dist);
                                  }
                              } else {
-                                 topic.publish("showErrorMessage", 'spanFileUploadMessage', nls.errorMessages.inValidAveryFormat, '#FF0000');
+                                 topic.publish("showErrorMessage", 'spanFileUploadMessage', sharedNls.errorMessages.inValidAveryFormat, '#FF0000');
                                  topic.publish("hideProgressIndicator");
                              }
                          } else {
-                             topic.publish("showErrorMessage", 'spanFileUploadMessage', nls.errorMessages.fileSelect, '#FF0000');
+                             topic.publish("showErrorMessage", 'spanFileUploadMessage', sharedNls.errorMessages.fileSelect, '#FF0000');
                              topic.publish("hideProgressIndicator");
                          }
                      } else {
-                         topic.publish("showErrorMessage", 'spanFileUploadMessage', nls.errorMessages.selectProperty, '#FF0000');
+                         topic.publish("showErrorMessage", 'spanFileUploadMessage', sharedNls.errorMessages.selectProperty, '#FF0000');
                          topic.publish("hideProgressIndicator");
                      }
                  } else {
-                     topic.publish("showErrorMessage", 'spanFileUploadMessage', nls.errorMessages.enterBufferDist, '#FF0000');
+                     topic.publish("showErrorMessage", 'spanFileUploadMessage', sharedNls.errorMessages.enterBufferDist, '#FF0000');
                      topic.publish("hideProgressIndicator");
                  }
              },
@@ -226,21 +226,23 @@ define([
 
              //Check for valid numeric strings
              isNumeric: function (dist) {
+                 var returnValue;
                  if (!/\D/.test(dist)) {
-                     return true;
+                     returnValue = true;
                  }
                  else if (/^\d+\.\d+$/.test(dist)) {
-                     return true;
+                     returnValue = true;
                  }
                  else {
-                     return false;
+                     returnValue = false;
                  }
+                 return returnValue;
              },
 
              //Validate the numeric text box control
              onlyNumbers: function (evt) {
                  var charCode;
-                 charCode = (evt.which) ? evt.which : event.keyCode;
+                 charCode = evt.which || event.keyCode;
                  if (charCode > 31 && (charCode < 48 || charCode > 57)) {
                      return false;
                  }
@@ -261,7 +263,7 @@ define([
                      }
                      params.geometries = [polygon];
                  } else {
-                     alert(nls.errorMessages.createBuffer);
+                     alert(sharedNls.errorMessages.createBuffer);
                  }
                  params.distances = [dist.value];
                  params.unit = GeometryService.UNIT_FOOT;
@@ -319,16 +321,18 @@ define([
                  }
                  if (featureSet.features.length === 0) {
                      if (!road) {
-                         alert(nls.errorMessages.noParcel);
+                         alert(sharedNls.errorMessages.noParcel);
                      } else {
-                         alert(nls.noAdjacentParcel + this.dist.value + nls.feet);
+                         alert(dojo.configData.NoAdjacentParcel + this.dist.value + dojo.configData.FeetCaption);
                      }
                      topic.publish("hideProgressIndicator");
                  } else {
                      try {
                          poly = new Geometry.Polygon(this.map.spatialReference);
                          for (feature in features) {
-                             poly.addRing(features[feature].geometry.rings[0]);
+                             if (features.hasOwnProperty(feature)) {
+                                 poly.addRing(features[feature].geometry.rings[0]);
+                             }
                          }
                          this.map.setExtent(poly.getExtent().expand(3));
                          topic.publish("drawPolygon", features, false);
@@ -417,13 +421,12 @@ define([
              },
 
              _createAveryParam: function (features) {
-                 var averyFieldsCollection = dojo.configData.AveryLabelSettings[0].AveryFieldsCollection, featureCount, fieldCount, occupantFields, strAveryParam
-                 , averyFields, subFields,i;
+                 var averyFieldsCollection = dojo.configData.AveryLabelSettings[0].AveryFieldsCollection, featureCount, fieldCount, occupantFields, strAveryParam,
+		 averyFields, subFields, i;
                  occupantFields = dojo.configData.AveryLabelSettings[0].OccupantFields.split(",");
                  try {
                      strAveryParam = '';
                      for (featureCount = 0; featureCount < features.length; featureCount++) {
-                         averyFields;
                          if (this.owners === "checked" || this.owners) {
                              for (fieldCount = 0; fieldCount < averyFieldsCollection.length; fieldCount++) {
                                  averyFields = averyFieldsCollection[fieldCount];
@@ -480,28 +483,27 @@ define([
              },
 
              _executeGPTask: function (pdf, csv, strAveryParam, strCsvParam) {
-                 var gpTaskAvery, gpTaskCsv,params, csvParams;
+                 var gpTaskAvery, gpTaskCsv, params, csvParams;
                  gpTaskAvery = new Geoprocessor(dojo.configData.AveryLabelSettings[0].PDFServiceTask);
                  gpTaskCsv = new Geoprocessor(dojo.configData.AveryLabelSettings[0].CSVServiceTask);
                  topic.publish("showProgressIndicator");
                  if (pdf) {
-                     _self = this;
                      params = { "Label_Format": this.averyFormat, "Address_Items": strAveryParam };
-                     gpTaskAvery.submitJob(params, _self._completeGPJob, _self._statusCallback, _self._errCallback);
+                     gpTaskAvery.submitJob(params, lang.hitch(this, this._completeGPJob), this._statusCallback, this._errCallback);
                  }
                  if (csv) {
-                     _self = this;
                      csvParams = { "Address_Items": strCsvParam };
-                     gpTaskCsv.submitJob(csvParams, _self._completeCsvGPJob, _self._statusCallback);
+                     gpTaskCsv.submitJob(csvParams, lang.hitch(this, this._completeCsvGPJob), this._statusCallback);
                  }
                  topic.publish("hideProgressIndicator");
              },
 
              //PDF generation callback completion event handler
              _completeGPJob: function (jobInfo) {
-                 var gpTaskAvery = new Geoprocessor(dojo.configData.AveryLabelSettings[0].PDFServiceTask);
+                 var gpTaskAvery;
+                 gpTaskAvery = new Geoprocessor(dojo.configData.AveryLabelSettings[0].PDFServiceTask);
                  if (jobInfo.jobStatus !== "esriJobFailed") {
-                     gpTaskAvery.getResultData(jobInfo.jobId, "Output_File", _self._downloadFile);
+                     gpTaskAvery.getResultData(jobInfo.jobId, "Output_File", this._downloadFile);
                      if (this.window.location.toString().split("$displayInfo=").length > 1) {
                          if (!dojo.shareinfo) {
                              dojo.shareinfo = true;
@@ -515,14 +517,13 @@ define([
              _completeCsvGPJob: function (jobInfo) {
                  var gpTaskAvery = new Geoprocessor(dojo.configData.AveryLabelSettings[0].CSVServiceTask);
                  if (jobInfo.jobStatus !== "esriJobFailed") {
-                     gpTaskAvery.getResultData(jobInfo.jobId, "Output_File", _self._downloadCSVFile);
+                     gpTaskAvery.getResultData(jobInfo.jobId, "Output_File", this._downloadCSVFile);
                      if (this.window.location.toString().split("$displayInfo=").length > 1) {
                          if (!dojo.shareinfo) {
                              dojo.shareinfo = true;
                              topic.publish("shareInfoWindow");
                          }
                      }
-
                      topic.publish("hideProgressIndicator");
                  }
              },
@@ -531,7 +532,7 @@ define([
              _statusCallback: function (jobInfo) {
                  var status = jobInfo.jobStatus;
                  if (status === "esriJobFailed") {
-                     alert(nls.errorMessages.noDataAvailable);
+                     alert(sharedNls.errorMessages.noDataAvailable);
                  }
              },
 

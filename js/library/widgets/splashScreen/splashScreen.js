@@ -1,4 +1,4 @@
-﻿/*global */
+﻿/*global define,dojo */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
 /*
  | Copyright 2014 Esri
@@ -32,7 +32,7 @@ define([
     "../scrollBar/scrollBar"
     ],
 
-     function (declare, domConstruct, domStyle, lang, domClass, domAttr, on, domGeom, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, nls, scrollBar) {
+     function (declare, domConstruct, domStyle, lang, domClass, domAttr, on, domGeom, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, nls, ScrollBar) {
          return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
              templateString: template,
              nls: nls,
@@ -54,8 +54,8 @@ define([
                  domStyle.set(this.domNode, "display", "block");
                  this.splashScreenContent = domConstruct.create("div", { "class": "esriGovtSplashContent" }, this.splashScreenScrollBarContainer);
                  this.splashScreenScrollBarContainer.style.height = (this.splashScreenDialogContainer.offsetHeight - 70) + "px";
-                 domAttr.set(this.splashScreenContent, "innerHTML", nls.splashScreenContent);
-                 this.splashScreenScrollbar = new scrollBar({ domNode: this.splashScreenScrollBarContainer });
+                 domAttr.set(this.splashScreenContent, "innerHTML", dojo.configData.SplashScreen.SplashScreenContent);
+                 this.splashScreenScrollbar = new ScrollBar({ domNode: this.splashScreenScrollBarContainer });
                  domClass.add(this.splashScreenScrollbar._scrollBarContent, "splashScreenscrollBarheight");
                  this.splashScreenScrollbar.setContent(this.splashScreenContent);
                  this.splashScreenScrollbar.createScrollBar();

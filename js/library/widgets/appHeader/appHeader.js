@@ -1,4 +1,4 @@
-﻿/*global dojo,define,dojoConfig */
+﻿/*global dojo,define,document,dojoConfig */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
 /*
  | Copyright 2013 Esri
@@ -27,16 +27,14 @@ define([
     "dijit/_TemplatedMixin",
     "dijit/_WidgetsInTemplateMixin",
     "dojo/dom-class",
-     "dojo/topic",
-    "dojo/i18n!nls/localizedStrings"
+     "dojo/topic"
     ],
-     function (declare, domConstruct, lang, domAttr, dom, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, domClass, topic, nls) {
+     function (declare, domConstruct, lang, domAttr, dom, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, domClass, topic) {
 
          //========================================================================================================================//
 
          return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
              templateString: template,
-             nls: nls,
 
              /**
              * create header panel

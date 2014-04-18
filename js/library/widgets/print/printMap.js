@@ -1,4 +1,4 @@
-﻿/*global dojo,define */
+﻿/*global dojo,define,document,window */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
 /*
  | Copyright 2013 Esri
@@ -64,7 +64,7 @@ function (declare, domConstruct, on, topic, lang, _WidgetBase, esriMap, printMap
                 "Extent": this.map.extent,
                 "Window": window,
                 "BaseMapLayer": this.map.getLayer("esriCTbasemap")
-            }
+            };
             window.showModalDialog("js/library/widgets/print/templates/print.html", dataObject);
         },
 

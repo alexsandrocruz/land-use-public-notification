@@ -1,4 +1,4 @@
-﻿/*global dojo,define,require,esri */
+﻿/*global dojo,define,document,require,window,esri */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
 /*
  | Copyright 2013 Esri
@@ -92,5 +92,3 @@ require([
      });
 
  });
-
-
