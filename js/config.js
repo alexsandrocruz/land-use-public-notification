@@ -54,7 +54,7 @@ define([], function () {
 
         RoadDisplayText: "Road Centerline",
 
-        OverLayDisplayText: "OverLay Layers",
+        OverLayDisplayText: "School Districts",
 
         AdjacentParcels: "Add adjacent parcel",
 
