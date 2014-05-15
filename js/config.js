@@ -1,5 +1,5 @@
 ﻿/*global define */
-/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
+/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /*
  | Copyright 2013 Esri
  |
@@ -29,11 +29,18 @@ define([], function () {
         // 5.  Specify header widget settings                - [ Tag(s) to look for: AppHeaderWidgets ]
         // 6.  Specify URLs for base maps                    - [ Tag(s) to look for: BaseMapLayers ]
         // 7.  Set initial map extent                        - [ Tag(s) to look for: DefaultExtent ]
-        // 8.  Specify URLs for operational layers           - [ Tag(s) to look for: OperationalLayers]
+        // 8.  Specify settings for overlay                  - [ Tag(s) to look for: OperationalLayers]
+        //     operational layers
         // 9.  Customize zoom level for address search       - [ Tag(s) to look for: ZoomLevel ]
-        // 10.  Customize address search settings            - [ Tag(s) to look for: LocatorSettings]
-        // 11.  Set URL for geometry service                 - [ Tag(s) to look for: GeometryService ]
-        // 12. Specify URLs for map sharing                  - [ Tag(s) to look for: MapSharingOptions,TinyURLServiceURL, TinyURLResponseAttribute, FacebookShareURL, TwitterShareURL, ShareByMailLink ]
+        // 10.  Specify settings for parcel                  - [ Tag(s) to look for: OperationalLayers]
+        //     layer
+        // 11. Specify settings for roadLine                 - [ Tag(s) to look for: OperationalLayers]
+        //     layer
+        //      Settings for create point layer graphics     - [ Tag(s) to look for: PointSymbology]
+        //     Avery Label Settings                          - [ Tag(s) to look for: AveryLabelSettings]
+        // 12. Customize address search settings             - [ Tag(s) to look for: SearchSettings]
+        // 13. Set URL for geometry service                  - [ Tag(s) to look for: GeometryService ]
+        // 14. Specify URLs for map sharing                  - [ Tag(s) to look for: MapSharingOptions,TinyURLServiceURL, TinyURLResponseAttribute, FacebookShareURL, TwitterShareURL, ShareByMailLink ]
 
         // ------------------------------------------------------------------------------------------------------------------------
         // GENERAL SETTINGS
@@ -49,33 +56,6 @@ define([], function () {
 
         // Set URL of help page/portal
         HelpURL: "help.htm",
-
-        ParcelDisplayText: "ParcelID/Address",
-
-        RoadDisplayText: "Road Centerline",
-
-        OverLayDisplayText: "School Districts",
-
-        AdjacentParcels: "Add adjacent parcel",
-
-        AdjacentRoad: "Add adjacent road",
-
-        BackBtn: "Back",
-
-        ParcelsCount: "Parcels found at this location",
-
-        NoAdjacentParcel: "There are no parcels adjacent to the road within",
-
-        FeetCaption: "feet",
-
-        Details: "Details",
-
-        Notify: "notify",
-
-        ToolTipContents: {
-            Parcel: "Press Ctrl + Map click to select parcel<br>Click on a selected parcel when done",
-            Road: "Press Ctrl + Map click to select road<br>Click on a selected road when done"
-        },
 
         //Set splash window content - Message that appears when the application starts
         SplashScreen: {
@@ -120,18 +100,29 @@ define([], function () {
         // Minimum width should be 330 for the info-popup in pixels
         InfoPopupWidth: 350,
 
+        // ------------------------------------------------------------------------------------------------------------------------
+        // BASEMAP SETTINGS
+        // ------------------------------------------------------------------------------------------------------------------------
+        // Set baseMap layers
+        BaseMapLayers: [{
+            Key: "parcelMap",
+            ThumbnailSource: "js/library/themes/images/parcelmap.png",
+            Name: "Parcel Map",
+            MapURL: "http://tryitlive.arcgis.com/arcgis/rest/services/ParcelPublicAccessMI/MapServer"
+        }, {
+            Key: "taxMap",
+            ThumbnailSource: "js/library/themes/images/taxmap.png",
+            Name: "Tax Map",
+            MapURL: "http://tryitlive.arcgis.com/arcgis/rest/services/TaxParcelMI/MapServer"
+        }, {
+            Key: "imagery",
+            ThumbnailSource: "js/library/themes/images/imagery.png",
+            Name: "Imagery",
+            MapURL: "http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer"
+        }],
+
         // Set string value to be shown for null or blank values
         ShowNullValueAs: "N/A",
-
-        GroupURL: "http://www.arcgis.com/sharing/rest/",
-
-        SearchURL: "http://www.arcgis.com/sharing/rest/search?q=group:",
-
-        BasemapGroupTitle: "Land Use Public Notification", //CyberTech Systems and Software Limited
-
-        BasemapGroupOwner: "sagarnair_cssl", //cybertechagol
-
-        WebmapThumbnail: "js/library/themes/images/not-available.png",
 
         // Initial map extent. Use comma (,) to separate values and dont delete the last comma
         DefaultExtent: "-9273520, 5249870, -9270620, 5251510",
@@ -139,26 +130,26 @@ define([], function () {
 
         //Overlay layer settings refers to the other operational layers configured apart from the standard layers.
         // ------------------------------------------------------------------------------------------------------------------------
-        OverlayLayerSettings: [{
-            OverlayHighlightColor: "#1C86EE",
-            Title: "SchoolBoundaries",
-            index: "0",
-            LayerUrl: "http://ec2-54-214-169-132.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/SchoolDistrictQuery/MapServer/0",
-            SearchDisplayFields: "DISTRCTNAME,NAME",
-            SearchExpression: "UPPER(DISTRCTNAME) LIKE '%${0}%' OR UPPER(NAME) LIKE '%${0}%'",
-            InfoWindowSettings: [{
-                InfoWindowTitleFields: "NAME", //earlier key - InfoWindowTitle
-                InfoWindowData: [{
-                    DisplayText: "District Name:",
-                    FieldName: "DISTRCTNAME ",
-                    AliasField: "School District Name"
-                }, {
-                    DisplayText: "Name:",
-                    FieldName: "NAME",
-                    AliasField: "School Name"
+        OverlayLayerSettings: [
+            {
+                OverlayHighlightColor: "#1C86EE",
+                DisplayTitle: "School Boundaries",
+                LayerUrl: "http://ec2-54-214-169-132.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/SchoolDistrictQuery/MapServer/0",
+                SearchDisplayFields: "DISTRCTNAME,NAME",
+                SearchExpression: "UPPER(DISTRCTNAME) LIKE '%${0}%' OR UPPER(NAME) LIKE '%${0}%'",
+                InfoWindowSettings: [{
+                    InfoWindowTitleFields: "NAME",
+                    InfoWindowData: [{
+                        DisplayText: "District Name:",
+                        FieldName: "DISTRCTNAME ",
+                        AliasField: "School District Name"
+                    }, {
+                        DisplayText: "Name:",
+                        FieldName: "NAME",
+                        AliasField: "School Name"
+                    }]
                 }]
-            }]
-        }],
+            }],
 
         // ------------------------------------------------------------------------------------------------------------------------
         // Query fields
@@ -186,13 +177,13 @@ define([], function () {
         // LayerUrl: URL of the layer.
 
         ParcelLayerSettings: {
-            ParcelHighlightColor: "#1C86EE", //earlier key - RendererColor
+            ParcelHighlightColor: "#1C86EE",
             ParcelHighlightAlpha: 0.5,
             LayerUrl: "http://tryitlive.arcgis.com/arcgis/rest/services/TaxParcelQuery/MapServer/0",
             SearchDisplayFields: "PARCELID,SITEADDRESS",
-            SearchExpression: "UPPER(PARCELID) LIKE '%${0}%' OR UPPER(SITEADDRESS) LIKE '%${0}%'", //earlier key -  AddressSearchFields
+            SearchExpression: "UPPER(PARCELID) LIKE '%${0}%' OR UPPER(SITEADDRESS) LIKE '%${0}%'",
             InfoWindowSettings: [{
-                InfoWindowTitleFields: "Site Address,SITEADDRESS", //earlier key - InfoWindowTitle
+                InfoWindowTitleFields: "Site Address,SITEADDRESS",
                 InfoWindowData: [{
                     DisplayText: "Parcel ID:",
                     FieldName: "PARCELID",
@@ -233,9 +224,9 @@ define([], function () {
             LayerUrl: "http://tryitlive.arcgis.com/arcgis/rest/services/RoadCenterlineQuery/MapServer/0",
             SearchDisplayFields: "FULLNAME",
             SearchExpression: "UPPER(FULLNAME) LIKE '${0}%'",
-            RoadHighlightColor: "#FF0000", //earlier key - RoadLineColor
+            RoadHighlightColor: "#FF0000",
             InfoWindowSettings: [{
-                InfoWindowTitleFields: "FULLNAME", //earlier key - InfoWindowTitle
+                InfoWindowTitleFields: "FULLNAME",
                 InfoWindowData: [{
                     DisplayText: "Road Class:",
                     FieldName: "ROADCLASS",
@@ -264,14 +255,22 @@ define([], function () {
             }]
         },
 
-        SearchSettings: { //earlier key LocatorSettings
-            DefaultLocatorSymbol: "/js/library/themes/redpushpin.png",
+        SearchSettings: {
+            DefaultLocatorSymbol: "/js/library/themes/images/redpushpin.png",
             MarkupSymbolSize: [{
                 width: 35,
                 height: 35
             }],
-            HintText: "Enter address/road/school district name",
-            MultipleResults: "PARCELID,SITEADDRESS" //earlier key - AddressSearchFields
+            HintText: "Enter address/road",
+            MultipleResults: "PARCELID,SITEADDRESS"
+        },
+
+
+        PointSymbology: {
+            PointFillSymbolColor: "#FFFFFF",
+            PointSymbolBorder: "#1C86EE",
+            PointSymbolBorderWidth: "2",
+            LineSymbolColor: "#1C86EE"
         },
 
         AveryLabelSettings: [{
@@ -282,7 +281,7 @@ define([], function () {
             CSVServiceTask: "http://ec2-54-214-169-132.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/PublicNotification/GPServer/GenerateCSVMailingList",
 
             //Label to be displayed for Occupant
-            OccupantLabel: "Occupant", // earlier key-OccupantName
+            OccupantLabel: "Occupant",
 
             //Fields of the occupant
             OccupantFields: "PARCELID,SITEADDRESS",
@@ -336,6 +335,42 @@ define([], function () {
             FacebookShareURL: "http://www.facebook.com/sharer.php?u=${0}&t=Public%20Notification",
             TwitterShareURL: "http://mobile.twitter.com/compose/tweet?status=Public%20Notification ${0}",
             ShareByMailLink: "mailto:%20?subject=Check%20out%20this%20map!&body=${0}"
-        }
+        },
+
+        // This text is displayed in search results as the title to group Parcel layer results
+        ParcelDisplayText: "ParcelID/Address",
+
+        // This text is displayed in search results as the title to group RoadLine layer results
+        RoadDisplayText: "Road Centerline",
+
+        // Label for adding adjacent parcel when infowindow is open
+        AdjacentParcels: "Add adjacent parcel",
+
+        // Label for adding adjacent road when infowindow is open
+        AdjacentRoad: "Add adjacent road",
+
+        // To go from unique parcel result to multiple overlapping parcel result when infowindow is open.
+        BackBtn: "Back",
+
+        // Shows number of parcels found when there are overlapping parcels present at one place
+        ParcelsCount: "Parcels found at this location",
+
+        // Alert message comes when we try to add adjacent road and there is no road present at that position
+        NoAdjacentParcel: "There are no parcels adjacent to the road within",
+
+        // Caption is used in alert message to display buffer distance in feet.
+        FeetCaption: "feet",
+
+        // Detail tool tip text for particular parcel/road/school
+        Details: "Details",
+
+        // Notify tool tip text to display the notification infowindow page.
+        Notify: "notify",
+
+        // label for helping user to find out the way to add adjacent parcel
+        ParcelCursorToolTip: "Press Ctrl + Map click to select parcel<br>Click on a selected parcel when done",
+
+        // label for helping user to find out the way to add adjacent parcel
+        RoadCursorToolTip: "Press Ctrl + Map click to select road<br>Click on a selected road when done"
     };
 });

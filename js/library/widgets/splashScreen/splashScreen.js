@@ -1,5 +1,5 @@
 ﻿/*global define,dojo */
-/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
+/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /*
  | Copyright 2014 Esri
  |
@@ -43,9 +43,9 @@ define([
             this.own(on(this.customButton, "click", lang.hitch(this, function () {
                 this._hideSplashScreenDialog();
             })));
-
-            this.domNode = domConstruct.create("div", { "class": "esriGovtLoadingIndicator" }, dojo.body());
+            this.domNode = domConstruct.create("div", { "class": "esriGovtLoadSpashScreen" }, dojo.body());
             this.domNode.appendChild(this.splashScreenScrollBarOuterContainer);
+            domConstruct.create("div", { "class": "esriCTLoadingIndicator", "id": "splashscreenlodingIndicator" }, this.splashScreenScrollBarOuterContainer);
         },
 
         _showSplashScreenDialog: function () {

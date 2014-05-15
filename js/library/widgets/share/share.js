@@ -1,5 +1,5 @@
 ﻿/*global define,dojo,alert,esri,parent:true,dijit */
-/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
+/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /*
  | Copyright 2013 Esri
  |
@@ -104,7 +104,7 @@ define([
         * @memberOf widgets/share/share
         */
         _sharelink: function () {
-            var mapExtent, url, urlStr, encodedUri, tinyResponse;
+            var mapExtent, url, urlStr, encodedUri;
             domAttr.set(this.esriCTDivshareCodeContainer, "innerHTML", sharedNls.webpageDispalyText);
             this.esriCTDivshareCodeContent.value = "<iframe width='100%' height='100%' src='" + location.href + "'></iframe> ";
             /**
@@ -114,6 +114,9 @@ define([
             mapExtent = this._getMapExtent();
             url = esri.urlToObject(window.location.toString());
 
+            /**
+            * check if parcel is getting shared
+            */
             if ((dojo.parcelArray.length > 0) && (dojo.roadArray.length <= 0) && (dojo.overLayArray.length <= 0)) {
                 if (this.map.getLayer("tempBufferLayer").graphics.length > 0) {
                     urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$dist="
@@ -135,6 +138,10 @@ define([
                 } else {
                     urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$parcelID=" + dojo.parcelArray.join(",");
                 }
+
+            /**
+            * check if road is getting shared
+            */
             } else if (dojo.roadArray.length > 0) {
                 if (!(this.map.infoWindow.txtBuffer.value)) {
                     this.map.infoWindow.txtBuffer.value = dojo.configData.DefaultBufferDistance;
@@ -170,8 +177,11 @@ define([
                     + dijit.byId('selectAvery').item.id[0]
                     + "$roadID="
                     + dojo.roadArray.join(",");
-            } else if (dojo.overLayArray.length > 0) {
 
+            /**
+            * check if overlay layers is getting shared
+            */
+            } else if (dojo.overLayArray.length > 0) {
                 if (this.map.getLayer("tempBufferLayer").graphics.length > 0) {
                     urlStr = encodeURI(url.path)
                         + "?extent="
@@ -193,18 +203,18 @@ define([
                         + "$overlayID="
                         + dojo.overLayArray.join(",")
                         + "$Where="
-                        + dojo.overlay;
+                        + dojo.overlay + "$shareOverLayId=" + dojo.shareOverLayerId;
                 } else if ((dojo.overLayGraphicShare) && (this.map.getLayer("tempBufferLayer").graphics.length === 0)) {
-                    urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$overlayID=" + dojo.overLayArray.join(",") + "$Where=" + dojo.overlay;
+                    urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$overlayID=" + dojo.overLayArray.join(",") + "$Where=" + dojo.overlay + "$shareOverLayId=" + dojo.shareOverLayerId;
                 } else {
-                    urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$overlayID=" + dojo.overLayArray.join(",");
+                    urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$overlayID=" + dojo.overLayArray.join(",") + "$shareOverLayId=" + dojo.shareOverLayerId;
                 }
             } else {
                 urlStr = encodeURI(url.path) + "?extent=" + mapExtent;
             }
 
             if ((dojo.overLayArray.length > 0) && dojo.displayInfo) {
-                urlStr = urlStr + "$displayInfo=" + dojo.displayInfo + "$point=" + dojo.selectedMapPoint.x + "," + dojo.selectedMapPoint.y + "$Where=" + dojo.overlay;
+                urlStr = urlStr + "$displayInfo=" + dojo.displayInfo + "$point=" + dojo.selectedMapPoint.x + "," + dojo.selectedMapPoint.y + "$Where=" + dojo.overlay + "$shareOverLayId=" + dojo.shareOverLayerId;
             } else if (dojo.displayInfo) {
                 urlStr = urlStr + "$displayInfo=" + dojo.displayInfo + "$point=" + dojo.selectedMapPoint.x + "," + dojo.selectedMapPoint.y;
             }
@@ -220,55 +230,57 @@ define([
                 }, {
                     useProxy: true
                 }).then(lang.hitch(this, function (response) {
-                    var tinyUrl, applicationHeaderDiv;
-
+                    var tinyUrl, tinyResponse;
                     tinyResponse = response.data;
                     if (tinyResponse) {
                         tinyUrl = tinyResponse.url;
                     }
-                    applicationHeaderDiv = domConstruct.create("div", { "class": "esriCTApplicationShareicon" }, dom.byId("esriCTParentDivContainer"));
-                    applicationHeaderDiv.appendChild(this.divAppContainer);
-                    if (html.coords(this.divAppContainer).h > 0) {
-
-                        /**
-                        * when user clicks on share icon in header panel, close the sharing panel if it is open
-                        */
-                        domClass.replace(this.domNode, "esriCTImgSocialMedia", "esriCTImgSocialMedia-select");
-                        domClass.replace(this.divAppContainer, "esriCTHideContainerHeight", "esriCTShowContainerHeight");
-                        domClass.replace(this.divAppContainer, "esriCTZeroHeight", "esriCTFullHeight");
-                    } else {
-
-                        /**
-                        * when user clicks on share icon in header panel, open the sharing panel if it is closed
-                        */
-                        domClass.replace(this.domNode, "esriCTImgSocialMedia-select", "esriCTImgSocialMedia");
-                        domClass.replace(this.divAppContainer, "esriCTShowContainerHeight", "esriCTHideContainerHeight");
-                        domClass.replace(this.divAppContainer, "esriCTFullHeight", "esriCTZeroHeight");
-                    }
-
-                    /**
-                    * remove event handlers from sharing options
-                    */
-                    if (this.facebookHandle) {
-                        this.facebookHandle.remove();
-                        this.twitterHandle.remove();
-                        this.emailHandle.remove();
-                    }
-                    /**
-                    * add event handlers to sharing options
-                    */
-                    this.facebookHandle = on(this.tdFacebook, "click", lang.hitch(this, function () { this._share("facebook", tinyUrl, urlStr); }));
-                    this.twitterHandle = on(this.tdTwitter, "click", lang.hitch(this, function () { this._share("twitter", tinyUrl, urlStr); }));
-                    this.emailHandle = on(this.tdMail, "click", lang.hitch(this, function () { this._share("email", tinyUrl, urlStr); }));
-
+                    this._displayShareContainer(tinyUrl, urlStr);
                 }), lang.hitch(this, function (error) {
-                    domClass.replace(this.domNode, "esriCTImgSocialMedia-select", "esriCTImgSocialMedia");
                     alert(sharedNls.errorMessages.shareLoadingFailed);
-
+                    this._displayShareContainer(null, urlStr);
                 }));
+
             } catch (err) {
                 alert(sharedNls.errorMessages.shareLoadingFailed);
+                this._displayShareContainer(null, urlStr);
             }
+        },
+
+        _displayShareContainer: function (tinyUrl, urlStr) {
+            var applicationHeaderDiv;
+            applicationHeaderDiv = domConstruct.create("div", { "class": "esriCTApplicationShareicon" }, dom.byId("esriCTParentDivContainer"));
+            applicationHeaderDiv.appendChild(this.divAppContainer);
+            if (html.coords(this.divAppContainer).h > 0) {
+                /**
+                * when user clicks on share icon in header panel, close the sharing panel if it is open
+                */
+                domClass.replace(this.domNode, "esriCTImgSocialMedia", "esriCTImgSocialMedia-select");
+                domClass.replace(this.divAppContainer, "esriCTHideContainerHeight", "esriCTShowContainerHeight");
+                domClass.replace(this.divAppContainer, "esriCTZeroHeight", "esriCTFullHeight");
+            } else {
+                /**
+                * when user clicks on share icon in header panel, open the sharing panel if it is closed
+                */
+                domClass.replace(this.domNode, "esriCTImgSocialMedia-select", "esriCTImgSocialMedia");
+                domClass.replace(this.divAppContainer, "esriCTShowContainerHeight", "esriCTHideContainerHeight");
+                domClass.replace(this.divAppContainer, "esriCTFullHeight", "esriCTZeroHeight");
+            }
+            /**
+            * remove event handlers from sharing options
+            */
+            if (this.facebookHandle) {
+                this.facebookHandle.remove();
+                this.twitterHandle.remove();
+                this.emailHandle.remove();
+            }
+            /**
+            * add event handlers to sharing options
+            */
+            this.facebookHandle = on(this.tdFacebook, "click", lang.hitch(this, function () { this._share("facebook", tinyUrl, urlStr); }));
+            this.twitterHandle = on(this.tdTwitter, "click", lang.hitch(this, function () { this._share("twitter", tinyUrl, urlStr); }));
+            this.emailHandle = on(this.tdMail, "click", lang.hitch(this, function () { this._share("email", tinyUrl, urlStr); }));
+
         },
 
         /**
@@ -328,6 +340,11 @@ define([
             }
         },
 
+        /**
+        * Get the parameters to buffer the parcel (or) road region(s)
+        * @param {boolean} check values are for parcel or road
+        * @memberOf widgets/share/share
+        */
         getValuesToBuffer: function (parcel) {
             var annotation, str;
             if (window.location.toString().split("$dist=").length > 1) {
@@ -356,6 +373,11 @@ define([
             }
         },
 
+        /**
+        * Get the parameters to buffer the overlay layer(s)
+        * @param {boolean} check values are for overlay
+        * @memberOf widgets/share/share
+        */
         getoverlayValuesToBuffer: function (overlay) {
             var annotation, str;
             if (window.location.toString().split("$dist=").length > 1) {

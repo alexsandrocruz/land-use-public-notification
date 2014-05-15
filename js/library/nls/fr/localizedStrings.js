@@ -1,5 +1,5 @@
 ﻿/*global define */
-/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
+/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /*
  | Copyright 2013 Esri
  |
@@ -32,6 +32,7 @@ define({
         invalidSearch: "No results found",
         falseConfigParams: "Required configuration key values are either null or not exactly matching with layer attributes, This message may appear multiple times.",
         invalidLocation: "Current Location not found.",
+        invalidExtent: "Selected feature is out of basemap extent",
         invalidProjection: "Unable to plot current location on the map.",
         widgetNotLoaded: "Fail to load widgets.",
         shareLoadingFailed: "Unable to load share options.",

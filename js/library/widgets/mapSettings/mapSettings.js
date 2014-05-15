@@ -1,5 +1,5 @@
-﻿/*global define,dojo,dojoConfig,alert,esri,dijit,query,Graphic */
-/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
+﻿/*global define,dojo,dojoConfig,alert,esri,dijit,Graphic */
+/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /*
  | Copyright 2013 Esri
  |
@@ -43,12 +43,16 @@ define([
     "dojo/topic",
     "widgets/locator/locator",
     "esri/geometry",
+    "esri/graphic",
     "esri/tasks/GeometryService",
     "dojo/_base/Color",
     "esri/symbol",
+    "esri/symbols/SimpleMarkerSymbol",
+    "esri/symbols/SimpleLineSymbol",
+    "esri/symbols/SimpleFillSymbol",
     "esri/renderers/Renderer",
     "dojo/domReady!"
-], function (declare, domConstruct, domStyle, lang, on, dom, dojoQuery, ScrollBar, domClass, domGeom, Query, QueryTask, _WidgetBase, EsriMap, FeatureLayer, GraphicsLayer, GeometryExtent, BaseMapGallery, sharedNls, HomeButton, spatialReference, urlUtils, InfoWindow, topic, Locator, Geometry, GeometryService, Color, Symbol, Renderer) {
+], function (declare, domConstruct, domStyle, lang, on, dom, dojoQuery, ScrollBar, domClass, domGeom, Query, QueryTask, _WidgetBase, EsriMap, FeatureLayer, GraphicsLayer, GeometryExtent, BaseMapGallery, sharedNls, HomeButton, SpatialReference, urlUtils, InfoWindow, topic, Locator, Geometry, Graphic, GeometryService, Color, Symbol, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Renderer) {
     //========================================================================================================================//
 
     return declare([_WidgetBase], {
@@ -160,7 +164,7 @@ define([
             })));
 
             this.own(on(glayer, "click", function (evt) {
-                dojo.graphicLayerClicked = true; //if graphic is clicked on map
+                dojo.graphicLayerClicked = true;
                 dojo.findTasksGraphicClicked = false;
             }));
 
@@ -169,7 +173,8 @@ define([
             */
             home = this._addHomeButton(this.map);
 
-            /* * set position of home button widget after map is successfully loaded
+            /* *
+            * set position of home button widget after map is successfully loaded
             * @param {array} dojo.configData.OperationalLayers List of operational Layers specified in configuration file
             */
             this.map.on("load", lang.hitch(this, function () {
@@ -192,7 +197,9 @@ define([
                     this._addbasMapObjectGallery();
                 }
 
-                //to share overlay layer's graphic and infopopup
+                /**
+                * to share parcel layer's graphic and infopopup
+                */
                 if (window.location.toString().split("$parcelID=").length > 1) {
                     topic.publish("getValuesToBuffer", true);
                     if (window.location.toString().split("$displayInfo=").length > 1) {
@@ -218,7 +225,9 @@ define([
                         topic.publish("addShareParcelsToMap", featureset, 0);
                     });
 
-                //to share RoadLine graphics and infopoup
+                    /**
+                    * to share RoadLine layer graphics and infopoup
+                    */
                 } else if (window.location.toString().split("$roadID=").length > 1) {
                     topic.publish("getValuesToBuffer", false);
                     if (window.location.toString().split("$displayInfo=").length > 1) {
@@ -247,15 +256,17 @@ define([
                         alert(err.message);
                     });
 
-                //to share overlay layer's graphic and infopopup
+                    /**
+                    * to share overlay layer's graphic and infopoup
+                    */
                 } else if (window.location.toString().split("$overlayID=").length > 1) {
-                    overLayQueryUrl = dojo.configData.OverlayLayerSettings[0].LayerUrl;
+                    overLayQueryUrl = dojo.configData.OverlayLayerSettings[window.location.toString().split("$shareOverLayId=")[1].split("$displayInfo=")[0].split(",")].LayerUrl;
                     topic.publish("getoverlayValuesToBuffer", true);
                     if (window.location.toString().split("$displayInfo=").length > 1) {
-                        dojo.overLayArray = window.location.toString().split("$overlayID=")[1].split("$displayInfo=")[0].split(",");
+                        dojo.overLayArray = window.location.toString().split("$overlayID=")[1].split("$displayInfo=")[0].split("$shareOverLayId")[0].split(",");
                     } else {
                         if ((window.location.toString().split("$overlayID=")[1].split("$Where=")[0].split(",").length) === 1) {
-                            dojo.overLayArray = window.location.toString().split("$overlayID=")[1].split("$Where=")[0].split(",");
+                            dojo.overLayArray = window.location.toString().split("$overlayID=")[1].split("$Where=")[0].split(","); //if only graphics objectid
                         } else {
                             dojo.overLayArray = window.location.toString().split("$overlayID=")[1].split(",");
                         }
@@ -265,13 +276,13 @@ define([
                     if (window.location.toString().split("$dist=").length > 1) {
                         parcelGroup = parcelGroup.split("$Where=")[0];
                     }
-                    dojo.whereclause = window.location.toString().split("$Where=")[1];
+                    dojo.whereclause = window.location.toString().split("$Where=")[1].split("$shareOverLayId")[0];
                     query.where = dojo.whereclause + " = (" + parcelGroup + ")";
                     query.returnGeometry = true;
                     query.outFields = ["*"];
                     qTask = new QueryTask(overLayQueryUrl);
                     qTask.execute(query, function (featureset) {
-                        topic.publish("addShareOverLayToMap", featureset, 0);
+                        topic.publish("addShareOverLayToMap", featureset, 0, featureset.geometryType);
                     });
                 } else {
                     topic.publish("hideProgressIndicator");
@@ -283,6 +294,10 @@ define([
             }));
         },
 
+        /* *
+        * Get query string value of the provided key, if not found the function returns empty string
+        * @return {string} return extent value
+        */
         _getQueryString: function (key) {
             var extentValue = "", regex, qs;
             regex = new RegExp("[\\?&]" + key + "=([^&#]*)");
@@ -307,6 +322,7 @@ define([
 
         /*
         * load esri 'Basemap Toggle' widget which allow toggle between configured base map
+        * @return {object} return a basemap object
         * @memberOf widgets/mapSettings/mapSettings
         */
         _addbasMapObjectGallery: function () {
@@ -316,6 +332,11 @@ define([
             return basMapObject;
         },
 
+        /**
+        * Display the parcels on map
+        * @param {object} Home button widget
+        * @memberOf widgets/mapSettings/mapSettings
+        */
         _executeQueryTask: function (evt) {
             if (!dojo.graphicLayerClicked || dojo.findTasksGraphicClicked) {
                 dojo.roadArray = [];
@@ -375,6 +396,11 @@ define([
             }
         },
 
+        /**
+        * Query for parcel when clicked on map
+        * @param {object} map onclick event
+        * @memberOf widgets/locator/locator
+        */
         _queryForParcel: function (evt) {
             var _this = this, taxParcelQueryUrl, qTask, mapPointForQuery, query;
             taxParcelQueryUrl = dojo.configData.ParcelLayerSettings.LayerUrl;
@@ -396,6 +422,11 @@ define([
             });
         },
 
+        /**
+        * Locate adjacent road
+        * @param {object} map onclick event
+        * @memberOf widgets/locator/locator
+        */
         queryForAdjacentRoad: function (evt) {
             var _self = this, roadCenterLinesLayerURL, j, geometryService, params, query, polyLine, queryTask;
 
@@ -439,6 +470,13 @@ define([
             });
         },
 
+
+        /**
+        * Function if their are multiple features in featureSet
+        * @param {object} fset set of multiple features
+        * @param {object} map onclick event
+        * @memberOf widgets/locator/locator
+        */
         _showFeatureSet: function (fset, evt) {
             topic.publish("clearAll", evt);
             var rendererColor = dojo.configData.OverlayLayerSettings[0].OverlayHighlightColor, centerPoint = evt.mapPoint,
@@ -472,6 +510,13 @@ define([
             }
         },
 
+        /**
+        * Triggered when highlighted features are clicked
+        * @param {object} fature for the selected unique parcel
+        * @param {object} mapPoint if mappoint is available
+        * @param {object} else if centerPoint is available
+        * @memberOf widgets/locator/locator
+        */
         _showUniqueParcel: function (feature, mapPoint, centerPoint) {
             var parcelLayerSettings = dojo.configData.ParcelLayerSettings, evtMapPoint;
             if (mapPoint.ctrlKey) {
@@ -506,6 +551,12 @@ define([
             }
         },
 
+
+        /**
+        * Create popup content for overlapping parcel
+        * @param {object} featureList is set of overlapping features present in the selected area
+        * @memberOf widgets/locator/locator
+        */
         _createContent: function (featureList) {
             var _this = this, adjacentLabel, customButtondiv, btnInnerDiv, btnTbody, divDisplayRow,
                 divDisplayColumn1, divInfoImg, divDisplayColumn2, divSpan, i;
@@ -590,6 +641,11 @@ define([
 
         },
 
+        /**
+        * Create content for overlapping parcels
+        * @param {object} featureList is set of overlapping features present in the selected area
+        * @memberOf widgets/locator/locator
+        */
         _createContentForGraphics: function (featureList) {
             var adjacentLabel, customButtondiv, btnInnerDiv, btnTbody, divDisplayTable, parcelID, divDisplayRow,
                 divDisplayColumn1, divInfoImg, divDisplayColumn2, divSpan;
@@ -671,6 +727,11 @@ define([
             domConstruct.create("div", { "class": "tdSiteAddress", "innerHTML": attributes[dojo.configData.AveryLabelSettings[0].ParcelInformation.SiteAddress] }, divDisplayRow);
         },
 
+        /**
+        * Show details of selected parcel.
+        * @param {object} attr is set of attributes of selected parcel
+        * @memberOf widgets/locator/locator
+        */
         _showParcelDetail: function (attr) {
             var adjacentParcel, imgAdjacentParcels, infoPopupFieldsCollection, parcelInformation, divParcelRow, divParcelInformation,
                 divInfoPopupDisplayText, divInfoPopupField, fieldName, fieldNames, notApplicableCounter, key, i, title;
@@ -744,6 +805,10 @@ define([
             }
         },
 
+        /**
+        * Display back to parcel list
+        * @memberOf widgets/locator/locator
+        */
         _showParcel: function () {
             var infoTitle = this.overlapCount + " " + dojo.configData.ParcelsCount, adjacentParcel, imgAdjacentParcels;
             this.map.infoWindow.setTitle(infoTitle);
@@ -769,6 +834,14 @@ define([
             this.content = this.divParcelList;
         },
 
+        /**
+        * Triggered when layer with multiple parcels is clicked
+        * @param {object} feature is the set of features of selected location
+        * @param {object} contentdiv will be the container for appending the infopopup structure
+        * @param {object} evt is the seleced graphic event
+        * @param {object} parcelFeature
+        * @memberOf widgets/locator/locator
+        */
         _showOverlappingParcels: function (feature, contentDiv, evt, parcelFeature) {
             var extentChanged, screenPoint, infoTitle;
             if (evt.mapPoint) {
@@ -787,7 +860,11 @@ define([
             topic.publish("hideProgressIndicator");
         },
 
-        //Get the extent of point
+        /**
+        * Get the extent of point
+        * @return {object} extent of the point
+        * @memberOf widgets/mapSettings/mapSettings
+        */
         _centerMapPoint: function (mapPoint, extent) {
             var width, height, xmin, ymin, xmax, ymax;
             width = extent.getWidth();
@@ -808,6 +885,13 @@ define([
             return this.map;
         },
 
+
+        /**
+        * Get the extent based on the map point for browser
+        * @param {object} map point to calculate extent
+        * @return {object} Current map instance
+        * @memberOf widgets/mapSettings/mapSettings
+        */
         _getBrowserMapExtent: function (mapPoint) {
             var width, height, xmin, ymin, xmax, ymax;
             width = this.map.extent.getWidth();
@@ -819,12 +903,24 @@ define([
             return new Geometry.Extent(xmin, ymin, xmax, ymax, this.map.spatialReference);
         },
 
+        /**
+        * function called to show details of feature while clicked on graphic layer
+        * @param {object} feature we get on click of graphics
+        * @param {object} map point for that selected graphics
+        * @memberOf widgets/mapSettings/mapSettings
+        */
         _showFeatureDetails: function (feature, mapPoint) {
-            var parcelLayerSettings, parcelInformation;
+            var parcelLayerSettings, parcelInformation, count, k;
 
             parcelLayerSettings = dojo.configData.ParcelLayerSettings;
             parcelInformation = dojo.configData.AveryLabelSettings[0].ParcelInformation;
-            if (feature.attributes) {
+            count = 0;
+            for (k in feature.attributes) {
+                if (feature.attributes.hasOwnProperty(k)) {
+                    ++count;
+                }
+            }
+            if (feature.attributes && count > 0) {
                 if (feature.attributes[parcelInformation.ParcelIdentification] ||
                         feature.attributes[parcelLayerSettings.SearchDisplayFields.split(",")[0]]) {
                     this._showUniqueParcel(feature, mapPoint);
@@ -841,6 +937,12 @@ define([
             }
         },
 
+        /**
+        * Create data template for overlapped parcels
+        * @param {object} feature we get on click of graphics
+        * @param {object} map point for that selected graphics
+        * @memberOf widgets/mapSettings/mapSettings
+        */
         createDataForOverlappedParcels: function (feature, mapPoint) {
             var parcelInformation, contentDiv, parcel, attr;
 
@@ -856,6 +958,11 @@ define([
             this._showOverlappingParcels(feature, contentDiv, mapPoint, attr[parcelInformation.ParcelIdentification]);
         },
 
+        /**
+        * Clear All Graphics
+        * @param {object} event we get when click on graphics
+        * @memberOf widgets/mapSettings/mapSettings
+        */
         clearAll: function (evt) {
             var i;
             dojo.selectedMapPoint = null;
@@ -876,9 +983,15 @@ define([
             }
         },
 
-        addShareOverLayToMap: function (fset, q) {
-            var _self = this, rendererColor, layer, lineColor, fillColor, symbol, feature;
-
+        /**
+        * Add overlay layers features  to map when app is shared
+        * @param {object} fset contains featureset of the feaures to be shared
+        * @param {object} q is the index of the features in the feaureset
+        * @param {object} geometry type of the feature
+        * @memberOf widgets/mapSettings/mapSettings
+        */
+        addShareOverLayToMap: function (fset, q, geometryType) {
+            var _self = this, rendererColor, layer, lineColor, fillColor, symbol, feature, locatorMarkupSymbol, graphic, polylineSymbol, polyLine;
             rendererColor = dojo.configData.OverlayLayerSettings[0].OverlayHighlightColor;
             feature = fset.features[q];
             if (fset.features[q]) {
@@ -888,16 +1001,47 @@ define([
                     topic.publish("addShareOverLayToMap", fset, q);
 
                 } else {
-                    layer = _self.map.getLayer("esriGraphicsLayerMapSettings");
-                    lineColor = new dojo.Color();
-                    lineColor.setColor(rendererColor);
-                    fillColor = new dojo.Color();
-                    fillColor.setColor(rendererColor);
-                    fillColor.a = 0.25;
-                    symbol = new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID,
-                        new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, lineColor, 3), fillColor);
-                    feature.setSymbol(symbol);
-                    layer.add(feature);
+
+                    if (geometryType === "esriGeometryPoint") {
+                        locatorMarkupSymbol = new SimpleMarkerSymbol(
+                            SimpleMarkerSymbol.STYLE_CIRCLE,
+                            12,
+                            new SimpleLineSymbol(
+                                SimpleLineSymbol.STYLE_SOLID,
+                                new Color(dojo.configData.PointSymbology.PointSymbolBorder),
+                                dojo.configData.PointSymbology.PointSymbolBorderWidth
+                            ),
+                            new Color(dojo.configData.PointSymbology.PointFillSymbolColor)
+                        );
+                        _self.mapPoint = new esri.geometry.Point(feature.geometry.x, feature.geometry.y, new SpatialReference(
+                            { wkid: _self.map.spatialReference.wkid }
+                        ));
+
+                        graphic = new Graphic(_self.mapPoint, locatorMarkupSymbol, {}, null);
+                        _self.map.getLayer("esriGraphicsLayerMapSettings").add(graphic);
+
+                    } else if (geometryType === "esriGeometryPolyline") {
+                        layer = this.map.getLayer("esriGraphicsLayerMapSettings");
+                        polylineSymbol = new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
+                            new Color(dojo.configData.PointSymbology.LineSymbolColor), 3);
+                        polyLine = new Geometry.Polyline(this.map.spatialReference.wkid);
+                        polyLine.addPath(feature.geometry.paths[0]);
+                        this.map.setExtent(polyLine.getExtent().expand(2));
+                        graphic = new Graphic(polyLine, polylineSymbol);
+                        _self.map.getLayer("esriGraphicsLayerMapSettings").add(graphic);
+
+                    } else {
+                        layer = _self.map.getLayer("esriGraphicsLayerMapSettings");
+                        lineColor = new dojo.Color();
+                        lineColor.setColor(rendererColor);
+                        fillColor = new dojo.Color();
+                        fillColor.setColor(rendererColor);
+                        fillColor.a = 0.25;
+                        symbol = new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID,
+                            new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, lineColor, 3), fillColor);
+                        feature.setSymbol(symbol);
+                        layer.add(feature);
+                    }
                     q++;
                     topic.publish("addShareOverLayToMap", fset, q);
                 }
@@ -917,6 +1061,12 @@ define([
             }
         },
 
+        /**
+        * Add parcels to map when app is shared
+        * @param {object} fset contains parcel feaure to be shared
+        * @param {object} q is the index of the features in the feaureset
+        * @memberOf widgets/mapSettings/mapSettings
+        */
         addShareParcelsToMap: function (fset, q) {
             var _self = this, parcelInformation, rendererColor, taxParcelQueryUrl,
                 qTask, feature, query, layer, lineColor, fillColor, symbol;
@@ -969,14 +1119,17 @@ define([
 
         },
 
+        /**
+        * Share overlay layers info-window with details
+        * @memberOf widgets/mapSettings/mapSettings
+        */
         shareOverInfoWindow: function () {
             var roadCenterLinesLayerURL, point, whereclause, overLayQueryUrl, qTask, roadTask, query, parcelGroup;
-
             roadCenterLinesLayerURL = dojo.configData.RoadCenterLayerSettings.LayerUrl;
             parcelGroup = dojo.overLayArray.join(",");
             point = new esri.geometry.Point(Number(window.location.toString().split("$point=")[1].split(",")[0]), Number(window.location.toString().split("$point=")[1].split("$Where=")[0].split(",")[1]), this.map.spatialReference);
-            overLayQueryUrl = dojo.configData.OverlayLayerSettings[0].LayerUrl;
-            whereclause = window.location.toString().split("$Where=")[1];
+            overLayQueryUrl = dojo.configData.OverlayLayerSettings[window.location.toString().split("$shareOverLayId=")[1].split("$displayInfo=")[0].split(",")].LayerUrl;
+            whereclause = window.location.toString().split("$Where=")[1].split("$shareOverLayId")[0];
             query = new esri.tasks.Query();
             query.where = whereclause + " = (" + parcelGroup + ")";
             query.returnGeometry = true;
@@ -984,7 +1137,7 @@ define([
             qTask = new QueryTask(overLayQueryUrl);
             if (window.location.toString().split("$displayInfo=")[1].split("$infoParcel").length > 1) {
                 qTask.execute(query, function (featureset) {
-                    topic.publish("createInfoWindowContent", featureset.features[0], point, dojo.configData.OverlayLayerSettings[0]);
+                    topic.publish("createInfoWindowContent", featureset.features[0], point, dojo.configData.OverlayLayerSettings[window.location.toString().split("$shareOverLayId=")[1].split("$displayInfo=")[0].split(",")]);
                 });
             } else {
                 query = new esri.tasks.Query();
@@ -998,6 +1151,11 @@ define([
             }
         },
 
+
+        /**
+        * Share info-window with details
+        * @memberOf widgets/mapSettings/mapSettings
+        */
         shareInfoWindow: function () {
             var roadCenterLinesLayerURL, _self = this, overlapQuery, parcelInformation, point, query,
                 taxParcelQueryUrl, qTask, contentDiv, roadTask;
@@ -1039,19 +1197,40 @@ define([
             }
         },
 
-        showRoadDetails: function (attributes, mapPoint, geometry) {
+        /**
+        * Display the particular road details in infowindow
+        * @param {object} attributes are the details to be shown in the infowindow
+        * @param {object} mapPoint is the location where infowindow gets open
+        * @memberOf widgets/mapSettings/mapSettings
+        */
+        showRoadDetails: function (attributes, mapPoint) {
             var attr, roadLayerSettings;
             dojo.selectedMapPoint = mapPoint;
             attr = attributes.attributes;
             roadLayerSettings = dojo.configData.RoadCenterLayerSettings;
             dojo.displayInfo = attr[this.map.getLayer("roadCenterLinesLayerID").objectIdField] + "$infoRoad";
-            topic.publish("createInfoWindowContent", attributes, mapPoint, roadLayerSettings, geometry);
+            topic.publish("createInfoWindowContent", attributes, mapPoint, roadLayerSettings);
         },
 
+        /**
+        * Trim the selected string
+        * @param {string} string to be trimmed
+        * @param {integer} length upto which string should be trimmed
+        * @return {string} trimmed string
+        * @memberOf widgets/mapSettings/mapSettings
+        */
         _trimString: function (str, len) {
             return (str.length > len) ? str.substring(0, len) + "..." : str;
         },
 
+        /**
+        * add graphics on the map
+        * @param {string} layer url on which we need to add the graphics
+        * @param {object} symbol contains details of the symbol to be added
+        * @param {object} point where we add symbol
+        * @param {object} feature to which we add the graphic symbol
+        * @memberOf widgets/mapSettings/mapSettings
+        */
         addGraphic: function (layer, symbol, point, attr) {
             var graphic, features = [], featureSet;
 

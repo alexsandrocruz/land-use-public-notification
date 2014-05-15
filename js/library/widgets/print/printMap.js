@@ -1,5 +1,5 @@
-﻿/*global dojo,define */
-/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
+﻿/*global dojo,define,dojoConfig */
+/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /*
  | Copyright 2013 Esri
  |
@@ -25,7 +25,7 @@ define([
     "dijit/_WidgetBase",
     "esri/map",
     "dojo/text!./templates/print.html"
-], function (declare, domConstruct, on, topic, lang, _WidgetBase, esriMap, printMap, Print) {
+], function (declare, domConstruct, on, topic, lang, _WidgetBase, esriMap, printMap) {
 
     //========================================================================================================================//
 
@@ -56,6 +56,10 @@ define([
             })));
         },
 
+        /**
+        * Display print window
+        * @memberOf widgets/printMap/printMap
+        */
         _showModal: function () {
             var dataObject = {
                 "ParcelLayer": this.map.getLayer("esriGraphicsLayerMapSettings"),
@@ -64,10 +68,13 @@ define([
                 "Window": window,
                 "BaseMapLayer": this.map.getLayer("esriCTbasemap")
             };
-            window.showModalDialog("js/library/widgets/print/templates/print.html", dataObject);
-        },
 
-        //Get current map extent
+            window.showModalDialog(dojoConfig.baseURL + "/js/library/widgets/print/templates/print.html", dataObject);
+        },
+        /**
+        * Get current map extent
+        * @memberOf widgets/printMap/printMap
+        */
         getPrintExtent: function () {
             return this.map.extent;
         }
@@ -75,3 +82,4 @@ define([
 
     });
 });
+

@@ -1,5 +1,5 @@
 ﻿/*global define,dojo,esri */
-/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
+/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /*
  | Copyright 2013 Esri
  |
@@ -41,30 +41,48 @@ define([
         * @name widgets/baseMapGallery/baseMapGallery
         */
         postCreate: function () {
-            var i, basemapContainer,
+            var i, basemapContainer, layer,
                 baseMapURL = 0,
                 baseMapURLCount = 0,
                 baseMapLayers = dojo.configData.BaseMapLayers;
 
             for (i = 0; i < baseMapLayers.length; i++) {
                 if (baseMapLayers[i].MapURL) {
+                    this.map.addLayer(this._createBaseMapLayer(baseMapLayers[i].MapURL, baseMapLayers[i].Key));
                     if (baseMapURLCount === 0) {
                         baseMapURL = i;
                     }
                     baseMapURLCount++;
                 }
             }
-
             basemapContainer = domConstruct.create("div", {}, dom.byId("esriCTParentDivContainer"));
             basemapContainer.appendChild(this.esriCTDivLayerContainer);
             this.layerList.appendChild(this._createBaseMapElement(baseMapURL, baseMapURLCount));
+
+            if (baseMapURLCount >= 1) {
+                layer = this.map.getLayer(baseMapLayers[baseMapURL].Key);
+                layer.show();
+            }
         },
 
+        /**
+        * Create basemap layer on the map
+        * @param {string} layer url for the basemap
+        * @param {string} layer id for the basemap
+        * @memberOf widgets/baseMapGallery/baseMapGallery
+        */
         _createBaseMapLayer: function (layerURL, layerId) {
             var layer = new esri.layers.ArcGISTiledMapServiceLayer(layerURL, { id: layerId, visible: false });
             return layer;
         },
 
+        /**
+        * Create basemap images with respective titles
+        * @param {string} layer url for the basemap
+        * @param {integer} count of the basemaps configured in the config file
+        * @return {object} divcontainer contains visible basemap image with respective title
+        * @memberOf widgets/baseMapGallery/baseMapGallery
+        */
         _createBaseMapElement: function (baseMapURL, baseMapURLCount) {
             var presentThumbNail, divContainer, imgThumbnail, presentBaseMap;
 
@@ -90,19 +108,26 @@ define([
             return divContainer;
         },
 
+        /**
+        * Toggle basemap layer
+        * @param {object} contains current basemap object
+        * @memberOf widgets/baseMapGallery/baseMapGallery
+        */
         _changeBaseMap: function (spanControl) {
-            var layer, basemap;
-            basemap = this.map.getLayer("esriCTbasemap");
-            this.map.removeLayer(basemap);
+            var layer;
 
-            layer = new esri.layers.ArcGISTiledMapServiceLayer(dojo.configData.BaseMapLayers[spanControl].MapURL, { id: "esriCTbasemap", visible: true });
-            this.map.addLayer(layer);
-
-
+            this._hideMapLayers();
+            layer = this.map.getLayer(dojo.configData.BaseMapLayers[spanControl].Key);
+            layer.show();
         },
 
+        /**
+        * Hide layers
+        * @memberOf widgets/baseMapGallery/baseMapGallery
+        */
         _hideMapLayers: function () {
             var i, layer;
+
             for (i = 0; i < dojo.configData.BaseMapLayers.length; i++) {
                 if (dojo.configData.BaseMapLayers[i].MapURL) {
                     layer = this.map.getLayer(dojo.configData.BaseMapLayers[i].Key);
