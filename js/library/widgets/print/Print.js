@@ -1,5 +1,5 @@
 ﻿/*global dojo,define,require,esri */
-/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
+/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /*
  | Copyright 2013 Esri
  |
@@ -21,8 +21,15 @@ require([
     "esri/map",
     "esri/layers/ImageServiceParameters",
     "esri/layers/ArcGISImageServiceLayer",
-    "../../../config.js"
+    "../../../../config.js"
 ], function (esriMap, ImageServiceParameters, ArcGISImageServiceLayer, config) {
+    /**
+    * create print  widget
+    *
+    * @class
+    * @name widgets/printMap/print
+    */
+
     var window_opener = window.dialogArguments,
         tempPolygonLayer = 'tempPolygonLayer',
         tempBuffer = 'tempBuffer',
@@ -49,6 +56,11 @@ require([
     imageServiceLayer = new ArcGISImageServiceLayer(baseMapLayer.url, { imageServiceParameters: params });
     printmap.addLayer(imageServiceLayer);
     document.title = config.ApplicationName;
+
+    /**
+    * function to add polygon and graphics in the print map window when it gets open
+    * @memberOf widgets/printMap/print
+    */
     dojo.connect(printmap, "onLoad", function () {
         var gLayer, i, buffersymbol, polygon, lineColor, fillColor, polysymbol;
         printmap.disablePan();

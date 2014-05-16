@@ -1,5 +1,5 @@
 ﻿/*global define,Modernizr,dojoConfig,dijit,dojo,alert,esri ,event*/
-/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
+/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /*
  | Copyright 2013 Esri
  |
@@ -32,6 +32,13 @@ define([
     "./infoWindowView"
 ], function (declare, domConstruct, domStyle, lang, on, dom, domClass, topic, domUtils, urlUtils, ScrollBar, template, infoWindowView) {
     return declare([infoWindowView], {
+
+        /**
+       * create infowindow view  widget
+       *
+       * @class
+       * @name widgets/infoWindow/infoWindow
+       */
 
         templateString: template,
         postCreate: function () {
@@ -66,6 +73,9 @@ define([
             this.txtBuffer.value = dojo.configData.DefaultBufferDistance;
             this.textoccupant.value = dojo.configData.AveryLabelSettings[0].OccupantLabel;
 
+             /**
+             * click event of close button in the infowindow
+             */
             this.own(on(this.esriCTclosediv, "click", lang.hitch(this, function () {
                 domUtils.hide(this.domNode);
                 dojo.selectedMapPoint = null;
@@ -83,6 +93,9 @@ define([
                 }
             })));
 
+             /**
+             * click event triggers when we click download button in the infowindow
+             */
             this.own(on(this.btnSubmit, "click", lang.hitch(this, function () {
                 this.createBuffer();
             })));
@@ -96,6 +109,12 @@ define([
             this._getAveryTemplates();
         },
 
+        /**
+        * display infowindow
+        * @param {object} container of the infowindow
+        * @param {object} location where infowindow gets open
+        * @memberOf widgets/infoWindow/infoWindow
+        */
         show: function (detailsTab, screenPoint) {
             if (this.divInfoDetailsScroll) {
                 while (this.divInfoDetailsScroll.hasChildNodes()) {
@@ -120,6 +139,12 @@ define([
             dojo.infoContainerScrollbar.createScrollBar();
         },
 
+        /**
+        * resize infowindow
+        * @param {integer} contains width of the infowindow
+        * @param {integer} contains height of the infowindow
+        * @memberOf widgets/infoWindow/infoWindow
+        */
         resize: function (width, height) {
             this.infoWindowWidth = width;
             this.infoWindowHeight = height;
@@ -129,6 +154,11 @@ define([
             });
         },
 
+        /**
+        * set title at the headder of the infowindow
+        * @param {string} contains string to be displayed at headder
+        * @memberOf widgets/infoWindow/infoWindow
+        */
         setTitle: function (str) {
             var infoTitle, len = 35;
             infoTitle = (str.length > len) ? str.substring(0, len) + "..." : str;
@@ -142,6 +172,11 @@ define([
 
         },
 
+       /**
+       * set position of the anchor attached to infowindow
+       * @param {object} position of the anchor on map
+       * @memberOf widgets/infoWindow/infoWindow
+       */
         setLocation: function (location) {
             if (location.spatialReference) {
                 location = this.map.toScreen(location);
@@ -154,18 +189,21 @@ define([
             this.isShowing = true;
         },
 
+       /**
+       * clear the infowindow from the map
+       * @memberOf widgets/infoWindow/infoWindow
+       */
         hide: function () {
             domUtils.hide(this.domNode);
             this.isShowing = false;
             this.onHide();
         },
 
-        _hideInfoContainer: function () {
-            this.own(on(this.esriCTclosediv, "click", lang.hitch(this, function () {
-                domUtils.hide(this.domNode);
-            })));
-        },
 
+       /**
+       * create buffer for road
+       * @memberOf widgets/infoWindow/infoWindow
+       */
         createRoadBuffer: function () {
             this.createBuffer();
         }

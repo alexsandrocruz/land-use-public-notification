@@ -7,16 +7,18 @@
                     <div data-dojo-attach-point="divAddressSearch" class="esriCTAddressSearch" align="left">
                         <div data-dojo-attach-point="divAddressPlaceHolder" class="esriCTAddressPlaceHolder">
                             <div style="float: left; width: 196px;">
-                                <input type="text" data-dojo-attach-point="txtAddress" class="esriCTTxtAddress" onfocus="if(this.setSelectionRange)this.setSelectionRange(this.value.length, this.value.length);" />
+							<div data-dojo-attach-point="txtAddressContainer" class="esriCTTxtAddress">
+								</div>
                             </div>
                             <div class="esriCTSearchClose" data-dojo-attach-point="clearhide">
-                                <span class="clearInput" title="${sharedNls.tooltips.clear}" data-dojo-attach-point="close"></span><span>
-                                    <img data-dojo-attach-point="imgSearchLoader" class="esriCTSearchLoader"/></span>
+                                <span class="clearInput" title="${sharedNls.tooltips.clear}" data-dojo-attach-point="close">
+                                </span><span>
+                                    <img data-dojo-attach-point="imgSearchLoader" class="esriCTSearchLoader" /></span>
                             </div>
                         </div>
                         <div class="esriCTSearch" data-dojo-attach-point="esriCTSearch">
-                            <span class="esriCTLocateSearchicon" title="${sharedNls.tooltips.locateAddress}" data-dojo-attach-point="esriCTimgLocate">
-                            </span>
+                            <span class="esriCTLocateSearchicon" title="${sharedNls.tooltips.locateAddress}"
+                                data-dojo-attach-point="esriCTimgLocate"></span>
                         </div>
                         <div data-dojo-attach-point="divAddressList" class="esriCTAddressList">
                             <div data-dojo-attach-point="divAddressScrollContainer" class="divAddressScrollContainer"

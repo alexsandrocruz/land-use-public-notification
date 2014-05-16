@@ -277,6 +277,47 @@
     height: 18px;
 }
 
+.claro .dijitSelect .dijitInputField, .claro .dijitTextBox .dijitInputField
+{
+    height: 15px;
+    padding: 7px 0 6px 8px !important;
+}
+
+.dijitInputInner::-ms-clear
+{
+    display: none;
+}
+
+.dijitTextBox
+{
+    width: 100% !important;
+    border: #DFDFDF solid 1px !important;
+}
+
+.dijitTextBoxHover
+{
+    background: #fff !important;
+}
+.dijitTextBox input[type="text"]
+{
+    border: #DFDFDF solid 1px;
+    outline: medium none;
+    vertical-align: middle !important;
+    color: #000 !important;
+    overflow: hidden;
+    vertical-align: middle !important;
+    background: #fff;
+}
+
+.claro .dijitSelect .dijitArrowButtonInner, .claro .dijitComboBox .dijitArrowButtonInner
+{
+    background-position: -30px 53%;
+}
+.claro .dijitComboBoxOpenOnClickHover .dijitArrowButtonInner, .claro .dijitComboBox .dijitDownArrowButtonHover .dijitArrowButtonInner
+{
+    background-position: -65px 53%;
+}
+
 .esriCTTxtAddress::-ms-clear
 {
     display: none;
@@ -764,6 +805,14 @@
 
 
 /*splash Screen*/
+.esriGovtLoadSpashScreen
+{
+    top: 0px;
+    left: 0px;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
 
 .splashScreenScrollBarContainer
 {
@@ -773,13 +822,13 @@
 
 .esriCTSplashScreenDialog
 {
-    text-align: left;
-    z-index: 1003;
+    z-index: 10007;
     padding: 5px;
     background-color: #fff;
-    color: #000;
+    color: #6e6e6e;
     width: 350px;
     height: 290px;
+    position: relative;
 }
 
 
@@ -837,7 +886,6 @@
 {
     overflow: hidden;
     position: relative;
-    margin-top: 10px;
     height: 100%;
 }
 
@@ -1232,7 +1280,7 @@ input
 
 .esriCTInputDistanc
 {
-    width: 45%;
+    width: 41%;
     float: left;
 }
 
@@ -1241,7 +1289,7 @@ input
     color: Black;
     width: 132px;
     border: 1px Solid #DFDFDF !important;
-    height: 20px;
+    height: 28px;
 }
 
 .esriCTselectBuffer

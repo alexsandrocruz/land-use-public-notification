@@ -1,5 +1,5 @@
 ﻿/*global define,Modernizr,dojoConfig,dijit,dojo,alert,esri ,event*/
-/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
+/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /*
  | Copyright 2013 Esri
  |
@@ -59,6 +59,12 @@ define([
 
     //========================================================================================================================//
     return declare([InfoWindowBase, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
+        /**
+        * create infowindow view  widget
+        *
+        * @class
+        * @name widgets/infoWindow/infoWindowView
+        */
         sharedNls: sharedNls,
         attachInfoWindowEvents: function () {
             this.own(on(this.esriCTShowDetailsView, "click", lang.hitch(this, function () {
@@ -92,6 +98,10 @@ define([
             })));
         },
 
+        /**
+        * Get template formats from configuration file
+        * @memberOf widgets/infoWindow/infoWindowView
+        */
         _getAveryTemplates: function () {
             var averyTemplates, averyTypes, averyComboBox, itemstore, i;
 
@@ -116,13 +126,20 @@ define([
             averyComboBox.textbox.readOnly = true;
         },
 
-        //Validate avery format
+        /**
+        * Validate avery format
+        * @memberOf widgets/infoWindow/infoWindowView
+        */
         _validateAveryFormat: function () {
             if (!dijit.byId('selectAvery').item) {
                 dijit.byId('selectAvery').setValue('');
             }
         },
 
+        /**
+        * Get buffer region around located parcel/address.
+        * @memberOf widgets/infoWindow/infoWindowView
+        */
         createBuffer: function () {
             var _this = this, geometryService, maxBufferDistance, params, polyLine, j;
             topic.publish("hideMapTip");
@@ -190,6 +207,10 @@ define([
             }
         },
 
+        /**
+        * Function to draw buffer for road(s)
+        * @memberOf widgets/infoWindow/infoWindowView
+        */
         _showBufferRoad: function (geometries) {
             var _this = this, taxParcelQueryUrl, qTask, symbol;
             topic.publish("hideMapTip");
@@ -216,7 +237,12 @@ define([
             }));
         },
 
-        //Check if buffer range is valid
+        /**
+        * Check if buffer range is valid
+        * @param {integer} distance of the buffer to be drawn
+        * @return{boolean} return the entered distance for buffer is valid or not
+        * @memberOf widgets/infoWindow/infoWindowView
+        */
         _isBufferValid: function (dist) {
             var maxBufferDistance = parseFloat(dojo.configData.MaxBufferDistance), isValid = true, length;
             length = parseFloat(dist);
@@ -226,7 +252,12 @@ define([
             return isValid;
         },
 
-        //Check for valid numeric strings
+        /**
+        * Check for valid numeric strings
+        * @param {integer} distance of the buffer to be drawn
+        * @return{boolean} return the numeric string is valid or not
+        * @memberOf widgets/infoWindow/infoWindowView
+        */
         isNumeric: function (dist) {
             var returnValue;
             if (!/\D/.test(dist)) {
@@ -239,7 +270,12 @@ define([
             return returnValue;
         },
 
-        //Validate the numeric text box control
+        /**
+        * Validate the numeric text box control
+        * @param {object} event of the key pressed
+        * @return{boolean} return the keycode is valid or not
+        * @memberOf widgets/infoWindow/infoWindowView
+        */
         onlyNumbers: function (evt) {
             var charCode;
             charCode = evt.which || event.keyCode;
@@ -249,35 +285,75 @@ define([
             return true;
         },
 
+        /**
+        *Fetch parameters to buffer
+        * @param {integer} distance of the buffer around graphic
+        * @memberOf widgets/infoWindow/infoWindowView
+        */
         _bufferParameters: function (dist) {
-            var geometryService, params, polygon, ringsLength, i, j;
+            var geometryService, params, polygon, ringsLength, i, j, polyLine;
             geometryService = new GeometryService(dojo.configData.GeometryService);
             params = new BufferParameters();
             if (this.map.getLayer("esriGraphicsLayerMapSettings").graphics) {
-                polygon = new Geometry.Polygon(this.map.spatialReference);
-                for (i = 0; i < this.map.getLayer("esriGraphicsLayerMapSettings").graphics.length; i++) {
-                    ringsLength = this.map.getLayer("esriGraphicsLayerMapSettings").graphics[i].geometry.rings.length;
-                    for (j = 0; j < ringsLength; j++) {
-                        polygon.addRing(this.map.getLayer("esriGraphicsLayerMapSettings").graphics[i].geometry.rings[j]);
+                if (this.map.getLayer("esriGraphicsLayerMapSettings").graphics[0].geometry.type === "polygon") {
+                    polygon = new Geometry.Polygon(this.map.spatialReference);
+                    for (i = 0; i < this.map.getLayer("esriGraphicsLayerMapSettings").graphics.length; i++) {
+                        ringsLength = this.map.getLayer("esriGraphicsLayerMapSettings").graphics[i].geometry.rings.length;
+                        for (j = 0; j < ringsLength; j++) {
+                            polygon.addRing(this.map.getLayer("esriGraphicsLayerMapSettings").graphics[i].geometry.rings[j]);
+                        }
                     }
+                    params.geometries = [polygon];
+                    params.distances = [dist.value];
+                    params.unit = GeometryService.UNIT_FOOT;
+                    params.outSpatialReference = this.map.spatialReference;
+                    geometryService.buffer(params, lang.hitch(this, this._showBuffer),
+                        function (err) {
+                            topic.publish("hideProgressIndicator");
+                            alert("Query " + err);
+                        });
                 }
-                params.geometries = [polygon];
+
+                if (this.map.getLayer("esriGraphicsLayerMapSettings").graphics[0].geometry.type === "point") {
+                    params.geometries = [this.map.getLayer("esriGraphicsLayerMapSettings").graphics[0].geometry];
+                    params.distances = [dist.value];
+                    params.unit = GeometryService.UNIT_FOOT;
+                    params.outSpatialReference = this.map.spatialReference;
+                    geometryService.buffer(params, lang.hitch(this, this._showBuffer),
+                        function (err) {
+                            topic.publish("hideProgressIndicator");
+                            alert("Query " + err);
+                        });
+                }
+
+                if (this.map.getLayer("esriGraphicsLayerMapSettings").graphics[0].geometry.type === "polyline") {
+                    polyLine = new Geometry.Polyline(this.map.spatialReference);
+                    polyLine.addPath(this.map.getLayer("esriGraphicsLayerMapSettings").graphics[0].geometry.paths[0]);
+                    params.geometries = [polyLine];
+                    params.distances = [dist.value];
+                    params.unit = GeometryService.UNIT_FOOT;
+                    params.outSpatialReference = this.map.spatialReference;
+                    geometryService.buffer(params, lang.hitch(this, this._showBuffer),
+                        function (err) {
+                            topic.publish("hideProgressIndicator");
+                            alert("Query " + err);
+                        });
+                }
+
             } else {
                 alert(sharedNls.errorMessages.createBuffer);
             }
-            params.distances = [dist.value];
-            params.unit = GeometryService.UNIT_FOOT;
-            params.outSpatialReference = this.map.spatialReference;
-            geometryService.buffer(params, lang.hitch(this, this._showBuffer),
-                function (err) {
-                    topic.publish("hideProgressIndicator");
-                    alert("Query " + err);
-                });
+
             dojo.selectedMapPoint = null;
             this.map.infoWindow.hide();
             topic.publish("showProgressIndicator");
         },
 
+        /**
+        *Function to draw buffer for parcel(s)
+        * @param {object} geometry of the graphic around which buffer will be drawn
+        * @memberOf widgets/infoWindow/infoWindowView
+        */
         _showBuffer: function (geometries) {
             var _this = this, maxAllowableOffset, taxParcelQueryUrl, qTask, symbol;
             dojo.displayInfo = null;
@@ -305,6 +381,14 @@ define([
 
         },
 
+        /**
+        * add graphics on the map
+        * @param {string} layer url on which we need to add the graphics
+        * @param {object} symbol contains details of the symbol to be added
+        * @param {object} point where we add symbol
+        * @param {object} feature to which we add the graphic symbol
+        * @memberOf widgets/infoWindow/infoWindowView
+        */
         _addGraphic: function (layer, symbol, point, attr) {
             var graphic = new Graphic(point, symbol, attr, null), featureSet, features = [];
             features.push(graphic);
@@ -313,6 +397,12 @@ define([
             layer.add(featureSet.features[0]);
         },
 
+        /**
+        * Handle queryTask callback for avery label and csv generation.
+        * @param {object} symbol contains details of the symbol to be added
+        * @param {boolean} check query is for road or any other layer
+        * @memberOf widgets/infoWindow/infoWindowView
+        */
         _queryCallback: function (featureSet, road) {
             var features = featureSet.features, poly, feature, strAveryParam, strCsvParam;
             if (this.map.getLayer("esriGraphicsLayerMapSettings")) {
@@ -322,7 +412,7 @@ define([
                 if (!road) {
                     alert(sharedNls.errorMessages.noParcel);
                 } else {
-                    alert(dojo.configData.NoAdjacentParcel + this.dist.value + dojo.configData.FeetCaption);
+                    alert(dojo.configData.NoAdjacentParcel + " " + this.dist.value + " " + dojo.configData.FeetCaption);
                 }
                 topic.publish("hideProgressIndicator");
             } else {
@@ -351,6 +441,12 @@ define([
             }
         },
 
+        /**
+        * Create dynamic csv parameter string
+        * @param {object} contains set of fetures inside the buffer region
+        * @return {string} returns dynamic csv parameter string
+        * @memberOf widgets/infoWindow/infoWindowView
+        */
         _createCsvParam: function (features) {
             var csvFieldsCollection, occupantFields, strCsvParam = '',
                 featureCount, fieldCount, i, csvFields, subFields, count;
@@ -420,6 +516,12 @@ define([
             return strCsvParam;
         },
 
+        /**
+        * Create dynamic avery parameter string
+        * @param {object} contains set of fetures inside the buffer region
+        * @return {string} returns dynamic avery parameter string
+        * @memberOf widgets/infoWindow/infoWindowView
+        */
         _createAveryParam: function (features) {
             var averyFieldsCollection = dojo.configData.AveryLabelSettings[0].AveryFieldsCollection, featureCount, fieldCount, occupantFields, strAveryParam,
                 averyFields, subFields, i;
@@ -479,6 +581,14 @@ define([
             }
         },
 
+        /**
+        * Submit Geo-Processing task
+        * @param {boolean} pdf option is selected or not
+        * @param {boolean} csv option is selected or not
+        * @param {string} contains dynamic avery parameter string
+        * @param {string} contains dynamic csv parameter string
+        * @memberOf widgets/infoWindow/infoWindowView
+        */
         _executeGPTask: function (pdf, csv, strAveryParam, strCsvParam) {
             var gpTaskAvery, gpTaskCsv, params, csvParams;
             gpTaskAvery = new Geoprocessor(dojo.configData.AveryLabelSettings[0].PDFServiceTask);
@@ -495,7 +605,12 @@ define([
             topic.publish("hideProgressIndicator");
         },
 
-        //PDF generation callback completion event handler
+
+        /**
+        * PDF generation callback completion event handler
+        * @param {object} jobinfo contains status regarding geoprocessing task completion
+        * @memberOf widgets/infoWindow/infoWindowView
+        */
         _completeGPJob: function (jobInfo) {
             var gpTaskAvery;
             gpTaskAvery = new Geoprocessor(dojo.configData.AveryLabelSettings[0].PDFServiceTask);
@@ -511,6 +626,11 @@ define([
             }
         },
 
+        /**
+        * Csv generation callback completion event handler
+        * @param {object} jobinfo contains status regarding geoprocessing task completion
+        * @memberOf widgets/infoWindow/infoWindowView
+        */
         _completeCsvGPJob: function (jobInfo) {
             var gpTaskAvery = new Geoprocessor(dojo.configData.AveryLabelSettings[0].CSVServiceTask);
             if (jobInfo.jobStatus !== "esriJobFailed") {
@@ -525,7 +645,11 @@ define([
             }
         },
 
-        //Pdf generation status callback event handler
+        /**
+        * Pdf generation status callback event handler
+        * @param {object} jobinfo contains status regarding geoprocessing task
+        * @memberOf widgets/infoWindow/infoWindowView
+        */
         _statusCallback: function (jobInfo) {
             var status = jobInfo.jobStatus;
             if (status === "esriJobFailed") {
@@ -533,7 +657,12 @@ define([
             }
         },
 
-        //function to call when the error exists
+
+        /**
+        * function to call when the error exists
+        * @param {string} error message when gp service fails
+        * @memberOf widgets/infoWindow/infoWindowView
+        */
         _errCallback: function (err) {
             alert(err.message);
             if (this.window.location.toString().split("$displayInfo=").length > 1) {
@@ -545,11 +674,21 @@ define([
             topic.publish("hideProgressIndicator");
         },
 
-        //Function to open generated Pdf in a new window
+        /**
+        * Function to open generated Pdf in a new window
+        * @param {object} object of downloaded outputfile
+        * @memberOf widgets/infoWindow/infoWindowView
+        */
         _downloadFile: function (outputFile) {
             this.window.open(outputFile.value.url);
         },
 
+
+        /**
+        * Function to open generated csv in a new window
+        * @param {object} object of downloaded outputfile
+        * @memberOf widgets/infoWindow/infoWindowView
+        */
         _downloadCSVFile: function (outputFile) {
             if (navigator.appVersion.indexOf("Mac") !== -1) {
                 window.open(outputFile.value.url);
