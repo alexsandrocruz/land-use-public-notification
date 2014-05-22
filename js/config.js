@@ -59,7 +59,7 @@ define([], function () {
 
         //Set splash window content - Message that appears when the application starts
         SplashScreen: {
-            SplashScreenContent: "Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.",
+            SplashScreenContent: "Land Use Public Notification</b> <br/> <hr/> <br/>The <b>Land Use Public Notification</b> application allows local government staff to identify properties within a given distance (buffer) of a subject property roadway, or school district and generate mailing labels and/or a structured text file for owners and occupants that fall within the buffer.<br/><br/>This application is typically used by local planning and zoning officials, but can be used by any agency looking to notify property owners and occupants of a formal action being taken. The process of public notification allows adjoining or nearby property owners and others, the opportunity to look at a proposed development, consider the likely impacts the proposal may have on them, and provide comment (either positive or negative) about the proposal prior to a decision being made.<br/><br/>",
             IsVisible: true
         },
 
