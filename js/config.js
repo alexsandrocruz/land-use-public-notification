@@ -134,21 +134,16 @@ define([], function () {
             {
                 OverlayHighlightColor: "#1C86EE",
                 DisplayTitle: "School Boundaries",
-                LayerUrl: "http://ec2-54-214-169-132.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/SchoolDistrictQuery/MapServer/0",
-                SearchDisplayFields: "DISTRCTNAME,NAME",
-                SearchExpression: "UPPER(DISTRCTNAME) LIKE '%${0}%' OR UPPER(NAME) LIKE '%${0}%'",
+                LayerUrl: "http://tryitlive.arcgis.com/arcgis/rest/services/AdministrativeAreas/MapServer/0",
+                SearchDisplayFields: "SCHLDSCRP",
+                SearchExpression: "UPPER(SCHLDSCRP) LIKE '%${0}%' OR UPPER(SCHLDSCRP) LIKE '%${0}%'",
                 InfoWindowSettings: [{
                     InfoWindowTitleFields: "NAME",
                     InfoWindowData: [{
-                        DisplayText: "District Name:",
-                        FieldName: "DISTRCTNAME ",
+                        DisplayText: "School District:",
+                        FieldName: "SCHLDSCRP",
                         AliasField: "School District Name"
-                    }, {
-                        DisplayText: "Name:",
-                        FieldName: "NAME",
-                        AliasField: "School Name"
-                    }]
-                }]
+                    },
             }],
 
         // ------------------------------------------------------------------------------------------------------------------------
