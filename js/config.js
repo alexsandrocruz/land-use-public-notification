@@ -59,7 +59,7 @@ define([], function () {
 
         //Set splash window content - Message that appears when the application starts
         SplashScreen: {
-            SplashScreenContent: "Land Use Public Notification</b> <br/> <hr/> <br/>The <b>Land Use Public Notification</b> application allows local government staff to identify properties within a given distance (buffer) of a subject property roadway, or school district and generate mailing labels and/or a structured text file for owners and occupants that fall within the buffer.<br/><br/>This application is typically used by local planning and zoning officials, but can be used by any agency looking to notify property owners and occupants of a formal action being taken. The process of public notification allows adjoining or nearby property owners and others, the opportunity to look at a proposed development, consider the likely impacts the proposal may have on them, and provide comment (either positive or negative) about the proposal prior to a decision being made.<br/><br/>",
+            SplashScreenContent: "Land Use Public Notification</b> <br/> <hr/> <br/>The <b>Land Use Public Notification</b> application allows local government staff to identify properties within a given distance (buffer) of a subject property roadway, or school district and generate mailing labels and/or a structured text file for owners and occupants that fall within the buffer.",
             IsVisible: true
         },
 
@@ -131,20 +131,21 @@ define([], function () {
         //Overlay layer settings refers to the other operational layers configured apart from the standard layers.
         // ------------------------------------------------------------------------------------------------------------------------
         OverlayLayerSettings: [
-            {
-                OverlayHighlightColor: "#1C86EE",
-                DisplayTitle: "School Boundaries",
-                LayerUrl: "http://tryitlive.arcgis.com/arcgis/rest/services/AdministrativeAreas/MapServer/0",
-                SearchDisplayFields: "SCHLDSCRP",
-                SearchExpression: "UPPER(SCHLDSCRP) LIKE '%${0}%' OR UPPER(SCHLDSCRP) LIKE '%${0}%'",
-                InfoWindowSettings: [{
-                    InfoWindowTitleFields: "NAME",
-                    InfoWindowData: [{
-                        DisplayText: "School District:",
-                        FieldName: "SCHLDSCRP",
-                        AliasField: "School District Name"
-                    },
-            }],
+              {
+                  OverlayHighlightColor: "#1C86EE",
+                  DisplayTitle: "School Boundaries",
+                  LayerUrl: "http://tryitlive.arcgis.com/arcgis/rest/services/AdministrativeAreas/MapServer/0",
+                  SearchDisplayFields: "SCHLDSCRP",
+                  SearchExpression: "UPPER(SCHLDSCRP) LIKE '%${0}%' OR UPPER(SCHLDSCRP) LIKE '%${0}%'",
+                  InfoWindowSettings: [{
+                      InfoWindowTitleFields: "SCHLDSCRP",
+                      InfoWindowData: [{
+                          DisplayText: "Number of Tax Parcels:",
+                          FieldName: "NOTXPRCL",
+                          AliasField: "Number of Tax Parcels"
+                      }]
+                  }]
+              }],
 
         // ------------------------------------------------------------------------------------------------------------------------
         // Query fields
@@ -256,7 +257,7 @@ define([], function () {
                 width: 35,
                 height: 35
             }],
-            HintText: "Enter address/road",
+            HintText: "Search Address/Road/School",
             MultipleResults: "PARCELID,SITEADDRESS"
         },
 
@@ -314,7 +315,7 @@ define([], function () {
         // GEOMETRY SERVICE SETTINGS
         // ------------------------------------------------------------------------------------------------------------------------
         // Set geometry service URL
-        GeometryService: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer",
+        GeometryService: "http://ec2-54-214-169-132.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/Utilities/Geometry/GeometryServer",
 
         // Set proxy url
         ProxyUrl: "/proxy/proxy.ashx",
