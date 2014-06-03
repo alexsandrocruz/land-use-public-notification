@@ -59,7 +59,7 @@ define([], function () {
 
         //Set splash window content - Message that appears when the application starts
         SplashScreen: {
-            SplashScreenContent: "Land Use Public Notification</b> <br/> <hr/> <br/>The <b>Land Use Public Notification</b> application allows local government staff to identify properties within a given distance (buffer) of a subject property roadway, or school district and generate mailing labels and/or a structured text file for owners and occupants that fall within the buffer.",
+            SplashScreenContent: "<b>Land Use Public Notification</b> <br/> <hr/> <br/>The <b>Land Use Public Notification</b> application allows local government staff to identify properties within a given distance (buffer) of a subject property roadway, or school district and generate mailing labels and/or a structured text file for owners and occupants that fall within the buffer.",
             IsVisible: true
         },
 
