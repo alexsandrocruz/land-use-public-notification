@@ -817,6 +817,7 @@ define([
             qTask = new QueryTask(overlayQueryUrl);
             qTask.execute(query, lang.hitch(this, function (featureSet) {
                 selectedSet = featureSet.features[0];
+                selectedSet.attributes.overLay = true;
                 if (featureSet.geometryType === "esriGeometryPoint") {
                     locatorMarkupSymbol = new SimpleMarkerSymbol(
                         SimpleMarkerSymbol.STYLE_CIRCLE,
@@ -841,6 +842,7 @@ define([
                             return;
                         }
                         graphic = new Graphic(this.mapPoint, locatorMarkupSymbol, {}, null);
+                        graphic.attributes.overLay = true;
                         _self.map.getLayer("esriGraphicsLayerMapSettings").add(graphic);
                         dojo.selectedMapPoint = this.mapPoint;
                         centerPoint = this.mapPoint;
@@ -883,6 +885,7 @@ define([
                     }
                     this.map.setExtent(polyLine.getExtent().expand(2));
                     graphic = new Graphic(polyLine, polylineSymbol);
+                    graphic.attributes.overLay = true;
                     _self.map.getLayer("esriGraphicsLayerMapSettings").add(graphic);
                     centerPoint = polyLine.getExtent().getCenter();
                     dojo.selectedMapPoint = centerPoint;

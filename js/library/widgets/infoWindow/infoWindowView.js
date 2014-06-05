@@ -141,7 +141,7 @@ define([
         * @memberOf widgets/infoWindow/infoWindowView
         */
         createBuffer: function () {
-            var _this = this, geometryService, maxBufferDistance, params, polyLine, j;
+            var _this = this, geometryService, maxBufferDistance, params, polyLine, j, bufferLimit;
             topic.publish("hideMapTip");
             this.map.getLayer("tempBufferLayer").clear();
             geometryService = new GeometryService(dojo.configData.GeometryService);
@@ -158,7 +158,8 @@ define([
                     this.dist.focus();
                     topic.publish("showErrorMessage", 'spanFileUploadMessage', sharedNls.errorMessages.enterNumeric, '#FF0000');
                 } else if (!(this._isBufferValid(this.dist.value))) {
-                    topic.publish("showErrorMessage", 'spanFileUploadMessage', 'Valid buffer range is between 1 to ' + maxBufferDistance + ' feet.', '#FF0000');
+                    bufferLimit = string.substitute(sharedNls.errorMessages.bufferRange, [maxBufferDistance]);
+                    topic.publish("showErrorMessage", 'spanFileUploadMessage', bufferLimit, '#FF0000');
                     return;
                 }
 
@@ -180,9 +181,13 @@ define([
                                 }
                                 params.distances = [this.dist.value];
                                 params.unit = GeometryService.UNIT_FOOT;
-                                geometryService.buffer(params, function (geometries) {
-                                    _this._showBufferRoad(geometries);
-                                });
+                                if (parseInt(this.dist.value, 10) !== 0) {
+                                    geometryService.buffer(params, function (geometries) {
+                                        _this._showBufferRoad(geometries);
+                                    });
+                                } else {
+                                    _this._showBufferRoad([polyLine]);
+                                }
                                 dojo.selectedMapPoint = null;
                                 dojo.displayInfo = null;
                                 this.map.infoWindow.hide();
@@ -246,7 +251,7 @@ define([
         _isBufferValid: function (dist) {
             var maxBufferDistance = parseFloat(dojo.configData.MaxBufferDistance), isValid = true, length;
             length = parseFloat(dist);
-            if ((length < 1) || (length > maxBufferDistance)) {
+            if ((length < 0) || (length > maxBufferDistance)) {
                 isValid = false;
             }
             return isValid;
@@ -307,11 +312,15 @@ define([
                     params.distances = [dist.value];
                     params.unit = GeometryService.UNIT_FOOT;
                     params.outSpatialReference = this.map.spatialReference;
-                    geometryService.buffer(params, lang.hitch(this, this._showBuffer),
-                        function (err) {
-                            topic.publish("hideProgressIndicator");
-                            alert("Query " + err);
-                        });
+                    if (parseInt(dist.value, 10) !== 0) {
+                        geometryService.buffer(params, lang.hitch(this, this._showBuffer),
+                            function (err) {
+                                topic.publish("hideProgressIndicator");
+                                alert("Query " + err);
+                            });
+                    } else {
+                        this._showBuffer(polygon);
+                    }
                 }
 
                 if (this.map.getLayer("esriGraphicsLayerMapSettings").graphics[0].geometry.type === "point") {
@@ -319,11 +328,15 @@ define([
                     params.distances = [dist.value];
                     params.unit = GeometryService.UNIT_FOOT;
                     params.outSpatialReference = this.map.spatialReference;
-                    geometryService.buffer(params, lang.hitch(this, this._showBuffer),
-                        function (err) {
-                            topic.publish("hideProgressIndicator");
-                            alert("Query " + err);
-                        });
+                    if (parseInt(dist.value, 10) !== 0) {
+                        geometryService.buffer(params, lang.hitch(this, this._showBuffer),
+                            function (err) {
+                                topic.publish("hideProgressIndicator");
+                                alert("Query " + err);
+                            });
+                    } else {
+                        this._showBuffer(polygon);
+                    }
                 }
 
                 if (this.map.getLayer("esriGraphicsLayerMapSettings").graphics[0].geometry.type === "polyline") {
@@ -333,11 +346,15 @@ define([
                     params.distances = [dist.value];
                     params.unit = GeometryService.UNIT_FOOT;
                     params.outSpatialReference = this.map.spatialReference;
-                    geometryService.buffer(params, lang.hitch(this, this._showBuffer),
-                        function (err) {
-                            topic.publish("hideProgressIndicator");
-                            alert("Query " + err);
-                        });
+                    if (parseInt(dist.value, 10) !== 0) {
+                        geometryService.buffer(params, lang.hitch(this, this._showBuffer),
+                            function (err) {
+                                topic.publish("hideProgressIndicator");
+                                alert("Query " + err);
+                            });
+                    } else {
+                        this._showBuffer(polygon);
+                    }
                 }
 
             } else {
@@ -369,7 +386,12 @@ define([
             array.forEach(geometries, lang.hitch(this, function (geometry) {
                 _this._addGraphic(_this.map.getLayer("tempBufferLayer"), symbol, geometry);
             }));
-            query.geometry = geometries[0];
+
+            if (geometries[0]) {
+                query.geometry = geometries[0];
+            } else {
+                query.geometry = geometries;
+            }
             query.maxAllowableOffset = maxAllowableOffset;
             query.spatialRelationship = esri.tasks.Query.SPATIAL_REL_INTERSECTS;
             query.returnGeometry = true;

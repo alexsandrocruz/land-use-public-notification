@@ -44,8 +44,8 @@ define({
         enterBufferDist: "Please enter the buffer distance.",
         inValidAveryFormat: "Invalid Avery format. Please select a valid format from the dropdown list.",
         fileSelect: "Select at least one file format to download.",
-        noDataAvailable: "Data not available for this particular location."
-
+        noDataAvailable: "Data not available for this particular location.",
+        bufferRange: "Valid buffer range is between 0 to ${0} feet."
     },
     buttons: {
         embedding: "Embedding", //Shown next to icon for sharing the map embedding in website

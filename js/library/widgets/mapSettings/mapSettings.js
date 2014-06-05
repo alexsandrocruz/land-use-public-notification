@@ -47,12 +47,13 @@ define([
     "esri/tasks/GeometryService",
     "dojo/_base/Color",
     "esri/symbol",
+    "esri/domUtils",
     "esri/symbols/SimpleMarkerSymbol",
     "esri/symbols/SimpleLineSymbol",
     "esri/symbols/SimpleFillSymbol",
     "esri/renderers/Renderer",
     "dojo/domReady!"
-], function (declare, domConstruct, domStyle, lang, on, dom, dojoQuery, ScrollBar, domClass, domGeom, Query, QueryTask, _WidgetBase, EsriMap, FeatureLayer, GraphicsLayer, GeometryExtent, BaseMapGallery, sharedNls, HomeButton, SpatialReference, urlUtils, InfoWindow, topic, Locator, Geometry, Graphic, GeometryService, Color, Symbol, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Renderer) {
+], function (declare, domConstruct, domStyle, lang, on, dom, dojoQuery, ScrollBar, domClass, domGeom, Query, QueryTask, _WidgetBase, EsriMap, FeatureLayer, GraphicsLayer, GeometryExtent, BaseMapGallery, sharedNls, HomeButton, SpatialReference, urlUtils, InfoWindow, topic, Locator, Geometry, Graphic, GeometryService, Color, Symbol, domUtils, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Renderer) {
     //========================================================================================================================//
 
     return declare([_WidgetBase], {
@@ -127,6 +128,13 @@ define([
                 dojo.overLayerID = false;
                 this.btnDiv = dojoQuery(".scrollbar_footer")[0];
                 domStyle.set(this.btnDiv, "display", "none");
+                if (evt.graphic && evt.graphic.attributes && evt.graphic.attributes.overLay) {
+                    dojo.graphicLayerClicked = false;
+                    dojo.selectedMapPoint = evt.mapPoint;
+                    topic.publish("setMapTipPosition", dojo.selectedMapPoint, this.map);
+                    domUtils.show(this.map.infoWindow.domNode);
+                    return;
+                }
                 this._executeQueryTask(evt);
             }));
 
