@@ -503,6 +503,9 @@ define([
                 if (this.map.getLayer("tempBufferLayer")) {
                     this.map.getLayer("tempBufferLayer").clear();
                 }
+                if (this.map.getLayer("roadCenterLinesLayerID")) {
+                    this.map.getLayer("roadCenterLinesLayerID").clearSelection();
+                }
                 target = evt.currentTarget || evt.srcElement;
                 this.txtAddress.set("value", target.innerHTML);
                 domAttr.set(this.txtAddress, "defaultAddress", this.txtAddress.get("value"));
