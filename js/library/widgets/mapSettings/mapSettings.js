@@ -369,6 +369,9 @@ define([
                     if (evt.ctrlKey) {
                         if (dojo.polygon) {
                             topic.publish("hideMapTip");
+                            if (dojo.mouseMoveHandle) {
+                                dojo.mouseMoveHandle.remove();
+                            }
                             dojo.mouseMoveHandle = this.map.on("mouse-move", lang.hitch(this, function (evt) {
                                 topic.publish("showMapTipForParcels", evt);
                             }));

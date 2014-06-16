@@ -35,7 +35,7 @@ define({
         invalidExtent: "Selected feature is out of basemap extent",
         invalidProjection: "Unable to plot current location on the map.",
         widgetNotLoaded: "Fail to load widgets.",
-        shareLoadingFailed: "Unable to load share options.",
+        shareLoadingFailed: "Unable to shorten URL, Bit.ly failed to load.",
         shareFailed: "Unable to share.",
         noParcel: "Parcel not found at current location",
         unableToPerform: "Unable to perform operation: invalid geometry.",

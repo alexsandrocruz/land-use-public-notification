@@ -143,6 +143,9 @@ define([
         createBuffer: function () {
             var _this = this, geometryService, maxBufferDistance, params, polyLine, j, bufferLimit, distance;
             topic.publish("hideMapTip");
+            if (dojo.mouseMoveHandle) {
+                dojo.mouseMoveHandle.remove();
+            }
             this.map.getLayer("tempBufferLayer").clear();
             geometryService = new GeometryService(dojo.configData.GeometryService);
             maxBufferDistance = parseFloat(dojo.configData.MaxBufferDistance);
@@ -303,10 +306,13 @@ define([
         * @memberOf widgets/infoWindow/infoWindowView
         */
         _bufferParameters: function (dist) {
-            var geometryService, params, polygon, ringsLength, i, j, polyLine, featureSet;
+            var geometryService, params, polygon, ringsLength, i, j, polyLine, featureSet, overlayInfowindow;
             geometryService = new GeometryService(dojo.configData.GeometryService);
             params = new BufferParameters();
             featureSet = new esri.tasks.FeatureSet();
+            if (this.map.getLayer("esriGraphicsLayerMapSettings").graphics[0].attributes.overLay) {
+                overlayInfowindow = true;
+            }
             if (this.map.getLayer("esriGraphicsLayerMapSettings").graphics) {
                 featureSet.features = this.map.getLayer("esriGraphicsLayerMapSettings").graphics;
                 if (this.map.getLayer("esriGraphicsLayerMapSettings").graphics[0] && this.map.getLayer("esriGraphicsLayerMapSettings").graphics[0].geometry.type === "polygon") {
@@ -328,7 +334,7 @@ define([
                                 alert("Query " + err);
                             });
                     } else {
-                        this._showBuffer(polygon);
+                        this._showBuffer(polygon, overlayInfowindow);
                     }
                 }
 
@@ -344,7 +350,7 @@ define([
                                 alert("Query " + err);
                             });
                     } else {
-                        this._showBuffer(polygon);
+                        this._showBuffer(polygon, overlayInfowindow);
                     }
                 }
 
@@ -362,7 +368,7 @@ define([
                                 alert("Query " + err);
                             });
                     } else {
-                        this._showBuffer(polygon);
+                        this._showBuffer(polygon, overlayInfowindow);
                     }
                 }
 
@@ -379,12 +385,16 @@ define([
         * @param {object} geometry of the graphic around which buffer will be drawn
         * @memberOf widgets/infoWindow/infoWindowView
         */
-        _showBuffer: function (geometries) {
+        _showBuffer: function (geometries, overlayInfowindow) {
             var _this = this, maxAllowableOffset, taxParcelQueryUrl, qTask, symbol;
             dojo.displayInfo = null;
             maxAllowableOffset = dojo.configData.MaxAllowableOffset;
             dojo.selectedMapPoint = null;
             topic.publish("showProgressIndicator");
+            topic.publish("hideMapTip");
+            if (dojo.mouseMoveHandle) {
+                dojo.mouseMoveHandle.remove();
+            }
             taxParcelQueryUrl = dojo.configData.ParcelLayerSettings.LayerUrl;
             qTask = new QueryTask(taxParcelQueryUrl);
             query = new Query();
@@ -400,7 +410,11 @@ define([
                 query.spatialRelationship = esri.tasks.Query.SPATIAL_REL_INTERSECTS;
             } else {
                 query.geometry = geometries;
-                query.spatialRelationship = esri.tasks.Query.SPATIAL_REL_CONTAINS;
+                if (overlayInfowindow) {
+                    query.spatialRelationship = esri.tasks.Query.SPATIAL_REL_INTERSECTS;
+                } else {
+                    query.spatialRelationship = esri.tasks.Query.SPATIAL_REL_CONTAINS;
+                }
             }
             query.maxAllowableOffset = maxAllowableOffset;
             query.returnGeometry = true;
