@@ -141,13 +141,17 @@ define([
         * @memberOf widgets/infoWindow/infoWindowView
         */
         createBuffer: function () {
-            var _this = this, geometryService, maxBufferDistance, params, polyLine, j;
+            var _this = this, geometryService, maxBufferDistance, params, polyLine, j, bufferLimit, distance;
             topic.publish("hideMapTip");
+            if (dojo.mouseMoveHandle) {
+                dojo.mouseMoveHandle.remove();
+            }
             this.map.getLayer("tempBufferLayer").clear();
             geometryService = new GeometryService(dojo.configData.GeometryService);
             maxBufferDistance = parseFloat(dojo.configData.MaxBufferDistance);
             params = new BufferParameters();
             this.dist = this.txtBuffer;
+            distance = this.dist.value;
             this.pdfFormat = dijit.byId('chkPdf').checked;
             this.csvFormat = dijit.byId('chkCsv').checked;
             this.occupants = dijit.byId('chkOccupants').checked;
@@ -158,7 +162,8 @@ define([
                     this.dist.focus();
                     topic.publish("showErrorMessage", 'spanFileUploadMessage', sharedNls.errorMessages.enterNumeric, '#FF0000');
                 } else if (!(this._isBufferValid(this.dist.value))) {
-                    topic.publish("showErrorMessage", 'spanFileUploadMessage', 'Valid buffer range is between 1 to ' + maxBufferDistance + ' feet.', '#FF0000');
+                    bufferLimit = string.substitute(sharedNls.errorMessages.bufferRange, [maxBufferDistance]);
+                    topic.publish("showErrorMessage", 'spanFileUploadMessage', bufferLimit, '#FF0000');
                     return;
                 }
 
@@ -180,9 +185,13 @@ define([
                                 }
                                 params.distances = [this.dist.value];
                                 params.unit = GeometryService.UNIT_FOOT;
-                                geometryService.buffer(params, function (geometries) {
-                                    _this._showBufferRoad(geometries);
-                                });
+                                if (parseInt(this.dist.value, 10) !== 0) {
+                                    geometryService.buffer(params, function (geometries) {
+                                        _this._showBufferRoad(geometries, distance);
+                                    });
+                                } else {
+                                    _this._showBufferRoad([polyLine], distance);
+                                }
                                 dojo.selectedMapPoint = null;
                                 dojo.displayInfo = null;
                                 this.map.infoWindow.hide();
@@ -211,7 +220,7 @@ define([
         * Function to draw buffer for road(s)
         * @memberOf widgets/infoWindow/infoWindowView
         */
-        _showBufferRoad: function (geometries) {
+        _showBufferRoad: function (geometries, bufferDistance) {
             var _this = this, taxParcelQueryUrl, qTask, symbol;
             topic.publish("hideMapTip");
             if (dojo.mouseMoveHandle) {
@@ -223,14 +232,20 @@ define([
             symbol = new Symbol.SimpleFillSymbol(Symbol.SimpleFillSymbol.STYLE_SOLID,
                 new Symbol.SimpleLineSymbol(Symbol.SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0, 0.65]), 2), new Color([255, 0, 0, 0.35]));
             array.forEach(geometries, lang.hitch(this, function (geometry) {
-                _this._addGraphic(_this.map.getLayer("tempBufferLayer"), symbol, geometry);
+                if (parseInt(bufferDistance, 10) !== 0) {
+                    _this._addGraphic(_this.map.getLayer("tempBufferLayer"), symbol, geometry);
+                }
             }));
 
             query = new Query();
             query.geometry = geometries[0];
             query.outFields = dojo.configData.QueryOutFields.split(",");
             query.maxAllowableOffset = dojo.configData.MaxAllowableOffset;
-            query.spatialRelationship = esri.tasks.Query.SPATIAL_REL_INTERSECTS;
+            if (parseInt(bufferDistance, 10) === 0) {
+                query.spatialRelationship = esri.tasks.Query.SPATIAL_REL_CONTAINS;
+            } else {
+                query.spatialRelationship = esri.tasks.Query.SPATIAL_REL_INTERSECTS;
+            }
             query.returnGeometry = true;
             qTask.execute(query, lang.hitch(this, function (featureSet) {
                 this._queryCallback(featureSet, true);
@@ -246,7 +261,7 @@ define([
         _isBufferValid: function (dist) {
             var maxBufferDistance = parseFloat(dojo.configData.MaxBufferDistance), isValid = true, length;
             length = parseFloat(dist);
-            if ((length < 1) || (length > maxBufferDistance)) {
+            if ((length < 0) || (length > maxBufferDistance)) {
                 isValid = false;
             }
             return isValid;
@@ -291,11 +306,16 @@ define([
         * @memberOf widgets/infoWindow/infoWindowView
         */
         _bufferParameters: function (dist) {
-            var geometryService, params, polygon, ringsLength, i, j, polyLine;
+            var geometryService, params, polygon, ringsLength, i, j, polyLine, featureSet, overlayInfowindow;
             geometryService = new GeometryService(dojo.configData.GeometryService);
             params = new BufferParameters();
+            featureSet = new esri.tasks.FeatureSet();
+            if (this.map.getLayer("esriGraphicsLayerMapSettings").graphics[0].attributes.overLay) {
+                overlayInfowindow = true;
+            }
             if (this.map.getLayer("esriGraphicsLayerMapSettings").graphics) {
-                if (this.map.getLayer("esriGraphicsLayerMapSettings").graphics[0].geometry.type === "polygon") {
+                featureSet.features = this.map.getLayer("esriGraphicsLayerMapSettings").graphics;
+                if (this.map.getLayer("esriGraphicsLayerMapSettings").graphics[0] && this.map.getLayer("esriGraphicsLayerMapSettings").graphics[0].geometry.type === "polygon") {
                     polygon = new Geometry.Polygon(this.map.spatialReference);
                     for (i = 0; i < this.map.getLayer("esriGraphicsLayerMapSettings").graphics.length; i++) {
                         ringsLength = this.map.getLayer("esriGraphicsLayerMapSettings").graphics[i].geometry.rings.length;
@@ -307,46 +327,57 @@ define([
                     params.distances = [dist.value];
                     params.unit = GeometryService.UNIT_FOOT;
                     params.outSpatialReference = this.map.spatialReference;
-                    geometryService.buffer(params, lang.hitch(this, this._showBuffer),
-                        function (err) {
-                            topic.publish("hideProgressIndicator");
-                            alert("Query " + err);
-                        });
+                    if (parseInt(dist.value, 10) !== 0) {
+                        geometryService.buffer(params, lang.hitch(this, this._showBuffer),
+                            function (err) {
+                                topic.publish("hideProgressIndicator");
+                                alert("Query " + err);
+                            });
+                    } else {
+                        this._showBuffer(polygon, overlayInfowindow);
+                    }
                 }
 
-                if (this.map.getLayer("esriGraphicsLayerMapSettings").graphics[0].geometry.type === "point") {
+                if (this.map.getLayer("esriGraphicsLayerMapSettings").graphics[0] && this.map.getLayer("esriGraphicsLayerMapSettings").graphics[0].geometry.type === "point") {
                     params.geometries = [this.map.getLayer("esriGraphicsLayerMapSettings").graphics[0].geometry];
                     params.distances = [dist.value];
                     params.unit = GeometryService.UNIT_FOOT;
                     params.outSpatialReference = this.map.spatialReference;
-                    geometryService.buffer(params, lang.hitch(this, this._showBuffer),
-                        function (err) {
-                            topic.publish("hideProgressIndicator");
-                            alert("Query " + err);
-                        });
+                    if (parseInt(dist.value, 10) !== 0) {
+                        geometryService.buffer(params, lang.hitch(this, this._showBuffer),
+                            function (err) {
+                                topic.publish("hideProgressIndicator");
+                                alert("Query " + err);
+                            });
+                    } else {
+                        this._showBuffer(polygon, overlayInfowindow);
+                    }
                 }
 
-                if (this.map.getLayer("esriGraphicsLayerMapSettings").graphics[0].geometry.type === "polyline") {
+                if (this.map.getLayer("esriGraphicsLayerMapSettings").graphics[0] && this.map.getLayer("esriGraphicsLayerMapSettings").graphics[0].geometry.type === "polyline") {
                     polyLine = new Geometry.Polyline(this.map.spatialReference);
                     polyLine.addPath(this.map.getLayer("esriGraphicsLayerMapSettings").graphics[0].geometry.paths[0]);
                     params.geometries = [polyLine];
                     params.distances = [dist.value];
                     params.unit = GeometryService.UNIT_FOOT;
                     params.outSpatialReference = this.map.spatialReference;
-                    geometryService.buffer(params, lang.hitch(this, this._showBuffer),
-                        function (err) {
-                            topic.publish("hideProgressIndicator");
-                            alert("Query " + err);
-                        });
+                    if (parseInt(dist.value, 10) !== 0) {
+                        geometryService.buffer(params, lang.hitch(this, this._showBuffer),
+                            function (err) {
+                                topic.publish("hideProgressIndicator");
+                                alert("Query " + err);
+                            });
+                    } else {
+                        this._showBuffer(polygon, overlayInfowindow);
+                    }
                 }
 
             } else {
                 alert(sharedNls.errorMessages.createBuffer);
             }
-
+            topic.publish("showProgressIndicator");
             dojo.selectedMapPoint = null;
             this.map.infoWindow.hide();
-            topic.publish("showProgressIndicator");
         },
 
         /**
@@ -354,12 +385,16 @@ define([
         * @param {object} geometry of the graphic around which buffer will be drawn
         * @memberOf widgets/infoWindow/infoWindowView
         */
-        _showBuffer: function (geometries) {
+        _showBuffer: function (geometries, overlayInfowindow) {
             var _this = this, maxAllowableOffset, taxParcelQueryUrl, qTask, symbol;
             dojo.displayInfo = null;
             maxAllowableOffset = dojo.configData.MaxAllowableOffset;
             dojo.selectedMapPoint = null;
             topic.publish("showProgressIndicator");
+            topic.publish("hideMapTip");
+            if (dojo.mouseMoveHandle) {
+                dojo.mouseMoveHandle.remove();
+            }
             taxParcelQueryUrl = dojo.configData.ParcelLayerSettings.LayerUrl;
             qTask = new QueryTask(taxParcelQueryUrl);
             query = new Query();
@@ -369,12 +404,22 @@ define([
             array.forEach(geometries, lang.hitch(this, function (geometry) {
                 _this._addGraphic(_this.map.getLayer("tempBufferLayer"), symbol, geometry);
             }));
-            query.geometry = geometries[0];
+
+            if (geometries[0]) {
+                query.geometry = geometries[0];
+                query.spatialRelationship = esri.tasks.Query.SPATIAL_REL_INTERSECTS;
+            } else {
+                query.geometry = geometries;
+                if (overlayInfowindow) {
+                    query.spatialRelationship = esri.tasks.Query.SPATIAL_REL_INTERSECTS;
+                } else {
+                    query.spatialRelationship = esri.tasks.Query.SPATIAL_REL_CONTAINS;
+                }
+            }
             query.maxAllowableOffset = maxAllowableOffset;
-            query.spatialRelationship = esri.tasks.Query.SPATIAL_REL_INTERSECTS;
             query.returnGeometry = true;
 
-            //executing query task for selecting intersecting features
+            //executing query task for selecting intersecting/contains features
             qTask.execute(query, lang.hitch(this, function (featureSet) {
                 this._queryCallback(featureSet, false);
             }));

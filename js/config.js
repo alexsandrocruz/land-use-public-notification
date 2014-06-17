@@ -131,21 +131,21 @@ define([], function () {
         //Overlay layer settings refers to the other operational layers configured apart from the standard layers.
         // ------------------------------------------------------------------------------------------------------------------------
         OverlayLayerSettings: [
-              {
-                  OverlayHighlightColor: "#1C86EE",
-                  DisplayTitle: "School Boundaries",
-                  LayerUrl: "http://tryitlive.arcgis.com/arcgis/rest/services/AdministrativeAreas/MapServer/0",
-                  SearchDisplayFields: "SCHLDSCRP",
-                  SearchExpression: "UPPER(SCHLDSCRP) LIKE '%${0}%' OR UPPER(SCHLDSCRP) LIKE '%${0}%'",
-                  InfoWindowSettings: [{
-                      InfoWindowTitleFields: "SCHLDSCRP",
-                      InfoWindowData: [{
-                          DisplayText: "Number of Tax Parcels:",
-                          FieldName: "NOTXPRCL",
-                          AliasField: "Number of Tax Parcels"
-                      }]
-                  }]
-              }],
+            {
+                OverlayHighlightColor: "#1C86EE",
+                DisplayTitle: "School Boundaries",
+                LayerUrl: "http://tryitlive.arcgis.com/arcgis/rest/services/AdministrativeAreas/MapServer/0",
+                SearchDisplayFields: "SCHLDSCRP",
+                SearchExpression: "UPPER(SCHLDSCRP) LIKE '%${0}%' OR UPPER(SCHLDSCRP) LIKE '%${0}%'",
+                InfoWindowSettings: [{
+                    InfoWindowTitleFields: "SCHLDSCRP",
+                    InfoWindowData: [{
+                        DisplayText: "Number of Tax Parcels:",
+                        FieldName: "NOTXPRCL",
+                        AliasField: "Number of Tax Parcels"
+                    }]
+                }]
+            }],
 
         // ------------------------------------------------------------------------------------------------------------------------
         // Query fields
