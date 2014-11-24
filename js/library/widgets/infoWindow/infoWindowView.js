@@ -150,6 +150,7 @@ define([
             geometryService = new GeometryService(dojo.configData.GeometryService);
             maxBufferDistance = parseFloat(dojo.configData.MaxBufferDistance);
             params = new BufferParameters();
+            params.geodesic = this.map.spatialReference.isWebMapMercator();
             this.dist = this.txtBuffer;
             distance = this.dist.value;
             this.pdfFormat = dijit.byId('chkPdf').checked;
@@ -309,6 +310,7 @@ define([
             var geometryService, params, polygon, ringsLength, i, j, polyLine, featureSet, overlayInfowindow;
             geometryService = new GeometryService(dojo.configData.GeometryService);
             params = new BufferParameters();
+            params.geodesic = this.map.spatialReference.isWebMapMercator();
             featureSet = new esri.tasks.FeatureSet();
             if (this.map.getLayer("esriGraphicsLayerMapSettings").graphics[0].attributes.overLay) {
                 overlayInfowindow = true;
