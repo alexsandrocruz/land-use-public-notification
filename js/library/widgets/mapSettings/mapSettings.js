@@ -444,7 +444,7 @@ define([
             roadCenterLinesLayerURL = dojo.configData.RoadCenterLayerSettings.LayerUrl;
             geometryService = new GeometryService(dojo.configData.GeometryService);
             params = new esri.tasks.BufferParameters();
-            params.geodesic = this.map.spatialReference.isWebMapMercator();
+            params.geodesic = true;
             params.geometries = [evt.mapPoint];
             params.distances = [50];
             params.unit = GeometryService.UNIT_FOOT;
