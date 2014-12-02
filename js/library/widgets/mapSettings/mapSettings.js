@@ -194,7 +194,7 @@ define([
                     mapDefaultExtent = new GeometryExtent({ "xmin": parseFloat(extentPoints[0]), "ymin": parseFloat(extentPoints[1]), "xmax": parseFloat(extentPoints[2]), "ymax": parseFloat(extentPoints[3]), "spatialReference": { "wkid": this.map.spatialReference.wkid} });
                     this.map.setExtent(mapDefaultExtent);
                 } else {
-                    mapDefaultExtent = extent.split(',');
+                    mapDefaultExtent = decodeURIComponent(extent).split(',');
                     mapDefaultExtent = new GeometryExtent({ "xmin": parseFloat(mapDefaultExtent[0]), "ymin": parseFloat(mapDefaultExtent[1]), "xmax": parseFloat(mapDefaultExtent[2]), "ymax": parseFloat(mapDefaultExtent[3]), "spatialReference": { "wkid": this.map.spatialReference.wkid} });
                     this.map.setExtent(mapDefaultExtent);
                 }
@@ -444,6 +444,7 @@ define([
             roadCenterLinesLayerURL = dojo.configData.RoadCenterLayerSettings.LayerUrl;
             geometryService = new GeometryService(dojo.configData.GeometryService);
             params = new esri.tasks.BufferParameters();
+            params.geodesic = true;
             params.geometries = [evt.mapPoint];
             params.distances = [50];
             params.unit = GeometryService.UNIT_FOOT;
