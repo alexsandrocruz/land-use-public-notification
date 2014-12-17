@@ -113,8 +113,13 @@ define([], function () {
             Key: "imagery",
             ThumbnailSource: "js/library/themes/images/imagery.png",
             Name: "Imagery",
-            MapURL: "http://tryitlive.arcgis.com/arcgis/rest/services/ImageryReferenceOverlay/MapServer"
-        }],
+            MapURL: "http://tryitlive.arcgis.com/arcgis/rest/services/ImageryHybrid/MapServer"
+        }, {
+            Key: "topoMap",
+            ThumbnailSource: "js/library/themes/images/imagery.png",
+            Name: "Topographic",
+            MapURL: "http://services.arcgisonline.com/arcgis/rest/services/World_Topo_Map/MapServer"
+    }],
 
         // Set string value to be shown for null or blank values
         ShowNullValueAs: "N/A",
@@ -135,7 +140,11 @@ define([], function () {
                 InfoWindowSettings: [{
                     InfoWindowTitleFields: "NAME",
                     InfoWindowData: [{
-                        DisplayText: "School District Area:",
+                        DisplayText: "School District:",
+                        FieldName: "DISTRCTNAME",
+                        AliasField: "School District Name"
+                    }, {
+                        DisplayText: "School District Area (sq mi):",
                         FieldName: "SCHOOLAREA",
                         AliasField: "Area in Square Miles"
                     }]
