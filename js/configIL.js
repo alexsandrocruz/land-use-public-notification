@@ -128,16 +128,16 @@ define([], function () {
         OverlayLayerSettings: [
             {
                 OverlayHighlightColor: "#1C86EE",
-                DisplayTitle: "School Boundaries",
+                DisplayTitle: "School Name",
                 LayerUrl: "http://tryitlive.arcgis.com/arcgis/rest/services/AdministrativeAreasIL/MapServer/0",
-                SearchDisplayFields: "SCHLDSCRP",
-                SearchExpression: "UPPER(SCHLDSCRP) LIKE '%${0}%' OR UPPER(SCHLDSCRP) LIKE '%${0}%'",
+                SearchDisplayFields: "NAME",
+                SearchExpression: "UPPER(NAME) LIKE '%${0}%' OR UPPER(NAME) LIKE '%${0}%'",
                 InfoWindowSettings: [{
-                    InfoWindowTitleFields: "SCHLDSCRP",
+                    InfoWindowTitleFields: "NAME",
                     InfoWindowData: [{
-                        DisplayText: "Number of Tax Parcels:",
-                        FieldName: "NOTXPRCL",
-                        AliasField: "Number of Tax Parcels"
+                        DisplayText: "School District Area:",
+                        FieldName: "SCHOOLAREA",
+                        AliasField: "Area in Square Miles"
                     }]
                 }]
             }],
