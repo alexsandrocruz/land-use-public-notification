@@ -144,7 +144,7 @@ define([], function () {
                         FieldName: "DISTRCTNAME",
                         AliasField: "School District Name"
                     }, {
-                        DisplayText: "School District Area (sq mi):",
+                        DisplayText: "District Area (sq mi):",
                         FieldName: "SCHOOLAREA",
                         AliasField: "Area in Square Miles"
                     }]
