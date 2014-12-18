@@ -116,7 +116,7 @@ define([], function () {
             MapURL: "http://tryitlive.arcgis.com/arcgis/rest/services/ImageryHybrid/MapServer"
         }, {
             Key: "topoMap",
-            ThumbnailSource: "js/library/themes/images/imagery.png",
+            ThumbnailSource: "js/library/themes/images/Topographic.jpg",
             Name: "Topographic",
             MapURL: "http://services.arcgisonline.com/arcgis/rest/services/World_Topo_Map/MapServer"
     }],
