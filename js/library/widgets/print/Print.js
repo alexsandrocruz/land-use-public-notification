@@ -16,13 +16,21 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-
 require([
+    "dojo/on",
+    "dojo/_base/Color",
     "esri/map",
+    "esri/layers/ArcGISTiledMapServiceLayer",
     "esri/layers/ImageServiceParameters",
     "esri/layers/ArcGISImageServiceLayer",
-    "../../../../config.js"
-], function (esriMap, ImageServiceParameters, ArcGISImageServiceLayer, config) {
+    "esri/layers/GraphicsLayer",
+    "esri/graphic",
+    "esri/geometry/Polygon",
+    "esri/symbols/SimpleLineSymbol",
+    "esri/symbols/SimpleFillSymbol",
+    "../../../../config.js",
+    "dojo/domReady!"
+], function (on, Color, Map, ArcGISTiledMapServiceLayer, ImageServiceParameters, ArcGISImageServiceLayer, GraphicsLayer, Graphic, Polygon, SimpleLineSymbol, SimpleFillSymbol, config) {
     /**
     * create print  widget
     *
@@ -30,7 +38,7 @@ require([
     * @name widgets/printMap/print
     */
 
-    var window_opener = window.dialogArguments,
+    var top_opener = window.top.opener,
         tempPolygonLayer = 'tempPolygonLayer',
         tempBuffer = 'tempBuffer',
         params = dojo.byId("paramid"),
@@ -41,16 +49,16 @@ require([
         initialExtent,
         baseMapLayer,
         imageServiceLayer;
-    parcelLayer = window_opener.ParcelLayer;
-    bufferLayer = window_opener.Bufferlayer;
-    baseMapLayer = window_opener.BaseMapLayer;
-    initialExtent = window_opener.Extent;
+    //fetch data from parent window
+    parcelLayer = top_opener.dataObject.ParcelLayer;
+    bufferLayer = top_opener.dataObject.Bufferlayer;
+    baseMapLayer = top_opener.dataObject.BaseMapLayer;
+    initialExtent = top_opener.dataObject.Extent;
 
-    printmap = new esri.Map("mapPrint", { extent: initialExtent, slider: false });
+    printmap = new Map("mapPrint", { extent: initialExtent, slider: false });
 
-    baseMapLayer = new esri.layers.ArcGISTiledMapServiceLayer(baseMapLayer.url);
+    baseMapLayer = new ArcGISTiledMapServiceLayer(baseMapLayer.url);
     printmap.addLayer(baseMapLayer);
-
     params = new ImageServiceParameters();
     params.format = "PNG24";
     imageServiceLayer = new ArcGISImageServiceLayer(baseMapLayer.url, { imageServiceParameters: params });
@@ -61,48 +69,57 @@ require([
     * function to add polygon and graphics in the print map window when it gets open
     * @memberOf widgets/printMap/print
     */
-    dojo.connect(printmap, "onLoad", function () {
-        var gLayer, i, buffersymbol, polygon, lineColor, fillColor, polysymbol;
+    on(printmap, "load", function () {
+        var gLayer, i, j, buffersymbol, polygon, lineColor, fillColor, polysymbol, addWaitCount = 2;
         printmap.disablePan();
         printmap.disableDoubleClickZoom();
 
         printmap.disableKeyboardNavigation();
         printmap.disableScrollWheelZoom();
 
-        gLayer = new esri.layers.GraphicsLayer();
+        // Catch additions of graphics layers
+        on(printmap, "layer-add", function (addedLayer) {
+            if (addedLayer.layer.id === tempBuffer || addedLayer.layer.id === tempPolygonLayer) {
+                addWaitCount--;
+                if (addWaitCount === 0) {
+                    // After both layers have been added, perform the print
+                    window.print();
+                }
+            }
+        });
+
+        // Add the generated buffers
+        gLayer = new GraphicsLayer();
         gLayer.id = tempBuffer;
-        printmap.addLayer(gLayer);
-        for (i = 0; i < bufferLayer.graphics.length; i++) {
-            buffersymbol = new esri.symbol.SimpleFillSymbol(
-                esri.symbol.SimpleFillSymbol.STYLE_SOLID,
-                new esri.symbol.SimpleLineSymbol(
-                    esri.symbol.SimpleLineSymbol.STYLE_SOLID,
-                    new dojo.Color([255, 0, 0, 0.65]),
+        for (i = 0; i < bufferLayer.geometries.length; i++) {
+            buffersymbol = new SimpleFillSymbol(
+                SimpleFillSymbol.STYLE_SOLID,
+                new SimpleLineSymbol(
+                    SimpleLineSymbol.STYLE_SOLID,
+                    new Color([255, 0, 0, 0.65]),
                     2
                 ),
-                new dojo.Color([255, 0, 0, 0.35])
+                new Color([255, 0, 0, 0.35])
             );
 
-            polygon = new esri.geometry.Polygon(bufferLayer.graphics[i].geometry.toJson());
-            gLayer.add(new esri.Graphic(polygon, buffersymbol));
+            polygon = new Polygon(bufferLayer.geometries[i]);
+            gLayer.add(new Graphic(polygon, buffersymbol));
         }
-
-        gLayer = new esri.layers.GraphicsLayer();
-        gLayer.id = tempPolygonLayer;
         printmap.addLayer(gLayer);
-        for (i = 0; i < parcelLayer.graphics.length; i++) {
-            lineColor = new dojo.Color();
-            lineColor.setColor(color);
 
-            fillColor = new dojo.Color();
-            fillColor.setColor(color);
+        // Add the selected parcels
+        gLayer = new GraphicsLayer();
+        gLayer.id = tempPolygonLayer;
+        for (j = 0; j < parcelLayer.geometries.length; j++) {
+            lineColor = new Color(color);
+
+            fillColor = new Color(color);
             fillColor.a = 0.25;
-            polygon = new esri.geometry.Polygon(parcelLayer.graphics[i].geometry.toJson());
-            polysymbol = new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID, new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, lineColor, 3), fillColor);
+            polygon = new Polygon(parcelLayer.geometries[j]);
+            polysymbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, lineColor, 3), fillColor);
 
-            gLayer.add(new esri.Graphic(polygon, polysymbol));
+            gLayer.add(new Graphic(polygon, polysymbol));
         }
-        window.print();
+        printmap.addLayer(gLayer);
     });
-
 });
