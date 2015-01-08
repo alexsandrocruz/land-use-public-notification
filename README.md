@@ -22,7 +22,7 @@ You'll need to convert to an application in IIS and use the ASP .NET 4.0. applic
 
 **Start now using your own services**
 
-For more information on requirements and publication steps, see [Land Use Public Notification](https://links.esri.com/localgovernment/help/10.2/LandUsePublicNotification) help.
+For more information on requirements and publication steps, see [Land Use Public Notification](http://links.esri.com/localgovernment/help/10.2/LandUsePublicNotification) help.
 
 ## Resources
 
