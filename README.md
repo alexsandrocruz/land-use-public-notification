@@ -2,9 +2,9 @@
 
 Land Use Public Notification is a configuration of ArcGIS Server and a JavaScript application that allows local government staff to identify properties within a given distance (buffer) of a subject property and generate mailing labels and/or a structured text file of owners and occupants that fall within the buffer. This application is typically used by local planning and zoning officials, but can be used by any agency looking to notify property owners and occupants of a formal action being taken.
 
-[Try the Land Use Public Notfication application](http://localgovtemplates2.esri.com/PublicNotification/default.htm)
+[Try the Land Use Public Notfication application](http://links.esri.com/localgovernment/tryit/PublicNotification/)
 
-[![Image of Land Use Public Notification application](land-use-public-notification.png "Land Use Public Notification application")](http://localgovtemplates2.esri.com/PublicNotification/default.htm)
+[![Image of Land Use Public Notification application](land-use-public-notification.png "Land Use Public Notification application")](http://links.esri.com/localgovernment/tryit/PublicNotification/)
 
 ## Features
 
@@ -13,45 +13,28 @@ Land Use Public Notification is a configuration of ArcGIS Server and a JavaScrip
 * Generate mailing labels in PDF or CSV formats
 * Print a map of the buffer
 
-## Instructions
-
-### Esri Sample Services
-
-Esri's sample services can be used with this repository to extend the application.
-
-### Your Services
-
-[Detailed help](http://resources.arcgis.com/en/help/localgovernment/10.1/index.html#/What_is_Land_Use_Public_Notification/028s00000014000000/)
-on the ArcGIS Resource Center can guide you in the setup and configuration of the app with your services.
-
-### General Help
-[New to Github? Get started here.](http://htmlpreview.github.com/?https://github.com/Esri/esri.github.com/blob/master/help/esri-getting-to-know-github.html)
-
 ## Requirements
 
-### Esri Sample Services
+**Start now using Esri-supplied sample services**
 
-* Microsoft ASP.NET Framework 4.0 available from the [Microsoft website](http://www.microsoft.com/en-us/download/details.aspx?id=17851)
+You can start using the application now by setting it up on a web server running Microsoft Internet Information Services (IIS) and using sample services supplied by Esri.
+You'll need to convert to an application in IIS and use the ASP .NET 4.0. application pool.
 
-### Your Services
+**Start now using your own services**
 
-* ArcGIS for Desktop 10.2 - Standard or Advanced - [About](http://www.esri.com/software/arcgis/arcgis-for-desktop)
-* ArcGIS for Server 10.2 - Standard or Advanced - [About](http://www.esri.com/software/arcgis/arcgisserver)
-* Local Government Information Model - [About](http://www.arcgis.com/home/item.html?id=ae175b36c4154dda987127dff879350d)
-* Microsoft ASP.NET Framework 4.0 available from the [Microsoft website](http://www.microsoft.com/en-us/download/details.aspx?id=17851)
+For more information on requirements and publication steps, see [Land Use Public Notification](https://links.esri.com/localgovernment/help/10.2/LandUsePublicNotification) help.
 
 ## Resources
+
+Additional [information and sample data](http://www.arcgis.com/home/item.html?id=30f1c037c6b5407894fccb94b536c2b6) are available for the application.
 
 Learn more about Esri's [ArcGIS for Local Government maps and apps](http://solutions.arcgis.com/local-government/).
 
 Show me a list of other [Local Government GitHub repositories](http://esri.github.io/#Local-Government).
 
-Additional [information and sample data](http://www.arcgis.com/home/item.html?id=7b4f3974b2c24d339dc0d527366ec1eb)
-are available for the application.
+This application uses the 3.8 version of [Esri's ArcGIS API for JavaScript](http://help.arcgis.com/en/webapi/javascript/arcgis/); see the site for concepts, samples, and a reference for using the API to create mapping web sites.
 
-This application uses the 3.5 version of
-[Esri's ArcGIS API for JavaScript](http://help.arcgis.com/en/webapi/javascript/arcgis/);
-see the site for concepts, samples, and a reference for using the API to create mapping web sites.
+[New to Github? Get started here.](http://htmlpreview.github.com/?https://github.com/Esri/esri.github.com/blob/master/help/esri-getting-to-know-github.html)
 
 ## Issues
 
