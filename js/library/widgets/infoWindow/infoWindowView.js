@@ -475,7 +475,11 @@ define([
                     dojo.interactiveParcel = false;
                     strAveryParam = "";
                     strCsvParam = "";
+                    //Fix to show warning message when app tries to open PDF with large number of labels in Internet Explorer
                     if (this.pdfFormat === "checked" || this.pdfFormat) {
+                        if ((navigator && navigator.appVersion.indexOf("MSIE") !== -1 || !!navigator.userAgent.match(/Trident.*rv[ :]*11\./)) && features.length > 1000) {
+                            alert(sharedNls.unableToLoadPDF);
+                        }
                         strAveryParam = this._createAveryParam(features);
                     }
                     if (this.csvFormat === "checked" || this.csvFormat) {
