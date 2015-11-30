@@ -38,7 +38,7 @@ require([
     * @name widgets/printMap/print
     */
 
-    var top_opener = window.top.opener,
+    var printSettings = window.top.opener.dataObject,
         tempPolygonLayer = 'tempPolygonLayer',
         tempBuffer = 'tempBuffer',
         params = dojo.byId("paramid"),
@@ -49,11 +49,12 @@ require([
         initialExtent,
         baseMapLayer,
         imageServiceLayer;
+    //Fox for opening print page in new window
     //fetch data from parent window
-    parcelLayer = top_opener.dataObject.ParcelLayer;
-    bufferLayer = top_opener.dataObject.Bufferlayer;
-    baseMapLayer = top_opener.dataObject.BaseMapLayer;
-    initialExtent = top_opener.dataObject.Extent;
+    parcelLayer = printSettings.ParcelLayer;
+    bufferLayer = printSettings.Bufferlayer;
+    baseMapLayer = printSettings.BaseMapLayer;
+    initialExtent = printSettings.Extent;
 
     printmap = new Map("mapPrint", { extent: initialExtent, slider: false });
 

@@ -60,7 +60,7 @@ define([
         * @memberOf widgets/printMap/printMap
         */
         _printPage: function () {
-            var parcelLayer, parcelGraphics, graphicsArray, bufferLayer, bufferGraphics, bufferGraphicsArray, extent, i, j;
+            var parcelLayer, parcelGraphics, graphicsArray, bufferLayer, bufferGraphics, bufferGraphicsArray, extent, i, j, selectedBasemapURL, layers;
             parcelLayer = this.map.getLayer("esriGraphicsLayerMapSettings");
             parcelGraphics =  parcelLayer.graphics;
             graphicsArray = [];
@@ -76,12 +76,19 @@ define([
                 bufferGraphicsArray.push(bufferGraphics[j].geometry.toJson());
             }
             extent = this.map.extent;
+            //Fix for printing selected basemap
+            layers = this.map.getLayersVisibleAtScale();
+            for (i = 0; i < layers.length; i++) {
+                if (layers[i].hasOwnProperty("isSelectedBaseMap") && layers[i].isSelectedBaseMap) {
+                    selectedBasemapURL = layers[i].url;
+                }
+            }
             //object that passes data from parent window to print window.
             dataObject = {
                 "ParcelLayer": {geometries : graphicsArray},
                 "Bufferlayer": {geometries : bufferGraphicsArray},
                 "Extent": extent,
-                "BaseMapLayer": {url: this.map.getLayer("esriCTbasemap").url}
+                "BaseMapLayer": { url: selectedBasemapURL || this.map.getLayer("esriCTbasemap").url }
             };
             //opens print.html
             window.open(dojoConfig.baseURL + "/js/library/widgets/print/templates/print.html");

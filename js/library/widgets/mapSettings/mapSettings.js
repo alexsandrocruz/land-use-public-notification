@@ -163,6 +163,12 @@ define([
                     if (dijit.byId('toolTipDialogues')) {
                         dojo.publish("hideRoad", evt);
                     }
+                } else {
+                    dojo.isSpanClicked = false;
+                    topic.publish("hideMapTip");
+                    if (dojo.mouseMoveHandle) {
+                        dojo.mouseMoveHandle.remove();
+                    }
                 }
                 topic.publish("createInfoWindowContent", evt.graphic, evt.mapPoint, roadLayerSettings);
                 evt.cancelBubble = true;
@@ -385,6 +391,11 @@ define([
                     dojo.graphicLayerClicked = false;
                 }
             } else {
+                dojo.isSpanClicked = false;
+                topic.publish("hideMapTip");
+                if (dojo.mouseMoveHandle) {
+                    dojo.mouseMoveHandle.remove();
+                }
                 this._showFeatureDetails(evt.graphic, evt);
                 dojo.graphicLayerClicked = false;
             }
@@ -491,6 +502,7 @@ define([
         */
         _showFeatureSet: function (fset, evt) {
             topic.publish("clearAll", evt);
+            topic.publish("hideMapTip");
             var rendererColor = dojo.configData.OverlayLayerSettings[0].OverlayHighlightColor, centerPoint = evt.mapPoint,
                 featureSet, features, contentDiv, feature, layer, fillColor, lineColor, symbol;
 
@@ -980,7 +992,9 @@ define([
             dojo.selectedMapPoint = null;
             dojo.displayInfo = null;
             this.map.infoWindow.hide();
-            this.map.graphics.clear();
+            if (this.map.graphics) {
+                this.map.graphics.clear();
+            }
             for (i = 0; i < this.map.graphicsLayerIds.length; i++) {
                 if (!((evt && evt.ctrlKey && this.map.graphicsLayerIds[i] === "esriGraphicsLayerMapSettings") || (evt && evt.ctrlKey && this.map.graphicsLayerIds[i] === "roadCenterLinesLayerID"))) {
                     if (!evt) {
