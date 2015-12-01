@@ -20,16 +20,24 @@
 require([
     "coreLibrary/widgetLoader",
     "application/js/config",
-    "dojo/domReady!",
-    "esri/config"
-], function (WidgetLoader, config, domReady, esriConfig) {
+    "esri/config",
+    "esri/urlUtils",
+    "dojo/domReady!"
+], function (WidgetLoader, config, esriConfig, urlUtils) {
 
     //========================================================================================================================//
 
     try {
         dojo.configData = config;
-        esriConfig.defaults.io.proxyUrl = dojoConfig.baseURL + dojo.configData.ProxyUrl;
-        esriConfig.defaults.io.timeout = 180000;
+
+        // Use the proxy for the portal if the proxy URL is provided
+        if (dojo.configData.ProxyUrl) {
+            urlUtils.addProxyRule({
+                urlPrefix: dojo.configData.ParcelLayerSettings.LayerUrl,
+                proxyUrl: dojoConfig.baseURL + dojo.configData.ProxyUrl
+            });
+        }
+
         /**
         * load application configuration settings from configuration file
         * create an object of widget loader class
