@@ -75,7 +75,12 @@ define([], function () {
             Title: "Search",
             WidgetPath: "widgets/locator/locator",
             MapInstanceRequired: true
-        }, {
+        },{
+            Title: "PolygonTool",
+            WidgetPath: "widgets/polygonTool/polygonTool",
+            MapInstanceRequired: true,
+            WidgetRequired: true
+        },{
             Title: "Locate",
             WidgetPath: "widgets/geoLocation/geoLocation",
             MapInstanceRequired: true

@@ -60,6 +60,7 @@ define({
         clear: "Clear",
         search: "Search",
         exit: "Exit",
-        locateAddress: "LocateAddress"
+        locateAddress: "LocateAddress",
+        polygon: "Polygon Tool"
     }
 });

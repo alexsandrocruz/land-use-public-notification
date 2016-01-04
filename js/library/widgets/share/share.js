@@ -117,7 +117,27 @@ define([
             /**
             * check if parcel is getting shared
             */
-            if ((dojo.parcelArray.length > 0) && (dojo.roadArray.length <= 0) && (dojo.overLayArray.length <= 0)) {
+            if ((dojo.polygonGeometry && !dojo.isDownloadReport) || (dojo.polygonGeometry && dojo.isDownloadReport)) {
+                //Varsha: share polygon geometry if it is created from draw tool
+                urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$dist="
+                        + this.map.infoWindow.txtBuffer.value
+                        + "$ocupntTxt="
+                        + this.map.infoWindow.textoccupant.value
+                        + "$PDF="
+                        + ((dijit.byId('chkPdf').checked) ? "checked" : false)
+                        + "$CSV="
+                        + ((dijit.byId('chkCsv').checked) ? "checked" : false)
+                        + "$occupant="
+                        + ((dijit.byId('chkOccupants').checked) ? "checked" : false)
+                        + "$owner="
+                        + ((dijit.byId('chkOwners').checked) ? "checked" : false)
+                        + "$averyFormat="
+                        + dijit.byId('selectAvery').item.id[0]
+                        + "$isDownloadReport=" + dojo.isDownloadReport
+                        + "$polygonGeometry=" + JSON.stringify(dojo.bufferGeometry)
+                        + "$newBufferDistance=" + dojo.newBufferDistance
+                        + "$currentBufferDistance=" + dojo.currentBufferDistance;
+            } else if ((dojo.parcelArray.length > 0) && (dojo.roadArray.length <= 0) && (dojo.overLayArray.length <= 0)) {
                 if (this.map.getLayer("tempBufferLayer").graphics.length > 0) {
                     urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$dist="
                         + this.map.infoWindow.txtBuffer.value
@@ -132,16 +152,22 @@ define([
                         + "$owner="
                         + ((dijit.byId('chkOwners').checked) ? "checked" : false)
                         + "$averyFormat="
-                        + dijit.byId('selectAvery').item.id[0]
-                        + "$parcelID="
-                        + dojo.parcelArray.join(",");
+                        + dijit.byId('selectAvery').item.id[0];
+
                 } else {
-                    urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$parcelID=" + dojo.parcelArray.join(",");
+                    urlStr = encodeURI(url.path) + "?extent=" + mapExtent;
                 }
 
-            /**
-            * check if road is getting shared
-            */
+                urlStr += "$isDownloadReport=" + dojo.isDownloadReport
+                if (dojo.polygonGeometry) {
+                    urlStr += "$polygonGeometry=" + JSON.stringify(dojo.bufferGeometry);
+                }
+                if (dojo.parcelArray.length > 0) {
+                    urlStr += "$parcelID=" + dojo.parcelArray.join(",");
+                };
+                /**
+                * check if road is getting shared
+                */
             } else if (dojo.roadArray.length > 0) {
                 if (!(this.map.infoWindow.txtBuffer.value)) {
                     this.map.infoWindow.txtBuffer.value = dojo.configData.DefaultBufferDistance;
@@ -363,8 +389,9 @@ define([
                 } else {
                     annotation = "$roadID=";
                 }
+
                 dijit.byId('selectAvery').store.fetch({
-                    query: { name: window.location.toString().split("$averyFormat=")[1].split(annotation)[0].split("avery")[1] },
+                    query: { name: window.location.toString().split("$averyFormat=")[1].split("avery")[1].split("$")[0] },
                     onComplete: function (items) {
                         dijit.byId('selectAvery').setDisplayedValue(items[0].name[0]);
                         dijit.byId('selectAvery').item = items[0];
