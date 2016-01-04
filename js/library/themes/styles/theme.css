@@ -98,7 +98,7 @@
     z-index: 1000;
     background-repeat: no-repeat;
 }
-.esriCTTdHeaderSearch, .esriCTTdHeaderSearch-select, .esriCTTdGeolocation, .esriCTImgSocialMedia-select, .esriCTImgSocialMedia, .esriCTRouteImg, .esriCTRouteImg-select, .esriCTHelpImg, .esriCTImgPrint
+.esriCTTdHeaderSearch, .esriCTTdHeaderSearch-select, .esriCTTdGeolocation, .esriCTImgSocialMedia-select, .esriCTImgSocialMedia, .esriCTRouteImg, .esriCTRouteImg-select, .esriCTHelpImg, .esriCTImgPrint, .esriCTTdHeaderPolygon, .esriCTTdHeaderPolygon-select
 {
     margin: 12px 24px;
     background-repeat: no-repeat;
@@ -117,6 +117,15 @@
 .esriCTTdHeaderSearch-select
 {
     background-image: url("../images/img24x24/search-select-24.png");
+}
+
+.esriCTTdHeaderPolygon
+{
+    background-image: url("../images/img24x24/polygon-24.png");
+}
+
+.esriCTTdHeaderPolygon-select {
+    background-image: url("../images/img24x24/polygon-select-24.png");
 }
 
 .esriCTTdGeolocation
@@ -1345,6 +1354,37 @@ input
     position: absolute;
     right: 130px;
     padding-top: 9px;
+}
+
+.downloadButton 
+{
+    float:right;
+}
+
+.selectedParcel {
+     color: #007ac2;
+     float:left;
+     margin-right:20px;
+     padding-top:2px;
+     cursor:pointer;
+}
+
+.spanAdjacentParcels {
+    float: left;
+    line-height: 18px;
+}
+
+.imgCreateNotificationAdjacentParcels {
+    background-image: url(../images/add.png );
+    background-size: 17px;
+    background-position: center;
+    background-repeat: no-repeat;
+    padding: 2px;
+    position: inherit;
+    height: 17px;
+    width: 17px;
+    float: left;
+    margin-right: 5px;
 }
 
 

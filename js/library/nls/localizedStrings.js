@@ -64,7 +64,8 @@ define({
             clear: "Clear",
             search: "Search",
             exit: "Exit",
-            locateAddress: "Locate Address"
+            locateAddress: "Locate Address",
+            polygon:"Polygon Tool"
         }
     },
     es: true,
