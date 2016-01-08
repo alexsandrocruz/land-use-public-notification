@@ -1371,20 +1371,18 @@ input
 
 .spanAdjacentParcels {
     float: left;
-    line-height: 18px;
+    line-height: 14px;
 }
 
 .imgCreateNotificationAdjacentParcels {
     background-image: url(../images/add.png );
     background-size: 17px;
-    background-position: center;
     background-repeat: no-repeat;
     padding: 2px;
     position: inherit;
     height: 17px;
     width: 17px;
     float: left;
-    margin-right: 5px;
 }
 
 
