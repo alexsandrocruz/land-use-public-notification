@@ -504,6 +504,8 @@ define([
                 topic.publish("hideProgressIndicator");
                 //this.map.setExtent(dojo.polygonGeometry.getExtent().expand(3));
                 topic.publish("drawPolygon", featureSet.features, false);
+                //set buffer distance to 0 if polygon tool is activated
+                this.txtBuffer.value = 0;
                 topic.publish("createInfoWindowContent", featureSet.features[0], dojo.polygonGeometry.getExtent().getCenter(), dojo.configData.ParcelLayerSettings);
                 this._toggleInfoWindowContent();
 
