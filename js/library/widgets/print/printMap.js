@@ -16,6 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
+var dataObject;
 define([
     "dojo/_base/declare",
     "dojo/dom-construct",
@@ -23,9 +24,8 @@ define([
     "dojo/topic",
     "dojo/_base/lang",
     "dijit/_WidgetBase",
-    "esri/map",
     "dojo/text!./templates/print.html"
-], function (declare, domConstruct, on, topic, lang, _WidgetBase, esriMap, printMap) {
+    ], function (declare, domConstruct, on, topic, lang, _WidgetBase, printMap) {
 
     //========================================================================================================================//
 
@@ -45,14 +45,13 @@ define([
         */
         postCreate: function () {
             this.domNode = domConstruct.create("div", { "title": this.title, "class": "esriCTImgPrint" }, null);
-
             this.own(on(this.domNode, "click", lang.hitch(this, function () {
 
                 /**
                 * minimize other open header panel widgets and show help
                 */
                 topic.publish("toggleWidget", "print");
-                this._showModal();
+                this._printPage();
             })));
         },
 
@@ -60,26 +59,39 @@ define([
         * Display print window
         * @memberOf widgets/printMap/printMap
         */
-        _showModal: function () {
-            var dataObject = {
-                "ParcelLayer": this.map.getLayer("esriGraphicsLayerMapSettings"),
-                "Bufferlayer": this.map.getLayer("tempBufferLayer"),
-                "Extent": this.map.extent,
-                "Window": window,
-                "BaseMapLayer": this.map.getLayer("esriCTbasemap")
+        _printPage: function () {
+            var parcelLayer, parcelGraphics, graphicsArray, bufferLayer, bufferGraphics, bufferGraphicsArray, extent, i, j, selectedBasemapURL, layers;
+            parcelLayer = this.map.getLayer("esriGraphicsLayerMapSettings");
+            parcelGraphics =  parcelLayer.graphics;
+            graphicsArray = [];
+            //loop through parcel graphics and convert the geometry to JSON
+            for (i = 0; i < parcelGraphics.length; i++) {
+                graphicsArray.push(parcelGraphics[i].geometry.toJson());
+            }
+            bufferLayer = this.map.getLayer("tempBufferLayer");
+            bufferGraphics =  bufferLayer.graphics;
+            bufferGraphicsArray = [];
+            //loop through buffer graphics and convert the geometry to JSON
+            for (j = 0; j < bufferGraphics.length; j++) {
+                bufferGraphicsArray.push(bufferGraphics[j].geometry.toJson());
+            }
+            extent = this.map.extent;
+            //Fix for printing selected basemap
+            layers = this.map.getLayersVisibleAtScale();
+            for (i = 0; i < layers.length; i++) {
+                if (layers[i].hasOwnProperty("isSelectedBaseMap") && layers[i].isSelectedBaseMap) {
+                    selectedBasemapURL = layers[i].url;
+                }
+            }
+            //object that passes data from parent window to print window.
+            dataObject = {
+                "ParcelLayer": {geometries : graphicsArray},
+                "Bufferlayer": {geometries : bufferGraphicsArray},
+                "Extent": extent,
+                "BaseMapLayer": { url: selectedBasemapURL || this.map.getLayer("esriCTbasemap").url }
             };
-
-            window.showModalDialog(dojoConfig.baseURL + "/js/library/widgets/print/templates/print.html", dataObject);
-        },
-        /**
-        * Get current map extent
-        * @memberOf widgets/printMap/printMap
-        */
-        getPrintExtent: function () {
-            return this.map.extent;
+            //opens print.html
+            window.open(dojoConfig.baseURL + "/js/library/widgets/print/templates/print.html");
         }
-
-
     });
 });
-

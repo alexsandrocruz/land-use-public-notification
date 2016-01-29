@@ -51,12 +51,12 @@
         background-image: url("../images/img44x44/embedding.png") !important;
     }
 
-    .esriCTTdHeaderSearch, .esriCTTdHeaderSearch-select, .esriCTTdGeolocation, .esriCTImgSocialMedia-select, .esriCTImgSocialMedia, .esriCTRouteImg, .esriCTRouteImg-select, .esriCTHelpImg, .esriCTImgPrint
+    .esriCTTdHeaderSearch, .esriCTTdHeaderSearch-select, .esriCTTdGeolocation, .esriCTImgSocialMedia-select, .esriCTImgSocialMedia, .esriCTRouteImg, .esriCTRouteImg-select, .esriCTHelpImg, .esriCTImgPrint, .esriCTTdHeaderPolygon, .esriCTTdHeaderPolygon-select
     {
         height: 44px !important;
         width: 44px !important;
         background-size: 44px !important;
-        width: 20% !important;
+        width: 16.5% !important;
         padding: 8px 0 !important;
         margin: 0px 0px;
     }
@@ -68,6 +68,16 @@
     .esriCTTdHeaderSearch-select
     {
         background-image: url("../images/img44x44/search-select.png") !important;
+    }
+
+     .esriCTTdHeaderPolygon
+    {
+        background-image: url("../images/img44x44/polygon.png") !important;
+    }
+
+    .esriCTTdHeaderPolygon-select
+    {
+        background-image: url("../images/img44x44/polygon-select.png") !important;
     }
 
     .esriCTTdGeolocation
@@ -271,12 +281,13 @@
         background-image: url("../images/img44x44/embedding.png") !important;
     }
 
-    .esriCTTdHeaderSearch, .esriCTTdHeaderSearch-select, .esriCTTdGeolocation, .esriCTImgSocialMedia-select, .esriCTImgSocialMedia, .esriCTRouteImg, .esriCTRouteImg-select, .esriCTHelpImg, .esriCTImgPrint
+
+    .esriCTTdHeaderSearch, .esriCTTdHeaderSearch-select, .esriCTTdGeolocation, .esriCTImgSocialMedia-select, .esriCTImgSocialMedia, .esriCTRouteImg, .esriCTRouteImg-select, .esriCTHelpImg, .esriCTImgPrint, .esriCTTdHeaderPolygon, .esriCTTdHeaderPolygon-select
     {
         height: 44px !important;
         width: 44px !important;
         background-size: 44px !important;
-        width: 20% !important;
+        width: 16.5% !important;
         padding: 8px 0 !important;
         margin: 0px 0px;
     }
@@ -308,6 +319,16 @@
     .esriCTHelpImg
     {
         background-image: url("../images/img44x44/help.png") !important;
+    }
+
+    .esriCTTdHeaderPolygon
+    {
+        background-image: url("../images/img44x44/polygon.png") !important;
+    }
+
+    .esriCTTdHeaderPolygon-select
+    {
+        background-image: url("../images/img44x44/polygon-select.png") !important;
     }
 
     .esriCTImgPrint
@@ -418,5 +439,13 @@
         top: 60px;
     }
 }
+
+@media screen and (min-width: 680px) and (max-width: 780px)
+{
+    .esriCTTdHeaderSearch, .esriCTTdHeaderSearch-select, .esriCTTdGeolocation, .esriCTImgSocialMedia-select, .esriCTImgSocialMedia, .esriCTRouteImg, .esriCTRouteImg-select, .esriCTHelpImg, .esriCTImgPrint, .esriCTTdHeaderPolygon, .esriCTTdHeaderPolygon-select {
+        margin: 12px 19px;
+    }
+}
+
 
 /* Landscape */

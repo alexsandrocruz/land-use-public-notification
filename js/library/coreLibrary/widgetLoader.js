@@ -45,13 +45,22 @@ define([
         * @name coreLibrary/widgetLoader
         */
         startup: function () {
-            var widgets = {}, splashScreen,
+            var widgets = {}, splashScreen, i,
                 deferredArray = [], mapInstance;
             if (dojo.configData.SplashScreen.IsVisible) {
                 splashScreen = new SplashScreen();
                 splashScreen._showSplashScreenDialog();
             }
             mapInstance = this._initializeMap();
+            //Loop header widgets array and filter out the widgets which are turned off from configuration file
+            for (i = 0; i < dojo.configData.AppHeaderWidgets.length; i++) {
+                //If widget is turned off from configuration file, remove it from the array
+                if (dojo.configData.AppHeaderWidgets[i].hasOwnProperty("WidgetRequired") && !dojo.configData.AppHeaderWidgets[i].WidgetRequired) {
+                    dojo.configData.AppHeaderWidgets.splice(i, 1);
+                    break;
+                }
+            }
+
             /**
             * create an object with widgets specified in Header Widget Settings of configuration file
             * @param {array} dojo.configData.AppHeaderWidgets Widgets specified in configuration file

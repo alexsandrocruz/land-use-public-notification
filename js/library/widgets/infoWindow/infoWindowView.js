@@ -66,36 +66,66 @@ define([
         * @name widgets/infoWindow/infoWindowView
         */
         sharedNls: sharedNls,
+        featureSet: null,
         attachInfoWindowEvents: function () {
             this.own(on(this.esriCTShowDetailsView, "click", lang.hitch(this, function () {
-                if (this.esriCTShowDetailsView.getAttribute("checked") === "info") {
-                    this.esriCTShowDetailsView.setAttribute("checked", "notify");
-                    domStyle.set(this.divInfoDetails, "display", "none");
-                    domStyle.set(this.divInfoNotify, "display", "block");
-                    this.esriCTShowDetailsView.src = dojoConfig.baseURL + "/js/library/themes/images/details.png";
-                    this.esriCTShowDetailsView.title = dojo.configData.Details;
-                    dijit.byId('selectAvery').store.fetch({
-                        query: { name: "5160" },
-                        onComplete: function (items) {
-                            dijit.byId('selectAvery').setDisplayedValue(items[0].name[0]);
-                            dijit.byId('selectAvery').item = items[0];
-                        }
-                    });
-
-                    dijit.byId('chkOwners').setChecked(false);
-                    dijit.byId('chkOccupants').setChecked(false);
-                    dijit.byId('chkPdf').setChecked(false);
-                    dijit.byId('chkCsv').setChecked(false);
-                    domStyle.set(this.spanFileUploadMessage, "display", "none");
-                    this.textoccupant.value = dojo.configData.AveryLabelSettings[0].OccupantLabel;
-                } else {
-                    this.esriCTShowDetailsView.setAttribute("checked", "info");
-                    this.esriCTShowDetailsView.src = dojoConfig.baseURL + "/js/library/themes/images/navigation.png";
-                    this.esriCTShowDetailsView.title = dojo.configData.Notify;
-                    domStyle.set(this.divInfoDetails, "display", "block");
-                    domStyle.set(this.divInfoNotify, "display", "none");
+                if (!dojo.polygonGeometry) {
+                    topic.publish("OnToggleInfoWindoContent");
                 }
             })));
+            on(this.selectedParcel, "click", lang.hitch(this, function () {
+                dojo.polygon = true;
+                dojo.interactiveParcel = true;
+                dojo.selectedMapPoint = null;
+                dojo.displayInfo = null;
+                if (dojo.isSpanClicked === true) {
+                    return;
+                }
+                dojo.mouseMoveHandle = this.map.on("mouse-move", lang.hitch(function (evt) {
+                    topic.publish("showMapTipForParcels", evt);
+                }));
+                dojo.isSpanClicked = true;
+            }));
+            topic.subscribe("OnToggleInfoWindoContent", lang.hitch(this, this._toggleInfoWindowContent));
+            topic.subscribe("OnSetBufferDistanceVisibility", lang.hitch(this, this._setBufferDistanceVisibility));
+        },
+
+        _toggleInfoWindowContent: function () {
+            if (this.esriCTShowDetailsView.getAttribute("checked") === "info") {
+                this.esriCTShowDetailsView.setAttribute("checked", "notify");
+                domStyle.set(this.divInfoDetails, "display", "none");
+                domStyle.set(this.divInfoNotify, "display", "block");
+                this.esriCTShowDetailsView.src = dojoConfig.baseURL + "/js/library/themes/images/details.png";
+                this.esriCTShowDetailsView.title = dojo.configData.Details;
+                dijit.byId('selectAvery').store.fetch({
+                    query: { name: "5160" },
+                    onComplete: function (items) {
+                        dijit.byId('selectAvery').setDisplayedValue(items[0].name[0]);
+                        dijit.byId('selectAvery').item = items[0];
+                    }
+                });
+
+                dijit.byId('chkOwners').setChecked(false);
+                dijit.byId('chkOccupants').setChecked(false);
+                dijit.byId('chkPdf').setChecked(false);
+                dijit.byId('chkCsv').setChecked(false);
+                domStyle.set(this.spanFileUploadMessage, "display", "none");
+                this.textoccupant.value = dojo.configData.AveryLabelSettings[0].OccupantLabel;
+                if (dojo.polygonGeometry) {
+                    domStyle.set(this.selectedParcel, "display", "block");
+                    domStyle.set(this.esriCTShowDetailsView, "display", "none");
+                    domStyle.set(this.esriCTheadderPanel, "display", "none");
+                } else {
+                    domStyle.set(this.selectedParcel, "display", "none");
+                    domStyle.set(this.esriCTheadderPanel, "display", "block");
+                }
+            } else {
+                this.esriCTShowDetailsView.setAttribute("checked", "info");
+                this.esriCTShowDetailsView.src = dojoConfig.baseURL + "/js/library/themes/images/navigation.png";
+                this.esriCTShowDetailsView.title = dojo.configData.Notify;
+                domStyle.set(this.divInfoDetails, "display", "block");
+                domStyle.set(this.divInfoNotify, "display", "none");
+            }
         },
 
         /**
@@ -172,7 +202,7 @@ define([
                     if ((this.pdfFormat === "checked" || this.pdfFormat) || (this.csvFormat === "checked" || this.csvFormat)) {
                         if (dijit.byId('selectAvery').item !== null) {
                             this.averyFormat = dijit.byId('selectAvery').item.id[0];
-                            if (this.map.getLayer("roadCenterLinesLayerID").getSelectedFeatures().length > 0) {
+                            if (this.map.getLayer("roadCenterLinesLayerID").graphics.length > 0) {
                                 if (this.map.getLayer("roadCenterLinesLayerID").graphics) {
                                     polyLine = new Geometry.Polyline(this.map.spatialReference);
                                     for (j = 0; j < this.map.getLayer("roadCenterLinesLayerID").graphics.length; j++) {
@@ -249,7 +279,7 @@ define([
             }
             query.returnGeometry = true;
             qTask.execute(query, lang.hitch(this, function (featureSet) {
-                this._queryCallback(featureSet, true);
+                this._queryCallback(featureSet, true, false);
             }));
         },
 
@@ -325,6 +355,17 @@ define([
                             polygon.addRing(this.map.getLayer("esriGraphicsLayerMapSettings").graphics[i].geometry.rings[j]);
                         }
                     }
+                    if (dojo.polygonGeometry) {
+                        polygon = dojo.polygonGeometry;
+                        //This parameter will be used to create buffer when application is shared
+                        if (dojo.newBufferDistance) {
+                            dojo.newBufferDistance = parseInt(dojo.newBufferDistance, 10) + parseInt(dist.value, 10);
+                        } else {
+                            dojo.newBufferDistance = dist.value;
+                        }
+                        //This parameter will be used to show the current buffer value when application is shared
+                        dojo.currentBufferDistance = dist.value;
+                    }
                     params.geometries = [polygon];
                     params.distances = [dist.value];
                     params.unit = GeometryService.UNIT_FOOT;
@@ -387,7 +428,7 @@ define([
         * @param {object} geometry of the graphic around which buffer will be drawn
         * @memberOf widgets/infoWindow/infoWindowView
         */
-        _showBuffer: function (geometries, overlayInfowindow) {
+        _showBuffer: function (geometries, overlayInfowindow, isPolygonExists) {
             var _this = this, maxAllowableOffset, taxParcelQueryUrl, qTask, symbol;
             dojo.displayInfo = null;
             maxAllowableOffset = dojo.configData.MaxAllowableOffset;
@@ -405,6 +446,9 @@ define([
                 new Symbol.SimpleLineSymbol(Symbol.SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0, 0.65]), 2), new Color([255, 0, 0, 0.35]));
             array.forEach(geometries, lang.hitch(this, function (geometry) {
                 _this._addGraphic(_this.map.getLayer("tempBufferLayer"), symbol, geometry);
+                if (dojo.polygonGeometry) {
+                    dojo.polygonGeometry = geometry;
+                }
             }));
 
             if (geometries[0]) {
@@ -423,7 +467,11 @@ define([
 
             //executing query task for selecting intersecting/contains features
             qTask.execute(query, lang.hitch(this, function (featureSet) {
-                this._queryCallback(featureSet, false);
+                //varsha: set feature set in global variable
+                this.featureSet = featureSet;
+                this._queryCallback(featureSet, false, isPolygonExists);
+                dojo.selectedFeatures = [];
+                dojo.selectedFeatures = featureSet.features;
             }));
 
         },
@@ -450,41 +498,91 @@ define([
         * @param {boolean} check query is for road or any other layer
         * @memberOf widgets/infoWindow/infoWindowView
         */
-        _queryCallback: function (featureSet, road) {
-            var features = featureSet.features, poly, feature, strAveryParam, strCsvParam;
-            if (this.map.getLayer("esriGraphicsLayerMapSettings")) {
-                this.map.getLayer("esriGraphicsLayerMapSettings").clear();
-            }
-            if (featureSet.features.length === 0) {
-                if (!road) {
-                    alert(sharedNls.errorMessages.noParcel);
-                } else {
-                    alert(dojo.configData.NoAdjacentParcel + " " + this.dist.value + " " + dojo.configData.FeetCaption);
-                }
+        _queryCallback: function (featureSet, road, isPolygonExists) {
+            //Varsha: draw polygon on map if it is created from draw tool else get GP task parameters
+            if (isPolygonExists) {
                 topic.publish("hideProgressIndicator");
-            } else {
-                try {
-                    poly = new Geometry.Polygon(this.map.spatialReference);
-                    for (feature in features) {
-                        if (features.hasOwnProperty(feature)) {
-                            poly.addRing(features[feature].geometry.rings[0]);
-                        }
+                //this.map.setExtent(dojo.polygonGeometry.getExtent().expand(3));
+                topic.publish("drawPolygon", featureSet.features, false);
+                //set buffer distance to 0 if polygon tool is activated
+                this.txtBuffer.value = 0;
+                topic.publish("createInfoWindowContent", featureSet.features[0], dojo.polygonGeometry.getExtent().getCenter(), dojo.configData.ParcelLayerSettings);
+                this._toggleInfoWindowContent();
+
+            }
+            //Check for the flag to make sure the report is downloaded
+            if (dojo.isDownloadReport) {
+                //Varsha: generate GP task params if download button is clicked
+                if (featureSet.features.length === 0) {
+                    //clear features from map
+                    if (this.map.getLayer("esriGraphicsLayerMapSettings")) {
+                        this.map.getLayer("esriGraphicsLayerMapSettings").clear();
                     }
-                    this.map.setExtent(poly.getExtent().expand(3));
-                    topic.publish("drawPolygon", features, false);
-                    dojo.interactiveParcel = false;
-                    strAveryParam = "";
-                    strCsvParam = "";
-                    if (this.pdfFormat === "checked" || this.pdfFormat) {
-                        strAveryParam = this._createAveryParam(features);
+                    if (!road) {
+                        alert(sharedNls.errorMessages.noParcel);
+                    } else {
+                        alert(dojo.configData.NoAdjacentParcel + " " + this.dist.value + " " + dojo.configData.FeetCaption);
                     }
-                    if (this.csvFormat === "checked" || this.csvFormat) {
-                        strCsvParam = this._createCsvParam(features);
-                    }
-                    this._executeGPTask(this.pdfFormat, this.csvFormat, strAveryParam, strCsvParam);
-                } catch (err) {
-                    alert(err.message);
+                    topic.publish("hideProgressIndicator");
+                } else {
+                    this._checkInfowindowParams(featureSet, road, isPolygonExists);
                 }
+            }
+        },
+
+        _checkInfowindowParams: function (featureSet, road, isPolygonExists) {
+            var features = featureSet.features, poly, feature, strAveryParam, strCsvParam, i;
+            try {
+                this.pdfFormat = dijit.byId('chkPdf').checked;
+                this.csvFormat = dijit.byId('chkCsv').checked;
+                this.occupants = dijit.byId('chkOccupants').checked;
+                this.owners = dijit.byId('chkOwners').checked;
+                if (dijit.byId('selectAvery').item !== null) {
+                    this.averyFormat = dijit.byId('selectAvery').item.id[0];
+                }
+                //create polygon with buffer geometry when features is select to generate report
+                if (this.map.getLayer("esriGraphicsLayerMapSettings")) {
+                    this.map.getLayer("esriGraphicsLayerMapSettings").clear();
+                }
+                poly = new Geometry.Polygon(this.map.spatialReference);
+                for (feature in features) {
+                    if (features.hasOwnProperty(feature)) {
+                        poly.addRing(features[feature].geometry.rings[0]);
+                    }
+                }
+                //show polygon extent on map
+                this.map.setExtent(poly.getExtent().expand(3));
+                topic.publish("drawPolygon", features, false);
+
+                //Hide info window if buffer distance is zero
+                if (parseInt(this.txtBuffer.value, 10) === 0) {
+                    setTimeout(lang.hitch(this, function () {
+                        this.map.infoWindow.hide();
+                    }), 1000);
+                }
+
+                dojo.interactiveParcel = false;
+                strAveryParam = "";
+                strCsvParam = "";
+                //Fix to show warning message when app tries to open PDF with large number of labels in Internet Explorer
+                if (this.pdfFormat === "checked" || this.pdfFormat) {
+                    if ((navigator && navigator.appVersion.indexOf("MSIE") !== -1 || !!navigator.userAgent.match(/Trident.*rv[ :]*11\./)) && features.length > 1000) {
+                        alert(sharedNls.unableToLoadPDF);
+                    }
+                    strAveryParam = this._createAveryParam(features);
+                }
+                if (this.csvFormat === "checked" || this.csvFormat) {
+                    strCsvParam = this._createCsvParam(features);
+                }
+                if (isPolygonExists) {
+                    dojo.parcelArray = [];
+                    for (i = 0; i < features.length; i++) {
+                        dojo.parcelArray.push(features[i].attributes[dojo.configData.AveryLabelSettings[0].ParcelInformation.ParcelIdentification]);
+                    }
+                }
+                this._executeGPTask(this.pdfFormat, this.csvFormat, strAveryParam, strCsvParam);
+            } catch (err) {
+                alert(err.message);
             }
         },
 
@@ -649,7 +747,9 @@ define([
                 csvParams = { "Address_Items": strCsvParam };
                 gpTaskCsv.submitJob(csvParams, lang.hitch(this, this._completeCsvGPJob), this._statusCallback);
             }
-            topic.publish("hideProgressIndicator");
+            setTimeout(function () {
+                topic.publish("hideProgressIndicator");
+            }, 1000);
         },
 
 
@@ -741,6 +841,43 @@ define([
                 window.open(outputFile.value.url);
             } else {
                 this.window.location = outputFile.value.url;
+            }
+        },
+
+        /**
+        * Function generate buffer parameters
+        * @param {object} geometry of polygon present on map
+        * @memberOf widgets/infoWindow/infoWindowView
+        */
+        generateBufferParmas: function (polygonGeometry) {
+            var params, distance, geometryService, polygon;
+            this.dist = this.txtBuffer;
+            distance = this.dist.value;
+            this.pdfFormat = dijit.byId('chkPdf').checked;
+            this.csvFormat = dijit.byId('chkCsv').checked;
+            this.occupants = dijit.byId('chkOccupants').checked;
+            this.owners = dijit.byId('chkOwners').checked;
+            //Check for URL parameters and mixin the properties
+            if (location.href && ((location.href.toString().split("$newBufferDistance=")[1]).split('$')[0] &&
+                     (location.href.toString().split("$currentBufferDistance=")[1]).split('$')[0])) {
+                distance = (location.href.toString().split("$newBufferDistance=")[1]).split('$')[0];
+                this.dist.value = (location.href.toString().split("$currentBufferDistance=")[1]).split('$')[0];
+            }
+            geometryService = new GeometryService(dojo.configData.GeometryService);
+            params = new BufferParameters();
+            params.geodesic = true;
+            params.distances = [distance];
+            params.unit = GeometryService.UNIT_FOOT;
+            polygon = new Geometry.Polygon(this.map.spatialReference);
+            polygon = polygonGeometry;
+            params.geometries = [polygon];
+            params.outSpatialReference = this.map.spatialReference;
+            if (parseInt(distance, 10) !== 0) {
+                geometryService.buffer(params, lang.hitch(this, this._showBuffer),
+                    function (err) {
+                        topic.publish("hideProgressIndicator");
+                        alert("Query " + err);
+                    });
             }
         }
     });

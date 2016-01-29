@@ -500,6 +500,12 @@ define([
             domAttr.set(divDisplayColumn, "parcelId", features.attributes[addressParcelFields[0]]);
 
             this.own(on(divDisplayColumn, "click", lang.hitch(this, function (evt) {
+                //Change global variables to continue the workflow
+                dojo.polygonGeometry = null;
+                dojo.isDownloadReport = false;
+                dojo.newBufferDistance = null;
+                domStyle.set(dojoQuery(".esriCTInfOptions")[0], "display", "block");
+                domStyle.set(dojoQuery(".esriCTheadderPanel")[0], "display", "block");
                 if (this.map.getLayer("tempBufferLayer")) {
                     this.map.getLayer("tempBufferLayer").clear();
                 }
@@ -595,6 +601,13 @@ define([
                     divDisplayRow = domConstruct.create("div", {}, this.divDispalyResultContainer);
                     divDisplayColumn = domConstruct.create("div", { "class": "esriCTContentBottomBorder esriCTCursorPointer esriCTResultBottomBorder", "id": "i", "title": sharedNls.clickToLocate, "innerHTML": nameArray[i].attributes[roadLineLayerSettings.SearchDisplayFields] }, divDisplayRow);
                     this.own(on(divDisplayColumn, "click", function () {
+                        //Change global variables to continue the workflow
+                        dojo.polygonGeometry = null;
+                        dojo.isDownloadReport = false;
+                        dojo.newBufferDistance = null;
+                        dojo.selectedFeatures = [];
+                        domStyle.set(dojoQuery(".esriCTInfOptions")[0], "display", "block");
+                        domStyle.set(dojoQuery(".esriCTheadderPanel")[0], "display", "block");
                         if (_this.map.getLayer("tempBufferLayer")) {
                             _this.map.getLayer("tempBufferLayer").clear();
                         }
@@ -765,6 +778,13 @@ define([
             domAttr.set(divDisplayColumn, "index", i);
             this.assignOverlayId++;
             this.own(on(divDisplayColumn, "click", function () {
+                //Change global variables to continue the workflow
+                dojo.polygonGeometry = null;
+                dojo.isDownloadReport = false;
+                dojo.newBufferDistance = null;
+                dojo.selectedFeatures = [];
+                domStyle.set(dojoQuery(".esriCTInfOptions")[0], "display", "block");
+                domStyle.set(dojoQuery(".esriCTheadderPanel")[0], "display", "block");
                 if (_this.map.getLayer("tempBufferLayer")) {
                     _this.map.getLayer("tempBufferLayer").clear();
                 }
@@ -936,6 +956,8 @@ define([
             query.where = parcelInformation.ParcelIdentification + "= '" + selectedFeature.attributes[parcelInformation.ParcelIdentification] + "'";
             qTask = new QueryTask(taxParcelQueryUrl);
             qTask.execute(query, lang.hitch(this, function (featureSet) {
+                dojo.selectedFeatures = [];
+                dojo.selectedFeatures.push(featureSet.features[0]);
                 selectedSet = featureSet.features[0];
                 layer = this.map.getLayer("esriGraphicsLayerMapSettings");
                 lineColor = new Color();
@@ -1136,6 +1158,10 @@ define([
                 screenPoint.y = this.map.height - screenPoint.y;
                 this.map.infoWindow.setTitle(infoTitle);
                 this.map.infoWindow.show(divDetailsTab, screenPoint);
+                //If polygon geometry exsist, toggle infowindow content to directly show notification tab
+                if (dojo.polygonGeometry) {
+                    topic.publish("OnToggleInfoWindoContent");
+                }
             }));
         },
 

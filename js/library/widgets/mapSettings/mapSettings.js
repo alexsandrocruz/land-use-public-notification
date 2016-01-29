@@ -66,7 +66,7 @@ define([
         infoWindowContainerScrollbar: null,
         divDescription: null,
         divParcelList: null,
-
+        _mapClickHandler: null, //handler for map click event
 
         /**
         * initialize map object
@@ -93,6 +93,8 @@ define([
             topic.subscribe("queryForAdjacentRoad", lang.hitch(this, this.queryForAdjacentRoad));
             topic.subscribe("createDataForOverlappedParcels", lang.hitch(this, this.createDataForOverlappedParcels));
             topic.subscribe("addGraphic", lang.hitch(this, this.addGraphic));
+            topic.subscribe("drawToolActivated", lang.hitch(this, this.onDrawToolActivated));
+            topic.subscribe("drawToolDeActivated", lang.hitch(this, this.onDrawToolDeActivated));
 
             /**
             * set map extent to default extent specified in configuration file
@@ -123,20 +125,8 @@ define([
             glayer = new GraphicsLayer();
             glayer.id = this.tempGraphicsLayerId;
             this.map.addLayer(glayer);
-
-            this.map.on("click", lang.hitch(this, function (evt) {
-                dojo.overLayerID = false;
-                this.btnDiv = dojoQuery(".scrollbar_footer")[0];
-                domStyle.set(this.btnDiv, "display", "none");
-                if (evt.graphic && evt.graphic.attributes && evt.graphic.attributes.overLay) {
-                    dojo.graphicLayerClicked = false;
-                    dojo.selectedMapPoint = evt.mapPoint;
-                    topic.publish("setMapTipPosition", dojo.selectedMapPoint, this.map);
-                    domUtils.show(this.map.infoWindow.domNode);
-                    return;
-                }
-                this._executeQueryTask(evt);
-            }));
+            //varsha : map click handler
+            this._connectMapClickHandler();
 
             roadLineColor = dojo.configData.RoadCenterLayerSettings.RoadHighlightColor;
             roadLineSymbol = new Symbol.SimpleLineSymbol();
@@ -163,6 +153,13 @@ define([
                     if (dijit.byId('toolTipDialogues')) {
                         dojo.publish("hideRoad", evt);
                     }
+                } else {
+                    //Ashish : hide map tooltip to select road and remove the mouse move handle when user clicks on same road
+                    dojo.isSpanClicked = false;
+                    topic.publish("hideMapTip");
+                    if (dojo.mouseMoveHandle) {
+                        dojo.mouseMoveHandle.remove();
+                    }
                 }
                 topic.publish("createInfoWindowContent", evt.graphic, evt.mapPoint, roadLayerSettings);
                 evt.cancelBubble = true;
@@ -187,7 +184,7 @@ define([
             */
             this.map.on("load", lang.hitch(this, function () {
                 var _self = this, polyLine, taxParcelQueryUrl = dojo.configData.ParcelLayerSettings.LayerUrl, extent,
-                    mapDefaultExtent, query, parcelGroup, p, qTask, numSegments, j, overLayQueryUrl;
+                    mapDefaultExtent, query, parcelGroup, p, qTask, numSegments, j, overLayQueryUrl, PolygonGeom;
 
                 extent = this._getQueryString('extent');
                 if (extent === "") {
@@ -208,7 +205,23 @@ define([
                 /**
                 * to share parcel layer's graphic and infopopup
                 */
-                if (window.location.toString().split("$parcelID=").length > 1) {
+                //Varsha: check whether polygon geometry is shared
+                if (window.location.toString().split("$polygonGeometry=").length > 1) {
+                    //Call the fucntion to mixin the values of reuired URL parameters
+                    topic.publish("getValuesToBuffer", true);
+                    PolygonGeom = (window.location.toString().split("$polygonGeometry=")[1]).split('$')[0];
+                    dojo.polygonGeometry = Geometry.Polygon(JSON.parse(decodeURIComponent(PolygonGeom)));
+                }
+                //If polygon geometry exsist, create normal buffer and select the polygons
+                dojo.isDownloadReport = (window.location.toString().split("$isDownloadReport=")[1]).split('$')[0];
+                if (dojo.polygonGeometry && dojo.isDownloadReport === "true") {
+                    dojo.newBufferDistance = (window.location.toString().split("$newBufferDistance=")[1]).split('$')[0];
+                    dojo.currentBufferDistance = (window.location.toString().split("$currentBufferDistance=")[1]).split('$')[0];
+                    topic.publish("generateBufferParmas", dojo.polygonGeometry);
+                }
+                else if (dojo.polygonGeometry && dojo.isDownloadReport === "false") {
+                    topic.publish("polygonCreated", dojo.polygonGeometry);
+                } else if (window.location.toString().split("$parcelID=").length > 1) {
                     topic.publish("getValuesToBuffer", true);
                     if (window.location.toString().split("$displayInfo=").length > 1) {
                         dojo.parcelArray = window.location.toString().split("$parcelID=")[1].split("$displayInfo=")[0].split(",");
@@ -302,6 +315,30 @@ define([
             }));
         },
 
+        /*
+        * connect map click event
+        */
+        _connectMapClickHandler: function () {
+            this._mapClickHandler = this.map.on("click", lang.hitch(this, function (evt) {
+                dojo.isDownloadReport = false;
+                dojo.overLayerID = false;
+                if (!dojo.polygonGeometry) {
+                    dojo.newBufferDistance = null;
+                }
+                this.btnDiv = dojoQuery(".scrollbar_footer")[0];
+                domStyle.set(this.btnDiv, "display", "none");
+                if (evt.graphic && evt.graphic.attributes && evt.graphic.attributes.overLay) {
+                    dojo.graphicLayerClicked = false;
+                    dojo.selectedMapPoint = evt.mapPoint;
+                    topic.publish("setMapTipPosition", dojo.selectedMapPoint, this.map);
+                    domUtils.show(this.map.infoWindow.domNode);
+                    return;
+                }
+                this._executeQueryTask(evt);
+
+            }));
+        },
+
         /* *
         * Get query string value of the provided key, if not found the function returns empty string
         * @return {string} return extent value
@@ -385,6 +422,11 @@ define([
                     dojo.graphicLayerClicked = false;
                 }
             } else {
+                dojo.isSpanClicked = false;
+                topic.publish("hideMapTip");
+                if (dojo.mouseMoveHandle) {
+                    dojo.mouseMoveHandle.remove();
+                }
                 this._showFeatureDetails(evt.graphic, evt);
                 dojo.graphicLayerClicked = false;
             }
@@ -404,6 +446,13 @@ define([
                     }));
                     topic.publish("queryForAdjacentRoad", evt);
                 }
+            }
+            //If polygon geometry exsist, toggle infowindow content to directly show notification tab
+            if (dojo.polygonGeometry) {
+                topic.publish("OnToggleInfoWindoContent");
+            } else {
+                domStyle.set(dojoQuery(".esriCTInfOptions")[0], "display", "block");
+                domStyle.set(dojoQuery(".esriCTheadderPanel")[0], "display", "block");
             }
         },
 
@@ -491,9 +540,9 @@ define([
         */
         _showFeatureSet: function (fset, evt) {
             topic.publish("clearAll", evt);
+            topic.publish("hideMapTip");
             var rendererColor = dojo.configData.OverlayLayerSettings[0].OverlayHighlightColor, centerPoint = evt.mapPoint,
                 featureSet, features, contentDiv, feature, layer, fillColor, lineColor, symbol;
-
             if (fset.features.length > 1) {
                 featureSet = fset;
                 this.overlapCount = 0;
@@ -520,6 +569,14 @@ define([
                 layer.add(feature);
                 dojo.polygon = true;
             }
+            //Check if the parcels are selected using CTRL key and push them to selectedFeatures array
+            if (!evt.ctrlKey) {
+                dojo.selectedFeatures = [];
+                dojo.selectedFeatures = fset.features;
+            } else {
+                dojo.selectedFeatures.push(fset.features[0]);
+            }
+
         },
 
         /**
@@ -979,8 +1036,12 @@ define([
             var i;
             dojo.selectedMapPoint = null;
             dojo.displayInfo = null;
+            dojo.polygonGeometry = null;
+            dojo.newBufferDistance = null;
             this.map.infoWindow.hide();
-            this.map.graphics.clear();
+            if (this.map.graphics) {
+                this.map.graphics.clear();
+            }
             for (i = 0; i < this.map.graphicsLayerIds.length; i++) {
                 if (!((evt && evt.ctrlKey && this.map.graphicsLayerIds[i] === "esriGraphicsLayerMapSettings") || (evt && evt.ctrlKey && this.map.graphicsLayerIds[i] === "roadCenterLinesLayerID"))) {
                     if (!evt) {
@@ -1251,6 +1312,22 @@ define([
             featureSet = new esri.tasks.FeatureSet();
             featureSet.features = features;
             layer.add(featureSet.features[0]);
+        },
+
+        /*
+        * activate map click on deactivating draw tool
+        */
+        onDrawToolDeActivated: function () {
+            this._connectMapClickHandler();
+        },
+
+        /*
+        * deactivate map click on activating draw tool
+        */
+        onDrawToolActivated: function () {
+            if (this._mapClickHandler) {
+                this._mapClickHandler.remove();
+            }
         }
     });
 });
