@@ -130,19 +130,19 @@ define([
         * @memberOf widgets/infoWindow/infoWindow
         */
         _createFeatureCollection: function (fset) {
-            var featuresArray = [], featureObj = {}, filteredFeaturesArray = [], filteredFeaturesObjArray = [];
+            var featuresArray = [], featureObj = {}, filteredFeaturesArray = [], filteredFeaturesObjArray = [], parcelInformation = dojo.configData.AveryLabelSettings[0].ParcelInformation;
             //If the buffer value is 0, query the features with LOWPARCELID and show them
             if (fset && fset.features.length > 0 && parseInt(this.txtBuffer.value, 10) === 0) {
                 featuresArray = []; featureObj = {}; filteredFeaturesArray = []; filteredFeaturesObjArray = [];
                 //Loop all the selected feature and filter features based on LOWPARCELID
                 array.forEach(fset.features, lang.hitch(this, function (currentFeature, index) {
                     //Check if array
-                    if (filteredFeaturesArray.length >= 1 && filteredFeaturesArray.indexOf(currentFeature.attributes['LOWPARCELID']) === -1) {
-                        filteredFeaturesArray.push(currentFeature.attributes['LOWPARCELID']);
+                    if (filteredFeaturesArray.length >= 1 && filteredFeaturesArray.indexOf(currentFeature.attributes[parcelInformation.LowParcelIdentification]) === -1) {
+                        filteredFeaturesArray.push(currentFeature.attributes[parcelInformation.LowParcelIdentification]);
                         filteredFeaturesObjArray.push(currentFeature);
                     } else {
                         if (index === 0) {
-                            filteredFeaturesArray.push(currentFeature.attributes['LOWPARCELID']);
+                            filteredFeaturesArray.push(currentFeature.attributes[parcelInformation.LowParcelIdentification]);
                             filteredFeaturesObjArray.push(currentFeature);
                         }
                     }
@@ -150,7 +150,7 @@ define([
 
                 //Fetch all the features based on LOWPARCELID
                 array.forEach(filteredFeaturesObjArray, lang.hitch(this, function (currentFeature) {
-                    featuresArray.push(this._fetchPolygons(currentFeature));
+                    featuresArray.push(this._fetchPolygons(currentFeature, parcelInformation));
                 }));
 
 
@@ -204,12 +204,12 @@ define([
         * @param {object} feature
         * @memberOf widgets/infoWindow/infoWindow
         */
-        _fetchPolygons: function (currentFeature) {
+        _fetchPolygons: function (currentFeature, parcelInformation) {
             var qTask, query, featureDef = new Deferred();
             qTask = new QueryTask(dojo.configData.ParcelLayerSettings.LayerUrl);
             query = new Query();
             query.outFields = ["*"];
-            query.where = "LOWPARCELID = '" + currentFeature.attributes['LOWPARCELID'] + "'";
+            query.where = parcelInformation.LowParcelIdentification + "= '" + currentFeature.attributes[parcelInformation.LowParcelIdentification] + "'";
             query.returnGeometry = true;
             qTask.execute(query, lang.hitch(this, function (featureSet) {
                 featureDef.resolve(featureSet.features);
