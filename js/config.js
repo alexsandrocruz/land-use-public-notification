@@ -46,7 +46,7 @@ define([], function () {
         // GENERAL SETTINGS
         // ------------------------------------------------------------------------------------------------------------------------
         // Set application title
-        ApplicationName: "Land Use Public Notification",
+        ApplicationName: "Public Notification",
 
         // Set application icon path
         ApplicationIcon: "/js/library/themes/images/publicnotification.png",
@@ -59,7 +59,7 @@ define([], function () {
 
         //Set splash window content - Message that appears when the application starts
         SplashScreen: {
-            SplashScreenContent: "<b>Land Use Public Notification</b> <br/> <hr/> <br/>The <b>Land Use Public Notification</b> application allows local government staff to identify properties within a given distance (buffer) of a subject property or roadway; or identify properties with a given administrative area (ex. school district).  Once a given set of properties have been identified, mailing labels and/or a structured text file can be generated for owners and occupants and used in public notification workflows.",
+            SplashScreenContent: "<b>Public Notification</b> <br/> <hr/> <br/>The <b>Public Notification</b> application allows local government staff to identify properties within a given distance (buffer) of a subject property or roadway; or identify properties with a given administrative area (ex. school district).  Once a given set of properties have been identified, mailing labels and/or a structured text file can be generated for owners and occupants and used in public notification workflows.",
             IsVisible: true
         },
 
@@ -280,16 +280,16 @@ define([], function () {
 
         AveryLabelSettings: [{
             // Geoprocessing services for PDF creation
-            PDFServiceTask: "https://csslesxi3-vm2.cybertech.com/arcgis/rest/services/PublicNotificationGP/GPServer/GenerateAveryLabels",
+            PDFServiceTask: "http://54.183.93.10:6080/arcgis/rest/services/PublicNotification/GPServer/GenerateAveryLabels",
 
             // Geoprocessing service for CSV file creation
-            CSVServiceTask: "https://csslesxi3-vm2.cybertech.com/arcgis/rest/services/PublicNotificationGP/GPServer/GenerateCSVMailingList",
+            CSVServiceTask: "http://54.183.93.10:6080/arcgis/rest/services/PublicNotification/GPServer/GenerateCSVMailingList",
 
             //Label to be displayed for Occupant
             OccupantLabel: "Occupant",
 
             //Fields of the occupant
-            OccupantFields: "PARCELID,SITEADDRESS",
+            OccupantFields: "PARCELID,SITEADDRESS,PSTLCITY,PSTLSTATE,PSTLZIP5",
 
             //Fields for Avery labels
             AveryFieldsCollection: ["PARCELID", "OWNERNME1", "OWNERNME2", "PSTLADDRESS", "PSTLCITY,PSTLSTATE,PSTLZIP5"],
