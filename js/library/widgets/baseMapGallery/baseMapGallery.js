@@ -84,24 +84,25 @@ define([
         * @memberOf widgets/baseMapGallery/baseMapGallery
         */
         _createBaseMapElement: function (baseMapURL, baseMapURLCount) {
-            var presentThumbNail, divContainer, imgThumbnail, presentBaseMap;
+            var divContainer, imgThumbnail, i;
 
             divContainer = domConstruct.create("div", { "class": "esriCTbaseMapContainerNode" });
             imgThumbnail = domConstruct.create("img", { "class": "esriCTBasemapThumbnail", "src": dojo.configData.BaseMapLayers[baseMapURL + 1].ThumbnailSource }, null);
-            presentBaseMap = baseMapURL + 1;
-            presentThumbNail = baseMapURL + 2;
+            imgThumbnail.setAttribute("index", 1);
+            //Fix for creating basemap gallery as per configuration
             on(imgThumbnail, "click", lang.hitch(this, function () {
-                imgThumbnail.src = dojo.configData.BaseMapLayers[presentThumbNail].ThumbnailSource;
-                this._changeBaseMap(presentBaseMap);
-                if (baseMapURLCount - 1 === presentThumbNail) {
-                    presentThumbNail = baseMapURL;
-                } else {
-                    presentThumbNail++;
-                }
-                if (baseMapURLCount - 1 === presentBaseMap) {
-                    presentBaseMap = baseMapURL;
-                } else {
-                    presentBaseMap++;
+                for (i = 0; i < dojo.configData.BaseMapLayers.length; i++) {
+                    if (parseInt(imgThumbnail.getAttribute("index"), 10) === i) {
+                        this._changeBaseMap(dojo.configData.BaseMapLayers[i]);
+                        if (i >= baseMapURLCount - 1) {
+                            imgThumbnail.src = dojo.configData.BaseMapLayers[0].ThumbnailSource;
+                            imgThumbnail.setAttribute("index", 0);
+                        } else {
+                            imgThumbnail.src = dojo.configData.BaseMapLayers[i + 1].ThumbnailSource;
+                            imgThumbnail.setAttribute("index", i + 1);
+                        }
+                        break;
+                    }
                 }
             }));
             divContainer.appendChild(imgThumbnail);
@@ -113,12 +114,22 @@ define([
         * @param {object} contains current basemap object
         * @memberOf widgets/baseMapGallery/baseMapGallery
         */
-        _changeBaseMap: function (spanControl) {
-            var layer;
-
+        _changeBaseMap: function (basemap) {
+            var baseMapLayer, allLayer = this.map.getLayersVisibleAtScale(), i;
             this._hideMapLayers();
-            layer = this.map.getLayer(dojo.configData.BaseMapLayers[spanControl].Key);
-            layer.show();
+            baseMapLayer = this.map.getLayer(basemap.Key);
+            //Add boolean flag which will be used to identify the current basemap on map
+            for (i = 0; i < allLayer.length; i++) {
+                if (allLayer[i].url && baseMapLayer.url === allLayer[i].url) {
+                    allLayer[i].isSelectedBaseMap = true;
+                } else {
+                    if (allLayer[i].hasOwnProperty("isSelectedBaseMap")) {
+                        //If the basemap is not loaded, set flag to false
+                        allLayer[i].isSelectedBaseMap = false;
+                    }
+                }
+            }
+            baseMapLayer.show();
         },
 
         /**

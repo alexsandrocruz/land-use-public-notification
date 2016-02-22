@@ -95,9 +95,13 @@
                                     style="display: none; font-size: 11px; height: 20px;"></span>
                             </div>
                             <div class="downloadNotification">
-                                <div data-dojo-attach-point="btnSubmit">
+                                <div data-dojo-attach-point="btnSubmit" class="downloadButton">
                                     <img class="esriCTimgDownloadParcels" data-dojo-attach-point="btnSubmitImage" />
                                     <span class="esriCTspan">${sharedNls.downloadNotification}</span></div>
+                                <div class="selectedParcel" data-dojo-attach-point="selectedParcel">
+                                    <div class="imgCreateNotificationAdjacentParcels"></div>
+                                    <div class="spanAdjacentParcels" data-dojo-attach-point="selectParcelLabel"></div>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -28,6 +28,7 @@ define({
         csvFormat: "Download in CSV format",
         downloadNotification: "Download",
         clickToLocate: "Click To Locate",
+        unableToLoadPDF: "Internet Explorer may fail to load the pdf document sometimes, please try a different browser if the pdf fails to load.",
         errorMessages: {
             invalidSearch: "No results found",
             falseConfigParams: "Required configuration key values are either null or not exactly matching with layer attributes, This message may appear multiple times.",
@@ -63,7 +64,8 @@ define({
             clear: "Clear",
             search: "Search",
             exit: "Exit",
-            locateAddress: "Locate Address"
+            locateAddress: "Locate Address",
+            polygon:"Polygon Tool"
         }
     },
     es: true,
