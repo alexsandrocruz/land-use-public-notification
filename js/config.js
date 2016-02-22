@@ -80,11 +80,13 @@ define([], function () {
             WidgetPath: "widgets/polygonTool/polygonTool",
             MapInstanceRequired: true,
             WidgetRequired: true
-        },{
-            Title: "Locate",
-            WidgetPath: "widgets/geoLocation/geoLocation",
-            MapInstanceRequired: true
-        }, {
+        },
+        //{
+            //Title: "Locate",
+            //WidgetPath: "widgets/geoLocation/geoLocation",
+            //MapInstanceRequired: true
+        //}, 
+        {
             Title: "Print",
             WidgetPath: "widgets/print/printMap",
             MapInstanceRequired: true
