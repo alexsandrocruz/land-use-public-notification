@@ -81,12 +81,12 @@ define([], function () {
             MapInstanceRequired: true,
             WidgetRequired: true
         },
-        //{
-            //Title: "Locate",
-            //WidgetPath: "widgets/geoLocation/geoLocation",
-            //MapInstanceRequired: true
+		//{
+        //Title: "Locate",
+        //WidgetPath: "widgets/geoLocation/geoLocation",
+        //MapInstanceRequired: true
         //}, 
-        {
+		{
             Title: "Print",
             WidgetPath: "widgets/print/printMap",
             MapInstanceRequired: true
@@ -282,10 +282,10 @@ define([], function () {
 
         AveryLabelSettings: [{
             // Geoprocessing services for PDF creation
-            PDFServiceTask: "http://54.183.93.10:6080/arcgis/rest/services/PublicNotification/GPServer/GenerateAveryLabels",
+            PDFServiceTask: "http://52.26.253.224:6080/arcgis/rest/services/PublicNotification/GPServer/GenerateAveryLabels",
 
             // Geoprocessing service for CSV file creation
-            CSVServiceTask: "http://54.183.93.10:6080/arcgis/rest/services/PublicNotification/GPServer/GenerateCSVMailingList",
+            CSVServiceTask: "http://52.26.253.224:6080/arcgis/rest/services/PublicNotification/GPServer/GenerateCSVMailingList",
 
             //Label to be displayed for Occupant
             OccupantLabel: "Occupant",
