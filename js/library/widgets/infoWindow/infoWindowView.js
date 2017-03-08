@@ -472,6 +472,9 @@ define([
                 this._queryCallback(featureSet, false, isPolygonExists);
                 dojo.selectedFeatures = [];
                 dojo.selectedFeatures = featureSet.features;
+            }), lang.hitch(this, function (err) {
+                topic.publish("hideProgressIndicator");
+                alert("Unusable polygon");  
             }));
 
         },
