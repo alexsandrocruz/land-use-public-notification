@@ -46,6 +46,8 @@ define([
     "dijit/form/Button",
     "dijit/form/ComboBox",
     "dijit/form/CheckBox",
+    "esri/geometry/geometryEngine",
+    "esri/geometry/Polyline",
     "esri/tasks/BufferParameters",
     "esri/tasks/GeometryService",
     "esri/tasks/Geoprocessor",
@@ -55,7 +57,7 @@ define([
     "dijit/_WidgetBase",
     "dijit/_TemplatedMixin",
     "dijit/_WidgetsInTemplateMixin"
-], function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domClass, string, window, topic, Query, QueryTask, query, array, Deferred, DeferredList, all, Color, Symbol, Geometry, TaskFeatureSet, SpatialReference, Graphic, sharedNls, Button, ComboBox, CheckBox, BufferParameters, GeometryService, Geoprocessor, ItemFileReadStore, InfoWindowBase, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin) {
+], function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domClass, string, window, topic, Query, QueryTask, query, array, Deferred, DeferredList, all, Color, Symbol, Geometry, TaskFeatureSet, SpatialReference, Graphic, sharedNls, Button, ComboBox, CheckBox, geometryEngine, Polyline, BufferParameters, GeometryService, Geoprocessor, ItemFileReadStore, InfoWindowBase, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin) {
 
     //========================================================================================================================//
     return declare([InfoWindowBase, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
@@ -429,7 +431,7 @@ define([
         * @memberOf widgets/infoWindow/infoWindowView
         */
         _showBuffer: function (geometries, overlayInfowindow, isPolygonExists) {
-            var _this = this, maxAllowableOffset, taxParcelQueryUrl, qTask, symbol;
+            var _this = this, maxAllowableOffset, taxParcelQueryUrl, qTask, symbol, areaEpsilon = 10, json;
             dojo.displayInfo = null;
             maxAllowableOffset = dojo.configData.MaxAllowableOffset;
             dojo.selectedMapPoint = null;
@@ -453,6 +455,12 @@ define([
 
             if (geometries[0]) {
                 query.geometry = geometries[0];
+                if (query.geometry.type === "polygon" && areaEpsilon > geometryEngine.planarArea(query.geometry)) {
+                    json = query.geometry.toJson();
+                    json = json.rings[0];
+                    query.geometry = new Polyline([json[0], json[1]]);
+                    query.geometry.spatialReference = geometries[0].spatialReference;
+                }
                 query.spatialRelationship = esri.tasks.Query.SPATIAL_REL_INTERSECTS;
             } else {
                 query.geometry = geometries;
