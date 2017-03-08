@@ -46,7 +46,7 @@ define([], function () {
         // GENERAL SETTINGS
         // ------------------------------------------------------------------------------------------------------------------------
         // Set application title
-        ApplicationName: "Land Use Public Notification",
+        ApplicationName: "Public Notification",
 
         // Set application icon path
         ApplicationIcon: "/js/library/themes/images/publicnotification.png",
@@ -59,7 +59,7 @@ define([], function () {
 
         //Set splash window content - Message that appears when the application starts
         SplashScreen: {
-            SplashScreenContent: "<b>Land Use Public Notification</b> <br/> <hr/> <br/>The <b>Land Use Public Notification</b> application allows local government staff to identify properties within a given distance (buffer) of a subject property or roadway; or identify properties with a given administrative area (ex. school district).  Once a given set of properties have been identified, mailing labels and/or a structured text file can be generated for owners and occupants and used in public notification workflows.",
+            SplashScreenContent: "<b>Public Notification</b> <br/> <hr/> <br/>The <b>Public Notification</b> application allows local government staff to identify properties within a given distance (buffer) of a subject property or roadway; or identify properties with a given administrative area (ex. school district).  Once a given set of properties have been identified, mailing labels and/or a structured text file can be generated for owners and occupants and used in public notification workflows.",
             IsVisible: true
         },
 
@@ -75,11 +75,18 @@ define([], function () {
             Title: "Search",
             WidgetPath: "widgets/locator/locator",
             MapInstanceRequired: true
-        }, {
-            Title: "Locate",
-            WidgetPath: "widgets/geoLocation/geoLocation",
-            MapInstanceRequired: true
-        }, {
+        },{
+            Title: "PolygonTool",
+            WidgetPath: "widgets/polygonTool/polygonTool",
+            MapInstanceRequired: true,
+            WidgetRequired: true
+        },
+		//{
+        //Title: "Locate",
+        //WidgetPath: "widgets/geoLocation/geoLocation",
+        //MapInstanceRequired: true
+        //}, 
+		{
             Title: "Print",
             WidgetPath: "widgets/print/printMap",
             MapInstanceRequired: true
@@ -105,27 +112,27 @@ define([], function () {
         // ------------------------------------------------------------------------------------------------------------------------
         // Set baseMap layers
         BaseMapLayers: [{
-            Key: "parcelMap",
+            Key: "streetMap",
             ThumbnailSource: "js/library/themes/images/parcelmap.png",
-            Name: "Parcel Map",
-            MapURL: "http://tryitlive.arcgis.com/arcgis/rest/services/ParcelPublicAccessMI/MapServer"
-        }, {
-            Key: "taxMap",
-            ThumbnailSource: "js/library/themes/images/taxmap.png",
-            Name: "Tax Map",
-            MapURL: "http://tryitlive.arcgis.com/arcgis/rest/services/TaxParcelMI/MapServer"
-        }, {
+            Name: "Streets",
+            MapURL: "http://tryitlive.arcgis.com/arcgis/rest/services/GeneralPurpose/MapServer"
+        },{
             Key: "imagery",
             ThumbnailSource: "js/library/themes/images/imagery.png",
             Name: "Imagery",
-            MapURL: "http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer"
-        }],
+            MapURL: "http://tryitlive.arcgis.com/arcgis/rest/services/ImageryHybrid/MapServer"
+        }, {
+            Key: "topoMap",
+            ThumbnailSource: "js/library/themes/images/Topographic.jpg",
+            Name: "Topographic",
+            MapURL: "http://services.arcgisonline.com/arcgis/rest/services/World_Topo_Map/MapServer"
+    }],
 
         // Set string value to be shown for null or blank values
         ShowNullValueAs: "N/A",
 
         // Initial map extent. Use comma (,) to separate values and dont delete the last comma
-        DefaultExtent: "-9273520, 5249870, -9270620, 5251510",
+        DefaultExtent: "-9817210,5127895,-9814287,5127905",
 
 
         //Overlay layer settings refers to the other operational layers configured apart from the standard layers.
@@ -133,16 +140,20 @@ define([], function () {
         OverlayLayerSettings: [
             {
                 OverlayHighlightColor: "#1C86EE",
-                DisplayTitle: "School Boundaries",
-                LayerUrl: "http://tryitlive.arcgis.com/arcgis/rest/services/AdministrativeAreas/MapServer/0",
-                SearchDisplayFields: "SCHLDSCRP",
-                SearchExpression: "UPPER(SCHLDSCRP) LIKE '%${0}%' OR UPPER(SCHLDSCRP) LIKE '%${0}%'",
+                DisplayTitle: "School Name",
+                LayerUrl: "http://tryitlive.arcgis.com/arcgis/rest/services/AdministrativeAreasIL/MapServer/0",
+                SearchDisplayFields: "NAME",
+                SearchExpression: "UPPER(NAME) LIKE '%${0}%' OR UPPER(NAME) LIKE '%${0}%'",
                 InfoWindowSettings: [{
-                    InfoWindowTitleFields: "SCHLDSCRP",
+                    InfoWindowTitleFields: "NAME",
                     InfoWindowData: [{
-                        DisplayText: "Number of Tax Parcels:",
-                        FieldName: "NOTXPRCL",
-                        AliasField: "Number of Tax Parcels"
+                        DisplayText: "School District:",
+                        FieldName: "DISTRCTNAME",
+                        AliasField: "School District Name"
+                    }, {
+                        DisplayText: "District Area (sq mi):",
+                        FieldName: "SCHOOLAREA",
+                        AliasField: "Area in Square Miles"
                     }]
                 }]
             }],
@@ -175,7 +186,7 @@ define([], function () {
         ParcelLayerSettings: {
             ParcelHighlightColor: "#1C86EE",
             ParcelHighlightAlpha: 0.5,
-            LayerUrl: "http://tryitlive.arcgis.com/arcgis/rest/services/TaxParcelQuery/MapServer/0",
+            LayerUrl: "http://tryitlive.arcgis.com/arcgis/rest/services/TaxParcelQueryIL/MapServer/0",
             SearchDisplayFields: "PARCELID,SITEADDRESS",
             SearchExpression: "UPPER(PARCELID) LIKE '%${0}%' OR UPPER(SITEADDRESS) LIKE '%${0}%'",
             InfoWindowSettings: [{
@@ -217,7 +228,7 @@ define([], function () {
         },
 
         RoadCenterLayerSettings: {
-            LayerUrl: "http://tryitlive.arcgis.com/arcgis/rest/services/RoadCenterlineQuery/MapServer/0",
+            LayerUrl: "http://tryitlive.arcgis.com/arcgis/rest/services/RoadCenterlineQueryIL/MapServer/0",
             SearchDisplayFields: "FULLNAME",
             SearchExpression: "UPPER(FULLNAME) LIKE '${0}%'",
             RoadHighlightColor: "#FF0000",
@@ -271,16 +282,16 @@ define([], function () {
 
         AveryLabelSettings: [{
             // Geoprocessing services for PDF creation
-            PDFServiceTask: "http://ec2-54-214-169-132.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/PublicNotification/GPServer/GenerateAveryLabels",
+            PDFServiceTask: "http://52.26.253.224:6080/arcgis/rest/services/PublicNotification/GPServer/GenerateAveryLabels",
 
             // Geoprocessing service for CSV file creation
-            CSVServiceTask: "http://ec2-54-214-169-132.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/PublicNotification/GPServer/GenerateCSVMailingList",
+            CSVServiceTask: "http://52.26.253.224:6080/arcgis/rest/services/PublicNotification/GPServer/GenerateCSVMailingList",
 
             //Label to be displayed for Occupant
             OccupantLabel: "Occupant",
 
             //Fields of the occupant
-            OccupantFields: "PARCELID,SITEADDRESS",
+            OccupantFields: "PARCELID,SITEADDRESS,PSTLCITY,PSTLSTATE,PSTLZIP5",
 
             //Fields for Avery labels
             AveryFieldsCollection: ["PARCELID", "OWNERNME1", "OWNERNME2", "PSTLADDRESS", "PSTLCITY,PSTLSTATE,PSTLZIP5"],
@@ -315,7 +326,7 @@ define([], function () {
         // GEOMETRY SERVICE SETTINGS
         // ------------------------------------------------------------------------------------------------------------------------
         // Set geometry service URL
-        GeometryService: "http://ec2-54-214-169-132.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/Utilities/Geometry/GeometryServer",
+        GeometryService: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer",
 
         // Set proxy url
         ProxyUrl: "/proxy/proxy.ashx",

@@ -80,11 +80,13 @@ define([], function () {
             WidgetPath: "widgets/polygonTool/polygonTool",
             MapInstanceRequired: true,
             WidgetRequired: true
-        },{
-            Title: "Locate",
-            WidgetPath: "widgets/geoLocation/geoLocation",
-            MapInstanceRequired: true
-        }, {
+        },
+		//{
+        //Title: "Locate",
+        //WidgetPath: "widgets/geoLocation/geoLocation",
+        //MapInstanceRequired: true
+        //}, 
+		{
             Title: "Print",
             WidgetPath: "widgets/print/printMap",
             MapInstanceRequired: true
@@ -113,12 +115,12 @@ define([], function () {
             Key: "streetMap",
             ThumbnailSource: "js/library/themes/images/parcelmap.png",
             Name: "Streets",
-            MapURL: "http://tryitlive.arcgis.com/arcgis/rest/services/GeneralPurpose/MapServer"
+            MapURL: "http://tiles.arcgis.com/tiles/Pu6Fai10JE2L2xUd/arcgis/rest/services/GeneralPurposeBasemap/MapServer"
         },{
             Key: "imagery",
             ThumbnailSource: "js/library/themes/images/imagery.png",
             Name: "Imagery",
-            MapURL: "http://tryitlive.arcgis.com/arcgis/rest/services/ImageryHybrid/MapServer"
+            MapURL: "http://tiles.arcgis.com/tiles/Pu6Fai10JE2L2xUd/arcgis/rest/services/ImageryHybridBasemap/MapServer"
         }, {
             Key: "topoMap",
             ThumbnailSource: "js/library/themes/images/Topographic.jpg",
@@ -139,18 +141,18 @@ define([], function () {
             {
                 OverlayHighlightColor: "#1C86EE",
                 DisplayTitle: "School Name",
-                LayerUrl: "http://tryitlive.arcgis.com/arcgis/rest/services/AdministrativeAreasIL/MapServer/0",
+                LayerUrl: "http://services6.arcgis.com/Pu6Fai10JE2L2xUd/arcgis/rest/services/AdministrativeAreas/FeatureServer/0",
                 SearchDisplayFields: "NAME",
                 SearchExpression: "UPPER(NAME) LIKE '%${0}%' OR UPPER(NAME) LIKE '%${0}%'",
                 InfoWindowSettings: [{
                     InfoWindowTitleFields: "NAME",
                     InfoWindowData: [{
                         DisplayText: "School District:",
-                        FieldName: "DISTRCTNAME",
+                        FieldName: "NAME",
                         AliasField: "School District Name"
                     }, {
                         DisplayText: "District Area (sq mi):",
-                        FieldName: "SCHOOLAREA",
+                        FieldName: "DISTAREA",
                         AliasField: "Area in Square Miles"
                     }]
                 }]
@@ -184,7 +186,7 @@ define([], function () {
         ParcelLayerSettings: {
             ParcelHighlightColor: "#1C86EE",
             ParcelHighlightAlpha: 0.5,
-            LayerUrl: "http://tryitlive.arcgis.com/arcgis/rest/services/TaxParcelQueryIL/MapServer/0",
+            LayerUrl: "http://services6.arcgis.com/Pu6Fai10JE2L2xUd/arcgis/rest/services/TaxParcelQuery/FeatureServer/0",
             SearchDisplayFields: "PARCELID,SITEADDRESS",
             SearchExpression: "UPPER(PARCELID) LIKE '%${0}%' OR UPPER(SITEADDRESS) LIKE '%${0}%'",
             InfoWindowSettings: [{
@@ -226,7 +228,7 @@ define([], function () {
         },
 
         RoadCenterLayerSettings: {
-            LayerUrl: "http://tryitlive.arcgis.com/arcgis/rest/services/RoadCenterlineQueryIL/MapServer/0",
+            LayerUrl: "http://services6.arcgis.com/Pu6Fai10JE2L2xUd/arcgis/rest/services/RoadCenterlineQuery/FeatureServer/0",
             SearchDisplayFields: "FULLNAME",
             SearchExpression: "UPPER(FULLNAME) LIKE '${0}%'",
             RoadHighlightColor: "#FF0000",
@@ -280,10 +282,10 @@ define([], function () {
 
         AveryLabelSettings: [{
             // Geoprocessing services for PDF creation
-            PDFServiceTask: "http://54.183.93.10:6080/arcgis/rest/services/PublicNotification/GPServer/GenerateAveryLabels",
+            PDFServiceTask: "http://52.26.253.224:6080/arcgis/rest/services/PublicNotification/GPServer/GenerateAveryLabels",
 
             // Geoprocessing service for CSV file creation
-            CSVServiceTask: "http://54.183.93.10:6080/arcgis/rest/services/PublicNotification/GPServer/GenerateCSVMailingList",
+            CSVServiceTask: "http://52.26.253.224:6080/arcgis/rest/services/PublicNotification/GPServer/GenerateCSVMailingList",
 
             //Label to be displayed for Occupant
             OccupantLabel: "Occupant",
