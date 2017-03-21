@@ -482,7 +482,7 @@ define([
                 dojo.selectedFeatures = featureSet.features;
             }), lang.hitch(this, function (err) {
                 topic.publish("hideProgressIndicator");
-                alert("Unusable polygon");  
+                alert("Unusable polygon");
             }));
 
         },
@@ -577,6 +577,9 @@ define([
                 var occupantFields = [];
                 if (AveryLabelSettings.OccupantFields) {
                     occupantFields = AveryLabelSettings.OccupantFields.split(",");
+                    if (occupantFields.length > 1) {
+                        occupantFields.splice(1, 0, "");
+                    }
                 }
                 if (!AveryLabelSettings.AveryFieldsOccupantCollection) {
                     AveryLabelSettings.AveryFieldsOccupantCollection = occupantFields;
@@ -625,11 +628,11 @@ define([
         * Create dynamic parameter string
         * @param {array} features Set of features inside the buffer region
         * @param {array} fieldsToInclude Set of fields to include from features
-        * @param {string} nullFieldnameReplacement Text to insert if a 
+        * @param {string} nullFieldnameReplacement Text to insert if a
         *        fieldname in fieldsToInclude is null
-        * @param {boolean} keepNullFieldValues Switch to 
-        * @param {string | null} separatorChar 
-        * @param {string | null} escapingChar 
+        * @param {boolean} keepNullFieldValues Switch to
+        * @param {string | null} separatorChar
+        * @param {string | null} escapingChar
         * @return {string} returns dynamic parameter string
         * @memberOf widgets/infoWindow/infoWindowView
         */
