@@ -467,7 +467,7 @@ define([
 
             //executing query task for selecting intersecting/contains features
             qTask.execute(query, lang.hitch(this, function (featureSet) {
-                //varsha: set feature set in global variable
+                //Set feature set in global variable
                 this.featureSet = featureSet;
                 this._queryCallback(featureSet, false, isPolygonExists);
                 dojo.selectedFeatures = [];
@@ -499,12 +499,12 @@ define([
         * @memberOf widgets/infoWindow/infoWindowView
         */
         _queryCallback: function (featureSet, road, isPolygonExists) {
-            //Varsha: draw polygon on map if it is created from draw tool else get GP task parameters
+            //Draw polygon on map if it is created from draw tool else get GP task parameters
             if (isPolygonExists) {
                 topic.publish("hideProgressIndicator");
                 //this.map.setExtent(dojo.polygonGeometry.getExtent().expand(3));
                 topic.publish("drawPolygon", featureSet.features, false);
-                //set buffer distance to 0 if polygon tool is activated
+                //set buffer distance to 0 incase of polygon tool
                 this.txtBuffer.value = 0;
                 topic.publish("createInfoWindowContent", featureSet.features[0], dojo.polygonGeometry.getExtent().getCenter(), dojo.configData.ParcelLayerSettings);
                 this._toggleInfoWindowContent();
@@ -512,7 +512,7 @@ define([
             }
             //Check for the flag to make sure the report is downloaded
             if (dojo.isDownloadReport) {
-                //Varsha: generate GP task params if download button is clicked
+                //Generate GP task params if download button is clicked
                 if (featureSet.features.length === 0) {
                     //clear features from map
                     if (this.map.getLayer("esriGraphicsLayerMapSettings")) {
@@ -878,6 +878,9 @@ define([
                         topic.publish("hideProgressIndicator");
                         alert("Query " + err);
                     });
+                } else {
+                //If buffer distance is 0, pass polygon geomtery instead of new buffer geometry
+                this._showBuffer([polygonGeometry]);
             }
         }
     });
