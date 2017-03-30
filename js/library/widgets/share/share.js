@@ -118,7 +118,14 @@ define([
             * check if parcel is getting shared
             */
             if ((dojo.polygonGeometry && !dojo.isDownloadReport) || (dojo.polygonGeometry && dojo.isDownloadReport)) {
-                //Varsha: share polygon geometry if it is created from draw tool
+                //Share polygon geometry if it is created from draw tool
+                //If newBufferDistance and currentBufferDistance paramertes are null or undefined, assign 0 value
+                if (dojo.newBufferDistance === "null" || dojo.newBufferDistance == undefined) {
+                    dojo.newBufferDistance = 0;
+                }
+                if (dojo.currentBufferDistance === "null" || dojo.currentBufferDistance == undefined) {
+                    dojo.currentBufferDistance = 0;
+                }
                 urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$dist="
                         + this.map.infoWindow.txtBuffer.value
                         + "$ocupntTxt="
@@ -138,7 +145,7 @@ define([
                         + "$newBufferDistance=" + dojo.newBufferDistance
                         + "$currentBufferDistance=" + dojo.currentBufferDistance;
             } else if ((dojo.parcelArray.length > 0) && (dojo.roadArray.length <= 0) && (dojo.overLayArray.length <= 0)) {
-                if (this.map.getLayer("tempBufferLayer").graphics.length > 0) {
+                if (this.map.getLayer("tempBufferLayer").graphics.length > 0 || this.map.infoWindow.txtBuffer.value == 0) {
                     urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$dist="
                         + this.map.infoWindow.txtBuffer.value
                         + "$ocupntTxt="
@@ -202,16 +209,18 @@ define([
                     + "$averyFormat="
                     + dijit.byId('selectAvery').item.id[0]
                     + "$roadID="
-                    + dojo.roadArray.join(",");
+                    + dojo.roadArray.join(",") + "$isDownloadReport=" + dojo.isDownloadReport;
 
-            /**
-            * check if overlay layers is getting shared
-            */
+                /**
+                * check if overlay layers is getting shared
+                */
             } else if (dojo.overLayArray.length > 0) {
-                if (this.map.getLayer("tempBufferLayer").graphics.length > 0) {
+                if (this.map.getLayer("tempBufferLayer").graphics.length > 0 || this.map.infoWindow.txtBuffer.value == 0) {
                     urlStr = encodeURI(url.path)
                         + "?extent="
                         + mapExtent
+                        + "$isDownloadReport="
+                        + dojo.isDownloadReport
                         + "$dist="
                         + this.map.infoWindow.txtBuffer.value
                         + "$ocupntTxt="
@@ -231,9 +240,9 @@ define([
                         + "$Where="
                         + dojo.overlay + "$shareOverLayId=" + dojo.shareOverLayerId;
                 } else if ((dojo.overLayGraphicShare) && (this.map.getLayer("tempBufferLayer").graphics.length === 0)) {
-                    urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$overlayID=" + dojo.overLayArray.join(",") + "$Where=" + dojo.overlay + "$shareOverLayId=" + dojo.shareOverLayerId;
+                    urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$isDownloadReport=" + dojo.isDownloadReport + "$overlayID=" + dojo.overLayArray.join(",") + "$Where=" + dojo.overlay + "$shareOverLayId=" + dojo.shareOverLayerId;
                 } else {
-                    urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$overlayID=" + dojo.overLayArray.join(",") + "$shareOverLayId=" + dojo.shareOverLayerId;
+                    urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$isDownloadReport=" + dojo.isDownloadReport + "$overlayID=" + dojo.overLayArray.join(",") + "$shareOverLayId=" + dojo.shareOverLayerId;
                 }
             } else {
                 urlStr = encodeURI(url.path) + "?extent=" + mapExtent;
