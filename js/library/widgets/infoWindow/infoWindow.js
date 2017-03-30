@@ -101,58 +101,18 @@ define([
                 }
             })));
 
-             /**
-             * click event triggers when we click download button in the infowindow
-             */
-            var featuresArray = [], featureObj = {}, filteredFeaturesArray = [], filteredFeaturesObjArray = [];
+            /**
+            * click event triggers when we click download button in the infowindow
+            */
             this.own(on(this.btnSubmit, "click", lang.hitch(this, function () {
+                var featureset = {};
                 if (!this._validateBufferParameters()) {
                     return;
                 }
+                dojo.isDownloadReport = true;
                 topic.publish("showProgressIndicator");
-                featuresArray = []; featureObj = {}; filteredFeaturesArray = []; filteredFeaturesObjArray = [];
-                //If the buffer value is 0, query the features with LOWPARCELID and show them
-                if (dojo.selectedFeatures.length > 0 && parseInt(this.txtBuffer.value, 10) === 0) {
-                    //Loop all the selected feature and filter features based on LOWPARCELID
-                    array.forEach(dojo.selectedFeatures, lang.hitch(this, function (currentFeature, index) {
-                        //Check if array
-                        if (filteredFeaturesArray.length >= 1 && filteredFeaturesArray.indexOf(currentFeature.attributes['LOWPARCELID']) === -1) {
-                            filteredFeaturesArray.push(currentFeature.attributes['LOWPARCELID']);
-                            filteredFeaturesObjArray.push(currentFeature);
-                        } else {
-                            if (index === 0) {
-                                filteredFeaturesArray.push(currentFeature.attributes['LOWPARCELID']);
-                                filteredFeaturesObjArray.push(currentFeature);
-                            }
-                        }
-                    }));
-
-                    //Fetch all the features based on LOWPARCELID
-                    array.forEach(filteredFeaturesObjArray, lang.hitch(this, function (currentFeature) {
-                        featuresArray.push(this._fetchPolygons(currentFeature));
-                    }));
-
-
-                    //After fetching all the features, create an array and send it to further processing
-                    all(featuresArray).then(lang.hitch(this, function (featureSet) {
-                        featureObj.features = [];
-                        array.forEach(featureSet, function (currentFeature) {
-                            if (currentFeature) {
-                                if (currentFeature.length > 1) {
-                                    array.forEach(currentFeature, lang.hitch(this, function (subFeatures) {
-                                        featureObj.features.push(subFeatures);
-                                    }));
-                                } else {
-                                    featureObj.features.push(currentFeature[0]);
-                                }
-                            }
-                        });
-                        this._checkInfowindowParams(featureObj);
-                    }));
-                } else {
-                    dojo.isDownloadReport = true;
-                    this.createBuffer();
-                }
+                featureset.features = dojo.selectedFeatures;
+                this._createFeatureCollection(featureset);
             })));
 
             this.txtBuffer.onkeypress = lang.hitch(this, function (evt) {
@@ -165,7 +125,57 @@ define([
             topic.subscribe("polygonCreated", lang.hitch(this, this.onPolygonCreated));
         },
 
-        /**
+        /*
+        * fetch features based on lower parcel id
+        * @memberOf widgets/infoWindow/infoWindow
+        */
+        _createFeatureCollection: function (fset) {
+            var featuresArray = [], featureObj = {}, filteredFeaturesArray = [], filteredFeaturesObjArray = [], parcelInformation = dojo.configData.AveryLabelSettings[0].ParcelInformation;
+            //If the buffer value is 0, query the features with LOWPARCELID and show them
+            if (fset && fset.features.length > 0 && parseInt(this.txtBuffer.value, 10) === 0) {
+                featuresArray = []; featureObj = {}; filteredFeaturesArray = []; filteredFeaturesObjArray = [];
+                //Loop all the selected feature and filter features based on LOWPARCELID
+                array.forEach(fset.features, lang.hitch(this, function (currentFeature, index) {
+                    //Check if array
+                    if (filteredFeaturesArray.length >= 1 && filteredFeaturesArray.indexOf(currentFeature.attributes[parcelInformation.LowParcelIdentification]) === -1) {
+                        filteredFeaturesArray.push(currentFeature.attributes[parcelInformation.LowParcelIdentification]);
+                        filteredFeaturesObjArray.push(currentFeature);
+                    } else {
+                        if (index === 0) {
+                            filteredFeaturesArray.push(currentFeature.attributes[parcelInformation.LowParcelIdentification]);
+                            filteredFeaturesObjArray.push(currentFeature);
+                        }
+                    }
+                }));
+
+                //Fetch all the features based on LOWPARCELID
+                array.forEach(filteredFeaturesObjArray, lang.hitch(this, function (currentFeature) {
+                    featuresArray.push(this._fetchPolygons(currentFeature, parcelInformation));
+                }));
+
+
+                //After fetching all the features, create an array and send it to further processing
+                all(featuresArray).then(lang.hitch(this, function (featureSet) {
+                    featureObj.features = [];
+                    array.forEach(featureSet, function (currentFeature) {
+                        if (currentFeature) {
+                            if (currentFeature.length > 1) {
+                                array.forEach(currentFeature, lang.hitch(this, function (subFeatures) {
+                                    featureObj.features.push(subFeatures);
+                                }));
+                            } else {
+                                featureObj.features.push(currentFeature[0]);
+                            }
+                        }
+                    });
+                    this._checkInfowindowParams(featureObj);
+                }));
+            } else {
+                this.createBuffer();
+            }
+        },
+
+        /*
         * validate buffer parameters
         * @memberOf widgets/infoWindow/infoWindow
         */
@@ -194,12 +204,12 @@ define([
         * @param {object} feature
         * @memberOf widgets/infoWindow/infoWindow
         */
-        _fetchPolygons: function (currentFeature) {
+        _fetchPolygons: function (currentFeature, parcelInformation) {
             var qTask, query, featureDef = new Deferred();
             qTask = new QueryTask(dojo.configData.ParcelLayerSettings.LayerUrl);
             query = new Query();
             query.outFields = ["*"];
-            query.where = "LOWPARCELID = '" + currentFeature.attributes['LOWPARCELID'] + "'";
+            query.where = parcelInformation.LowParcelIdentification + "= '" + currentFeature.attributes[parcelInformation.LowParcelIdentification] + "'";
             query.returnGeometry = true;
             qTask.execute(query, lang.hitch(this, function (featureSet) {
                 featureDef.resolve(featureSet.features);
@@ -304,8 +314,8 @@ define([
        * create buffer for road
        * @memberOf widgets/infoWindow/infoWindow
        */
-        createRoadBuffer: function () {
-            this.createBuffer();
+        createRoadBuffer: function (fset) {
+            this._createFeatureCollection(fset);
         },
 
         /**

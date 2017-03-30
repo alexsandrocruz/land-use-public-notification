@@ -125,7 +125,7 @@ define([
             glayer = new GraphicsLayer();
             glayer.id = this.tempGraphicsLayerId;
             this.map.addLayer(glayer);
-            //varsha : map click handler
+            //function to handle map click
             this._connectMapClickHandler();
 
             roadLineColor = dojo.configData.RoadCenterLayerSettings.RoadHighlightColor;
@@ -154,7 +154,7 @@ define([
                         dojo.publish("hideRoad", evt);
                     }
                 } else {
-                    //Ashish : hide map tooltip to select road and remove the mouse move handle when user clicks on same road
+                    //Hide map tooltip to select road and remove the mouse move handle when user clicks on same road
                     dojo.isSpanClicked = false;
                     topic.publish("hideMapTip");
                     if (dojo.mouseMoveHandle) {
@@ -205,15 +205,18 @@ define([
                 /**
                 * to share parcel layer's graphic and infopopup
                 */
-                //Varsha: check whether polygon geometry is shared
+                //Check whether polygon geometry is shared
                 if (window.location.toString().split("$polygonGeometry=").length > 1) {
                     //Call the fucntion to mixin the values of reuired URL parameters
                     topic.publish("getValuesToBuffer", true);
                     PolygonGeom = (window.location.toString().split("$polygonGeometry=")[1]).split('$')[0];
                     dojo.polygonGeometry = Geometry.Polygon(JSON.parse(decodeURIComponent(PolygonGeom)));
                 }
+                //If download report parameter exsist, fetch and store it in variable
+                if (window.location.toString().split("$isDownloadReport=")[1]) {
+                    dojo.isDownloadReport = (window.location.toString().split("$isDownloadReport=")[1]).split('$')[0];
+                }
                 //If polygon geometry exsist, create normal buffer and select the polygons
-                dojo.isDownloadReport = (window.location.toString().split("$isDownloadReport=")[1]).split('$')[0];
                 if (dojo.polygonGeometry && dojo.isDownloadReport === "true") {
                     dojo.newBufferDistance = (window.location.toString().split("$newBufferDistance=")[1]).split('$')[0];
                     dojo.currentBufferDistance = (window.location.toString().split("$currentBufferDistance=")[1]).split('$')[0];
@@ -297,7 +300,7 @@ define([
                     if (window.location.toString().split("$dist=").length > 1) {
                         parcelGroup = parcelGroup.split("$Where=")[0];
                     }
-                    dojo.whereclause = window.location.toString().split("$Where=")[1].split("$shareOverLayId")[0];
+                    dojo.whereclause = window.location.toString().split("$Where=")[1].split("$")[0].split("$shareOverLayId")[0];
                     query.where = dojo.whereclause + " = (" + parcelGroup + ")";
                     query.returnGeometry = true;
                     query.outFields = ["*"];
@@ -1178,7 +1181,7 @@ define([
             } else {
                 if (window.location.toString().split("$dist=").length > 1) {
                     dojo.overLayerID = false;
-                    topic.publish("createRoadBuffer");
+                    topic.publish("createRoadBuffer", fset);
                 } else {
                     if (window.location.toString().split("$displayInfo=").length > 1) {
                         if (!dojo.shareinfo) {
