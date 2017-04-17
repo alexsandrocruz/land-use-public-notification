@@ -46,6 +46,8 @@ define([
     "dijit/form/Button",
     "dijit/form/ComboBox",
     "dijit/form/CheckBox",
+    "esri/geometry/geometryEngine",
+    "esri/geometry/Polyline",
     "esri/tasks/BufferParameters",
     "esri/tasks/GeometryService",
     "esri/tasks/Geoprocessor",
@@ -55,7 +57,7 @@ define([
     "dijit/_WidgetBase",
     "dijit/_TemplatedMixin",
     "dijit/_WidgetsInTemplateMixin"
-], function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domClass, string, window, topic, Query, QueryTask, query, array, Deferred, DeferredList, all, Color, Symbol, Geometry, TaskFeatureSet, SpatialReference, Graphic, sharedNls, Button, ComboBox, CheckBox, BufferParameters, GeometryService, Geoprocessor, ItemFileReadStore, InfoWindowBase, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin) {
+], function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, domClass, string, window, topic, Query, QueryTask, query, array, Deferred, DeferredList, all, Color, Symbol, Geometry, TaskFeatureSet, SpatialReference, Graphic, sharedNls, Button, ComboBox, CheckBox, geometryEngine, Polyline, BufferParameters, GeometryService, Geoprocessor, ItemFileReadStore, InfoWindowBase, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin) {
 
     //========================================================================================================================//
     return declare([InfoWindowBase, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
@@ -110,7 +112,7 @@ define([
                 dijit.byId('chkPdf').setChecked(false);
                 dijit.byId('chkCsv').setChecked(false);
                 domStyle.set(this.spanFileUploadMessage, "display", "none");
-                this.textoccupant.value = dojo.configData.AveryLabelSettings[0].OccupantLabel;
+                this.textoccupant.value = dojo.configData.AveryLabelSettings[0].OccupantLabel.trim();
                 if (dojo.polygonGeometry) {
                     domStyle.set(this.selectedParcel, "display", "block");
                     domStyle.set(this.esriCTShowDetailsView, "display", "none");
@@ -429,7 +431,7 @@ define([
         * @memberOf widgets/infoWindow/infoWindowView
         */
         _showBuffer: function (geometries, overlayInfowindow, isPolygonExists) {
-            var _this = this, maxAllowableOffset, taxParcelQueryUrl, qTask, symbol;
+            var _this = this, maxAllowableOffset, taxParcelQueryUrl, qTask, symbol, areaEpsilon = 10, json;
             dojo.displayInfo = null;
             maxAllowableOffset = dojo.configData.MaxAllowableOffset;
             dojo.selectedMapPoint = null;
@@ -453,6 +455,12 @@ define([
 
             if (geometries[0]) {
                 query.geometry = geometries[0];
+                if (query.geometry.type === "polygon" && areaEpsilon > geometryEngine.planarArea(query.geometry)) {
+                    json = query.geometry.toJson();
+                    json = json.rings[0];
+                    query.geometry = new Polyline([json[0], json[1]]);
+                    query.geometry.spatialReference = geometries[0].spatialReference;
+                }
                 query.spatialRelationship = esri.tasks.Query.SPATIAL_REL_INTERSECTS;
             } else {
                 query.geometry = geometries;
@@ -472,6 +480,9 @@ define([
                 this._queryCallback(featureSet, false, isPolygonExists);
                 dojo.selectedFeatures = [];
                 dojo.selectedFeatures = featureSet.features;
+            }), lang.hitch(this, function (err) {
+                topic.publish("hideProgressIndicator");
+                alert("Unusable polygon");
             }));
 
         },
@@ -561,6 +572,22 @@ define([
                     }), 1000);
                 }
 
+                // Handle backwards compatibility of OccupantFields
+                var AveryLabelSettings = dojo.configData.AveryLabelSettings[0];
+                var occupantFields = [];
+                if (AveryLabelSettings.OccupantFields) {
+                    occupantFields = AveryLabelSettings.OccupantFields.split(",");
+                    if (occupantFields.length > 1) {
+                        occupantFields.splice(1, 0, "");
+                    }
+                }
+                if (!AveryLabelSettings.AveryFieldsOccupantCollection) {
+                    AveryLabelSettings.AveryFieldsOccupantCollection = occupantFields;
+                }
+                if (!AveryLabelSettings.CsvFieldsOccupantCollection) {
+                    AveryLabelSettings.CsvFieldsOccupantCollection = occupantFields;
+                }
+
                 dojo.interactiveParcel = false;
                 strAveryParam = "";
                 strCsvParam = "";
@@ -569,10 +596,21 @@ define([
                     if ((navigator && navigator.appVersion.indexOf("MSIE") !== -1 || !!navigator.userAgent.match(/Trident.*rv[ :]*11\./)) && features.length > 1000) {
                         alert(sharedNls.unableToLoadPDF);
                     }
-                    strAveryParam = this._createAveryParam(features);
+
+                    if (this.owners === "checked" || this.owners) {
+                        strAveryParam += this._createParam(features, AveryLabelSettings.AveryFieldsCollection, this.textoccupant.value, false, "~");
+                    }
+                    if (this.occupants === "checked" || this.occupants) {
+                        strAveryParam += this._createParam(features, AveryLabelSettings.AveryFieldsOccupantCollection, this.textoccupant.value, false, "~");
+                    }
                 }
                 if (this.csvFormat === "checked" || this.csvFormat) {
-                    strCsvParam = this._createCsvParam(features);
+                    if (this.owners === "checked" || this.owners) {
+                        strCsvParam += this._createParam(features, AveryLabelSettings.CsvFieldsCollection, this.textoccupant.value, true, ",", "\"");
+                    }
+                    if (this.occupants === "checked" || this.occupants) {
+                        strCsvParam += this._createParam(features, AveryLabelSettings.CsvFieldsOccupantCollection, this.textoccupant.value, true, ",", "\"");
+                    }
                 }
                 if (isPolygonExists) {
                     dojo.parcelArray = [];
@@ -587,143 +625,63 @@ define([
         },
 
         /**
-        * Create dynamic csv parameter string
-        * @param {object} contains set of fetures inside the buffer region
-        * @return {string} returns dynamic csv parameter string
+        * Create dynamic parameter string
+        * @param {array} features Set of features inside the buffer region
+        * @param {array} fieldsToInclude Set of fields to include from features
+        * @param {string} nullFieldnameReplacement Text to insert if a
+        *        fieldname in fieldsToInclude is null
+        * @param {boolean} keepNullFieldValues Switch to
+        * @param {string | null} separatorChar
+        * @param {string | null} escapingChar
+        * @return {string} returns dynamic parameter string
         * @memberOf widgets/infoWindow/infoWindowView
         */
-        _createCsvParam: function (features) {
-            var csvFieldsCollection, occupantFields, strCsvParam = '',
-                featureCount, fieldCount, i, csvFields, subFields, count;
+        _createParam: function (features, fieldsToInclude, nullFieldnameReplacement, keepNullFieldValues, separatorChar, escapingChar) {
+            var strParam = "", iFeature, field, iField, subFields, iSubFields, featureAttributes, attributeValue, strSubfield;
+            separatorChar = separatorChar || "";
+            escapingChar = escapingChar || "";
 
-            csvFieldsCollection = dojo.configData.AveryLabelSettings[0].CsvFieldsCollection;
-            occupantFields = dojo.configData.AveryLabelSettings[0].OccupantFields.split(",");
+            for (iFeature = 0; iFeature < features.length; iFeature++) {//looping through populated features
+                featureAttributes = features[iFeature].attributes;
 
-            for (featureCount = 0; featureCount < features.length; featureCount++) {//looping through populated features for owners
-                if (this.owners === "checked" || this.owners) {
-                    for (fieldCount = 0; fieldCount < csvFieldsCollection.length; fieldCount++) { //looping through configurable avery fields
-                        csvFields = csvFieldsCollection[fieldCount];
-                        if (csvFields.split(',').length > 1) {
-                            subFields = csvFields.split(',');
-                            strCsvParam += "\"";
-                            for (i = 0; i < subFields.length; i++) {
-                                if (features[featureCount].attributes[subFields[i]]) {
-                                    strCsvParam += features[featureCount].attributes[subFields[i]].replace(',', '') + " ";
-                                } else {
-                                    strCsvParam += features[featureCount].attributes[subFields[i]] + " ";
+                for (iField = 0; iField < fieldsToInclude.length; iField++) { //looping through fields to include
+                    field = fieldsToInclude[iField];
+
+                    if (!field) {
+                        strParam += nullFieldnameReplacement + separatorChar;
+                    } else {
+                        subFields = field.split(',');
+                        if (subFields.length > 1) {
+                            strSubfield = "";
+                            for (iSubFields = 0; iSubFields < subFields.length; iSubFields++) {
+                                attributeValue = featureAttributes[subFields[iSubFields]];
+                                if (attributeValue) {
+                                    if (strSubfield.length > 0) {
+                                        strSubfield += " ";
+                                    }
+                                    strSubfield += attributeValue.replace(',', '');
                                 }
                             }
-                            strCsvParam = strCsvParam.slice(0, -1) + "\",";
+                            if (keepNullFieldValues || strSubfield.length > 0) {
+                                strParam += escapingChar + strSubfield + escapingChar + separatorChar;
+                            }
+
                         } else {
-                            if (features[featureCount].attributes[csvFields]) {
-                                strCsvParam += features[featureCount].attributes[csvFields].replace(',', '') + ",";
-                            } else {
-                                strCsvParam += features[featureCount].attributes[csvFields] + ",";
+                            attributeValue = featureAttributes[field];
+                            if (attributeValue) {
+                                strParam += attributeValue.replace(',', '') + separatorChar;
+                            } else if (keepNullFieldValues) {
+                                strParam += separatorChar;
                             }
                         }
                     }
-                    strCsvParam += "$";
                 }
+                if (strParam.length > 0 && separatorChar.length > 0 && strParam.slice(-1) === separatorChar) {
+                    strParam = strParam.slice(0, -1);
+                }
+                strParam += "$";
             }
-            for (featureCount = 0; featureCount < features.length; featureCount++) {
-                if (this.occupants === "checked" || this.occupants) {
-                    if (features[featureCount].attributes[occupantFields[1]]) {
-                        for (fieldCount = 0; fieldCount < occupantFields.length; fieldCount++) {
-                            csvFields = occupantFields[fieldCount];
-                            if (fieldCount === 1) {
-                                strCsvParam += lang.trim(this.textoccupant.value) + ",";
-                            }
-                            if (csvFields.split(',').length > 1) {
-                                subFields = csvFields.split(',');
-                                strCsvParam += "\"";
-                                for (i = 0; i < subFields.length; i++) {
-                                    strCsvParam += features[featureCount].attributes[subFields[i]].replace(',', '') + " ";
-                                }
-                                strCsvParam = strCsvParam.slice(0, -1) + "\",";
-                            } else {
-                                if (features[featureCount].attributes[csvFields]) {
-                                    strCsvParam += features[featureCount].attributes[csvFields].replace(',', '') + ",";
-                                } else {
-                                    strCsvParam += features[featureCount].attributes[csvFields] + ",";
-                                }
-                            }
-                        }
-                        //Additional loop for appending additional commas
-                        for (count = 0; count < (csvFieldsCollection.length - occupantFields.length); count++) {
-                            strCsvParam += ",";
-                        }
-                        strCsvParam = strCsvParam.slice(0, -1);
-                        strCsvParam += "$";
-                    }
-                }
-            }
-            strCsvParam = strCsvParam.slice(0, -1);
-            return strCsvParam;
-        },
-
-        /**
-        * Create dynamic avery parameter string
-        * @param {object} contains set of fetures inside the buffer region
-        * @return {string} returns dynamic avery parameter string
-        * @memberOf widgets/infoWindow/infoWindowView
-        */
-        _createAveryParam: function (features) {
-            var averyFieldsCollection = dojo.configData.AveryLabelSettings[0].AveryFieldsCollection, featureCount, fieldCount, occupantFields, strAveryParam,
-                averyFields, subFields, i;
-            occupantFields = dojo.configData.AveryLabelSettings[0].OccupantFields.split(",");
-            try {
-                strAveryParam = '';
-                for (featureCount = 0; featureCount < features.length; featureCount++) {
-                    if (this.owners === "checked" || this.owners) {
-                        for (fieldCount = 0; fieldCount < averyFieldsCollection.length; fieldCount++) {
-                            averyFields = averyFieldsCollection[fieldCount];
-                            if (averyFields.split(',').length > 1) {
-                                subFields = averyFields.split(',');
-                                for (i = 0; i < subFields.length; i++) {
-                                    if (features[featureCount].attributes[subFields[i]]) {
-                                        strAveryParam += features[featureCount].attributes[subFields[i]].replace(',', '') + " ";
-                                    }
-                                }
-                                strAveryParam = strAveryParam.slice(0, -1) + "~";
-                            } else {
-                                if (features[featureCount].attributes[averyFields]) {
-                                    strAveryParam += features[featureCount].attributes[averyFields].replace(',', '') + "~";
-                                }
-                            }
-                        }
-                        strAveryParam += "$";
-                    }
-                }
-                for (featureCount = 0; featureCount < features.length; featureCount++) {
-                    if (this.occupants === "checked" || this.occupants) {
-                        if (features[featureCount].attributes[occupantFields[1]]) {
-                            for (fieldCount = 0; fieldCount < occupantFields.length; fieldCount++) {
-                                averyFields = occupantFields[fieldCount];
-                                if (fieldCount === 1) {
-                                    strAveryParam += lang.trim(this.textoccupant.value) + "~";
-                                }
-                                if (averyFields.split(',').length > 1) {
-                                    subFields = averyFields.split(',');
-                                    for (i = 0; i < subFields.length; i++) {
-                                        if (features[featureCount].attributes[subFields[i]]) {
-                                            strAveryParam += features[featureCount].attributes[subFields[i]].replace(',', '') + " ";
-                                        }
-                                    }
-                                    strAveryParam = strAveryParam.slice(0, -1) + "~";
-                                } else {
-                                    if (features[featureCount].attributes[averyFields]) {
-                                        strAveryParam += features[featureCount].attributes[averyFields].replace(',', '') + "~";
-                                    }
-                                }
-                            }
-                            strAveryParam += "$";
-                        }
-                    }
-                }
-                return strAveryParam;
-            } catch (err) {
-                alert(err.Message);
-            }
+            return strParam;
         },
 
         /**

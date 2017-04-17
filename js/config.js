@@ -290,14 +290,21 @@ define([], function () {
             //Label to be displayed for Occupant
             OccupantLabel: "Occupant",
 
-            //Fields of the occupant
-            OccupantFields: "PARCELID,SITEADDRESS,PSTLCITY,PSTLSTATE,PSTLZIP5",
-
-            //Fields for Avery labels
+            //Fields for "owner" checkbox: Avery labels and CSV files. Each list item is a separate line (Avery label) or 
+            //column (CSV file).
             AveryFieldsCollection: ["PARCELID", "OWNERNME1", "OWNERNME2", "PSTLADDRESS", "PSTLCITY,PSTLSTATE,PSTLZIP5"],
+            CsvFieldsCollection: ["PARCELID", "OWNERNME1", "OWNERNME2", "PSTLADDRESS", "PSTLCITY,PSTLSTATE,PSTLZIP5"],
 
-            //Fields for CSV files
-            CsvFieldsCollection: ["PARCELID", "OWNERNME1", "OWNERNME2", "PSTLADDRESS", "PSTLCITY", "PSTLSTATE", "PSTLZIP5"],
+            //Fields for "occupant" checkbox: Avery labels and CSV files. Each list item is a separate line (Avery label) or 
+            //column (CSV file). Use a null to indicate where the value of OccupantLabel is to go.
+            AveryFieldsOccupantCollection: ["PARCELID", null, "PSTLADDRESS", "PSTLCITY,PSTLSTATE,PSTLZIP5"],
+            CsvFieldsOccupantCollection: ["PARCELID", null, "PSTLADDRESS", "PSTLCITY,PSTLSTATE,PSTLZIP5"],
+
+            //Older fields list for "occupant" checkbox. Ignored if AveryFieldsOccupantCollection is specified when doing Avery 
+            //labels and CsvFieldsOccupantCollection is specified when doing CSV file. Otherwise, it is handled as if it was 
+            //supplied as a list of field name strings. Note that this means that PSTLCITY, PSTLSTATE, and PSTLZIP5 will be on 
+            //separate lines for Avery labels.
+            //OccupantFields: "PARCELID,SITEADDRESS,PSTLCITY,PSTLSTATE,PSTLZIP5",
 
             //Fields information for parcels
             ParcelInformation: {
