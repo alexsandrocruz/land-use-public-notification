@@ -1,6 +1,6 @@
 # land-use-public-notification
 
-This land use public notification repo has been replaced by the Public Notification app, applications built from this repo are in mature support.
+This land use public notification repo has been replaced by the ArcGIS for Web AppBuilder [Public Notification](https://doc.arcgis.com/en/web-appbuilder/create-apps/widget-public-notification.htm)widget, applications built from this repo are in mature support.
 
 [Check out the new Public Notification solution](http://solutions.arcgis.com/local-government/help/public-notifications/)
 
