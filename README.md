@@ -6,7 +6,7 @@
 
 Public Notification (previously known as Land Use Public Notification) is a configuration of ArcGIS Server and a JavaScript application that allows local government staff to identify properties within a given distance (buffer) of a subject property and generate mailing labels and/or a structured text file of owners and occupants that fall within the buffer. This application is typically used by local planning and zoning officials, but can be used by any agency looking to notify property owners and occupants of a formal action being taken.
 
-[![Image of Public Notification application](land-use-public-notification.png "Public Notification application")](http://links.esri.com/localgovernment/tryit/PublicNotification/)
+[![Image of Public Notification application](land-use-public-notification.png)]
 
 ## Features
 
